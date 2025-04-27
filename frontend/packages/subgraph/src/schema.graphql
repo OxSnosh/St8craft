@@ -1,0 +1,116 @@
+type Nation @entity {
+  id: ID!
+  nationId: BigInt!
+  ruler: String!
+  name: String!
+  owner: Bytes!
+  createdAt: BigInt!
+  transactionHash: String!
+}
+
+type War @entity {
+  id: ID!
+  warId: BigInt!
+  offenseId: BigInt!
+  defenseId: BigInt!
+  transactionHash: String!
+}
+
+type GroundBattle @entity {
+  id: ID!
+  groundBattleId: BigInt!
+  warId: BigInt!
+  attackerId: BigInt!
+  attackerSoldierLosses: BigInt!
+  attackerTankLosses: BigInt!
+  defenderId: BigInt!
+  defenderSoldierLosses: BigInt!
+  defenderTankLosses: BigInt!
+  transactionHash: String!
+}
+
+type CruiseMissileAttack @entity {
+  id: ID!
+  attackId: BigInt!
+  attackerId: BigInt!
+  defenderId: BigInt!
+  landed: Boolean!
+  warId: BigInt!
+  damageTypeNumber: BigInt!
+  transactionHash: String!
+}
+
+type NukeAttack @entity {
+  id: ID!
+  attackId: BigInt!
+  attackerId: BigInt!
+  defenderId: BigInt!
+  landed: Boolean!
+  warId: BigInt!
+  transactionHash: String!
+}
+
+type SpyOperation @entity {
+  id: ID!
+  attackId: BigInt!
+  attackerId: BigInt!
+  defenderId: BigInt!
+  success: Boolean!
+  attackType: BigInt!
+  transactionHash: String!
+}
+
+type AirBattle @entity {
+  id: ID!
+  battleId: BigInt!
+  attackerId: BigInt!
+  defenderId: BigInt!
+  attackerFighterLosses: Bytes!
+  attackerBomberLosses: Bytes!
+  defenderFighterLosses: Bytes!
+  infrastructureDamage: BigInt!
+  tankDamage: BigInt!
+  cruiseMissileDamage: BigInt!
+  transactionHash: String!
+}
+
+type NavalAttack @entity {
+  id: ID!
+  attackerLosses: [BigInt!]!
+  defenderLosses: [BigInt!]!
+  attackId: BigInt!
+  transactionHash: String!
+}
+
+type BreakBlockade @entity {
+  id: ID!
+  battleId: BigInt!
+  attackerLosses: [BigInt!]!
+  defenderLosses: [BigInt!]!
+  transactionHash: String!
+}
+
+type Blockade @entity {
+  id: ID!
+  battleId: BigInt!
+  attackerLosses: [BigInt!]!
+  defenderLosses: [BigInt!]!
+  transactionHash: String!
+}
+
+type Message @entity {
+  id: ID!
+  sender: BigInt!
+  receiver: BigInt!
+  message: String!
+  createdAt: BigInt!
+  transactionHash: String!
+}
+
+type Post @entity {
+  id: ID!
+  sender: BigInt!
+  post: String!
+  createdAt: BigInt!
+  transactionHash: String!
+}

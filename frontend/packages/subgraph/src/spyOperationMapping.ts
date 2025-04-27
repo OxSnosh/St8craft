@@ -1,0 +1,13 @@
+import { SpyAttackResults } from "../generated/SpyOperationsContract/SpyOperationsContract"
+import { SpyOperation } from "../generated/schema"
+
+export function handleSpyOperation(event: SpyAttackResults): void {
+  let entity = new SpyOperation(event.params.attackId.toString())
+  entity.attackId = event.params.attackId
+  entity.attackerId = event.params.attackerId
+  entity.defenderId = event.params.defenderId
+  entity.success = event.params.success
+  entity.attackType = event.params.attackType
+  entity.transactionHash = event.transaction.hash.toHexString()
+  entity.save()
+}

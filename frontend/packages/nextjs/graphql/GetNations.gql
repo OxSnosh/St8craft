@@ -1,0 +1,143 @@
+query GetNations {
+  nations(first: 5, orderBy: createdAt, orderDirection: desc) {
+    nationId
+    name
+    ruler
+    owner
+    createdAt
+  }
+}
+
+query GetWars {
+  wars {
+    id
+    warId
+    offenseId
+    defenseId
+    transactionHash
+  }
+}
+
+query GetGroundBattles {
+  groundBattles {
+    id
+    groundBattleId
+    warId
+    attackerId
+    attackerSoldierLosses
+    attackerTankLosses
+    defenderId
+    defenderSoldierLosses
+    defenderTankLosses
+    transactionHash
+  }
+}
+
+query GetCruiseMissileAttacks {
+  cruiseMissileAttacks {
+    id
+    attackId
+    attackerId
+    defenderId
+    landed
+    warId
+    damageTypeNumber
+    transactionHash
+  }
+}
+
+query GetNukeAttacks {
+  nukeAttacks {
+    id
+    attackId
+    attackerId
+    defenderId
+    landed
+    warId
+    transactionHash
+  }
+}
+
+query GetSpyOperations {
+  spyOperations {
+    id
+    attackId
+    attackerId
+    defenderId
+    success
+    attackType
+    transactionHash
+  }
+}
+
+query GetAirBattles {
+  airBattles {
+    id
+    battleId
+    attackerId
+    defenderId
+    attackerFighterLosses
+    attackerBomberLosses
+    defenderFighterLosses
+    infrastructureDamage
+    tankDamage
+    cruiseMissileDamage
+  }
+}
+
+query GetNavalAttacks {
+  navalAttacks {
+    attackerLosses
+    defenderLosses
+    attackId
+  }
+}
+
+query GetBreakBlockades {
+  breakBlockades {
+    attackerLosses
+    defenderLosses
+    battleId
+  }
+}
+
+query GetBlockades {
+  blockades {
+    battleId
+    attackerLosses
+    defenderLosses
+  }
+}
+
+query GetPosts($sender: BigInt) {
+  posts(where: { sender: $sender }) {
+    id
+    sender
+    post
+    createdAt
+    transactionHash
+  }
+}
+
+query GetReceivedMessages($receiver: BigInt!) {
+  messages(where: { receiver: $receiver }) {
+    id
+    sender
+    receiver
+    message
+    createdAt
+    transactionHash
+  }
+}
+
+
+query GetSentMessages($sender: BigInt!) {
+  messages(where: { sender: $sender }) {
+    id
+    sender
+    receiver
+    message
+    createdAt
+    transactionHash
+  }
+}

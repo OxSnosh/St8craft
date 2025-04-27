@@ -1,0 +1,203 @@
+specVersion: 0.0.4
+description: CountryMinter
+repository: https://github.com/scaffold-eth/se-2/packages/subgraph/
+schema:
+  file: ./src/schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: CountryMinter
+    network: localhost
+    source:
+      abi: CountryMinter
+      address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Nation
+      abis:
+        - name: CountryMinter
+          file: ./abis/localhost_CountryMinter.json
+      eventHandlers:
+        - event: NationCreated(string,string,indexed uint256,address)
+          handler: handleNationCreated
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: WarContract
+    network: localhost
+    source:
+      abi: WarContract
+      address: "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - War
+      abis:
+        - name: WarContract
+          file: ./abis/localhost_WarContract.json
+      eventHandlers:
+        - event: WarDeclared(indexed uint256,indexed uint256,indexed uint256)
+          handler: handleWarDeclared
+      file: ./src/warMapping.ts
+  - kind: ethereum/contract
+    name: CruiseMissileContract
+    network: localhost
+    source:
+      abi: CruiseMissileContract
+      address: "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - CruiseMissileAttack
+      abis:
+        - name: CruiseMissileContract
+          file: ./abis/localhost_CruiseMissileContract.json
+      eventHandlers:
+        - event: CruiseMissileAttackResults(indexed uint256,indexed uint256,indexed
+            uint256,bool,uint256,uint256)
+          handler: handleCruiseMissileAttackResults
+      file: ./src/cruiseMissileMapping.ts
+  - kind: ethereum/contract
+    name: NukeContract
+    network: localhost
+    source:
+      abi: NukeContract
+      address: "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - NukeAttack
+      abis:
+        - name: NukeContract
+          file: ./abis/localhost_NukeContract.json
+      eventHandlers:
+        - event: NukeAttackEvent(indexed uint256,indexed uint256,indexed
+            uint256,uint256,bool)
+          handler: handleNukeAttackResults
+      file: ./src/nukeMapping.ts
+  - kind: ethereum/contract
+    name: SpyOperationsContract
+    network: localhost
+    source:
+      abi: SpyOperationsContract
+      address: "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - SpyOperation
+      abis:
+        - name: SpyOperationsContract
+          file: ./abis/localhost_SpyOperationsContract.json
+      eventHandlers:
+        - event: SpyAttackResults(indexed uint256,indexed uint256,indexed
+            uint256,bool,uint256)
+          handler: handleSpyOperation
+      file: ./src/spyOperationMapping.ts
+  - kind: ethereum/contract
+    name: AdditionalAirBattle
+    network: localhost
+    source:
+      abi: AdditionalAirBattle
+      address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - SpyOperation
+      abis:
+        - name: AdditionalAirBattle
+          file: ./abis/localhost_AdditionalAirBattle.json
+      eventHandlers:
+        - event: AirAssaultCasualties(indexed uint256,indexed uint256,indexed
+            uint256,bytes,bytes,bytes,uint256,uint256,uint256)
+          handler: handleAirBattle
+      file: ./src/airBattleMapping.ts
+  - kind: ethereum/contract
+    name: NavalAttackContract
+    network: localhost
+    source:
+      abi: NavalAttackContract
+      address: "0x4826533B4897376654Bb4d4AD88B7faFD0C98528"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - NavyAttack
+      abis:
+        - name: NavalAttackContract
+          file: ./abis/localhost_NavalAttackContract.json
+      eventHandlers:
+        - event: NavalAttackComplete(uint256[],uint256[],uint256)
+          handler: handleNavyAttack
+      file: ./src/navyAttackMapping.ts
+  - kind: ethereum/contract
+    name: BreakBlocadeContract
+    network: localhost
+    source:
+      abi: BreakBlocadeContract
+      address: "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - BreakBlockade
+      abis:
+        - name: BreakBlocadeContract
+          file: ./abis/localhost_BreakBlocadeContract.json
+      eventHandlers:
+        - event: BreakBlockadeComlpete(uint256[],uint256[],uint256)
+          handler: handleBreakBlockade
+      file: ./src/breakBlockadeMapping.ts
+  - kind: ethereum/contract
+    name: NavalBlockadeContract
+    network: localhost
+    source:
+      abi: NavalBlockadeContract
+      address: "0x998abeb3E57409262aE5b751f60747921B33613E"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - BreakBlockade
+      abis:
+        - name: NavalBlockadeContract
+          file: ./abis/localhost_NavalBlockadeContract.json
+      eventHandlers:
+        - event: BlockadeCompleted(uint256[],uint256[],uint256)
+          handler: handleBlockade
+      file: ./src/blockadeMapping.ts
+  - kind: ethereum/contract
+    name: Messenger
+    network: localhost
+    source:
+      abi: Messenger
+      address: "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0"
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Message
+        - Post
+      abis:
+        - name: Messenger
+          file: ./abis/localhost_Messenger.json
+      eventHandlers:
+        - event: MessageSent(indexed uint256,indexed uint256,string)
+          handler: handleMessage
+        - event: PostSent(indexed uint256,string)
+          handler: handlePost
+      file: ./src/messengerMapping.ts
