@@ -303,6 +303,10 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
         uint256[] memory attackerBomberArray
     ) internal view returns (bool) {
         require(
+            bomber.getAh1CobraCount(attackerId) >= attackerBomberArray[0],
+            "not enough ah1 Cobras"
+        );
+        require(
             bomber.getAh64ApacheCount(attackerId) >= attackerBomberArray[1],
             "not enough ah64s"
         );
@@ -359,8 +363,11 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
         return defenderFighterArray;
     }
 
+    mapping(uint256 => bool) public pendingRequests;
+    mapping(uint256 => uint256) public pendingRequestTimestamp;
+    uint256 public constant RETRY_TIMEOUT = 5 minutes;
+
     function fulfillRequest(uint256 battleId) internal {
-        console.log("arrived to fulfillRequest()");
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
@@ -369,7 +376,8 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
             NUM_WORDS
         );
         s_requestIdToRequestIndex[requestId] = battleId;
-        console.log("arrived to end of fulfillRequest()");
+        pendingRequests[battleId] = true;
+        pendingRequestTimestamp[battleId] = block.timestamp;
     }
 
     bytes32 jobId;
@@ -397,16 +405,10 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
         uint256 requestId,
         uint256[] memory randomWords
     ) internal override {
-        require(requestId != 0, "Chainlink request failed");
-        require(s_requestIdToRequestIndex[requestId] > 0, "Invalid VRF response");
-        console.log("arrived to fulfillRandomWords()");
-        console.log(randomWords[0]);
-        console.log(randomWords[1]);
-        console.log(randomWords[2]);
-        console.log(randomWords[3]);
-        console.log(randomWords[4]);
-        console.log(randomWords[5]);
+        require(s_requestIdToRequestIndex[requestId] != 0 || requestId == 0, "Invalid VRF response");
         uint256 requestNumber = s_requestIdToRequestIndex[requestId];
+        delete pendingRequests[requestNumber];
+        delete pendingRequestTimestamp[requestNumber];
         s_requestIndexToRandomWords[requestNumber] = randomWords;
         Chainlink.Request memory req = buildOperatorRequest(
             jobId,
@@ -431,11 +433,30 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
         req.addBytes("randomNumbers", abi.encode(randomWords));
         req.addUint("attackerId", attackerId);
         req.addUint("defenderId", defenderId);
-        req.addUint("defenderId", defenderId);
         req.addUint("attackId", attackId);
         console.log("arrived to sendOperatorRequest()");
         sendOperatorRequest(req, fee);
         console.log("arrived to fulfillRandomWords()");
+    }
+
+    function retryFulfillRequest(uint256 battleId) public {
+        require(pendingRequests[battleId], "No pending request");
+        require(
+            block.timestamp > pendingRequestTimestamp[battleId] + RETRY_TIMEOUT,
+            "Retry not allowed yet"
+        );
+
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+            i_gasLane,
+            i_subscriptionId,
+            REQUEST_CONFIRMATIONS,
+            i_callbackGasLimit,
+            NUM_WORDS
+        );
+
+        s_requestIdToRequestIndex[requestId] = battleId;
+        pendingRequests[battleId] = true;
+        pendingRequestTimestamp[battleId] = block.timestamp;
     }
 
     function completeAirBattle(
@@ -459,68 +480,8 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
             tankDamage,
             cruiseMissileDamage,
             battleId
-        );  
-        // uint256[] memory attackerFighterCasualties = abi.decode(
-        //     attackerFighterCasualtiesBytes,
-        //     (uint256[])
-        // );
-        // uint256[] memory attackerBomberCasualties = abi.decode(
-        //     attackerBomberCasualtiesBytes,
-        //     (uint256[])
-        // );
-        // uint256[] memory defenderFighterCasualties = abi.decode(
-        //     defenderFighterCasualtiesBytes,
-        //     (uint256[])
-        // );
-        // fighterLoss.decrementLosses(attackerFighterCasualties, attackerId);
-        // bomber.decrementBomberLosses(attackerBomberCasualties, attackerId);
-        // fighterLoss.decrementLosses(defenderFighterCasualties, defenderId);
-        // completeAirBattleCont(
-        //     infrastructureDamage,
-        //     tankDamage,
-        //     cruiseMissileDamage,
-        //     battleId,
-        //     attackerFighterCasualties,
-        //     attackerBomberCasualties,
-        //     defenderFighterCasualties,
-        //     defenderId
-        // );
+        );
     }
-
-    // function completeAirBattleCont(
-    //     uint256 infrastructureDamage,
-    //     uint256 tankDamage,
-    //     uint256 cruiseMissileDamage,
-    //     uint256 battleId,
-    //     uint256[] memory attackerFighterCasualties,
-    //     uint256[] memory attackerBomberCasualties,
-    //     uint256[] memory defenderFighterCasualties,
-    //     uint256 defenderId
-    // ) public {
-    //     bool antiAir = won1.getAntiAirDefenseNewtwork(defenderId);
-    //     if (antiAir) {
-    //         infrastructureDamage = ((infrastructureDamage * 60) / 100);
-    //         tankDamage = ((tankDamage * 60) / 100);
-    //         cruiseMissileDamage = ((cruiseMissileDamage * 60) / 100);
-    //     }
-    //     inf.decreaseInfrastructureCountFromAirBattleContract(
-    //         defenderId,
-    //         infrastructureDamage
-    //     );
-    //     force.decreaseDefendingTankCountFromAirBattleContract(
-    //         defenderId,
-    //         tankDamage
-    //     );
-    //     mis.decreaseCruiseMissileCountFromAirBattleContract(
-    //         defenderId,
-    //         cruiseMissileDamage
-    //     );
-    //     uint256[3] memory damage = [
-    //         infrastructureDamage,
-    //         tankDamage,
-    //         cruiseMissileDamage
-    //     ];
-    // }
 }
 
 contract AdditionalAirBattle is Ownable, ReentrancyGuard {    

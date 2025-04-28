@@ -136,8 +136,6 @@ export const getPlayerResources = async (
       return [];
   }
 
-  console.log("Fetching player resources for nation ID:", nationId);
-
   const resources = await publicClient.readContract({
       abi: bonusResourcesContract.abi,
       address: bonusResourcesContract.address,

@@ -135,7 +135,7 @@ contract AidContract is Ownable, ReentrancyGuard {
         require(aidAvailable, "aid not available");
         bool sanctioned = sen.isSanctioned(idSender, idRecipient);
         require(!sanctioned, "trade not possible");
-        bool federalAidEligable = getFederalAidEligability(
+        bool federalAidEligable = getFederalAidEligibility(
             idSender,
             idRecipient
         );
@@ -166,7 +166,6 @@ contract AidContract is Ownable, ReentrancyGuard {
             balanceAid,
             soldiersAid
         );
-        aidProposalId++;
     }
 
     function completeProposal(
@@ -179,7 +178,7 @@ contract AidContract is Ownable, ReentrancyGuard {
         uint256 soldiersAid
     ) internal {
         Proposal memory newProposal = Proposal(
-            aidProposalId,
+            proposalId,
             day,
             idSender,
             idRecipient,
@@ -189,9 +188,9 @@ contract AidContract is Ownable, ReentrancyGuard {
             false,
             false
         );
-        idToProposal[aidProposalId] = newProposal;
-        idToAidProposalsSent[idSender].push(aidProposalId);
-        idToAidProposalsReceived[idRecipient].push(aidProposalId);
+        idToProposal[proposalId] = newProposal;
+        idToAidProposalsSent[idSender].push(proposalId);
+        idToAidProposalsReceived[idRecipient].push(proposalId);
         emit AidProposed(
             proposalId,
             idSender,
@@ -201,6 +200,7 @@ contract AidContract is Ownable, ReentrancyGuard {
             balanceAid,
             soldiersAid
         );
+        aidProposalId++;
     }
 
     ///@dev this function is public but called by the proposeAid() function to check the availabiliy of proposing aid
@@ -243,7 +243,7 @@ contract AidContract is Ownable, ReentrancyGuard {
         } else {
             daysToCheck = day;
         }
-        for (uint256 i = 0; i <= daysToCheck; i++) {
+        for (uint256 i = 0; i < daysToCheck; i++) {
             uint256 dayToCheck = day - i;
             proposalsLast10Days += idToAidProposalsLast10Days[id][dayToCheck]
                 .length;
@@ -298,7 +298,7 @@ contract AidContract is Ownable, ReentrancyGuard {
     ///@param idSender is the nation ID of the sender of the aid proposal
     ///@param idRecipient id the nation ID of the recipient of the aid proposal
     ///@return bool true if both sender and reciever have a federal aid commission
-    function getFederalAidEligability(
+    function getFederalAidEligibility(
         uint256 idSender,
         uint256 idRecipient
     ) public view returns (bool) {
@@ -459,7 +459,7 @@ contract AidContract is Ownable, ReentrancyGuard {
     ///@dev this function is a public function that allows the aid proposal to be cancelled by the sender of the proposal
     ///@notice this function allows the aid sender or recipient to cancel an aid proposal prior to it being accepted
     ///@param proposalId this is the id of the proposal
-    function cancelAid(uint256 proposalId) public {
+    function cancelAid(uint256 proposalId) public nonReentrant{
         uint256 idRecipient = idToProposal[proposalId].idRecipient;
         uint256 idSender = idToProposal[proposalId].idSender;
         address addressRecipient = mint.ownerOf(idRecipient);

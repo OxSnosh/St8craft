@@ -49,7 +49,6 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
 
     struct CountrySettings {
         uint256 dayCreated;
-        string alliance;
         uint256 nationTeam;
         uint256 governmentType;
         uint256 dayGovernmentChanged;
@@ -194,7 +193,6 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         uint256 day = keep.getGameDay();
         CountrySettings memory newCountrySettings = CountrySettings(
             day,
-            "No Alliance Yet",
             0,
             0,
             0,
@@ -284,19 +282,6 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         require(isOwner, "!nation owner");
         idToCountryParameters[id].nationSlogan = newNationSlogan;
         emit NationSloganChanged(id, newNationSlogan);
-    }
-
-    ///@dev this is public function that will allow a nation ruler to set an alliance
-    ///@notice use this function to set an alliance
-    ///@notice this function is only callable by the nation owner
-    ///@notice there are an unlimited number of alliances , anyone can start an alliance
-    ///@param newAlliance is the updated name for the nation ruler
-    ///@param id is the nation ID for the update
-    function setAlliance(string memory newAlliance, uint256 id) public {
-        bool isOwner = mint.checkOwnership(id, msg.sender);
-        require(isOwner, "!nation owner");
-        idToCountrySettings[id].alliance = newAlliance;
-        emit AllianceChanged(id, newAlliance);
     }
 
     ///@dev this is public function that will allow a nation ruler to set a team membership for the nation
@@ -448,15 +433,6 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         return slogan;
     }
 
-    ///@dev this is a view funtion that will return the alliance name for a country
-    ///@param countryId this is the ID for the nation being queried
-    function getAlliance(
-        uint256 countryId
-    ) public view returns (string memory) {
-        string memory alliance = idToCountrySettings[countryId].alliance;
-        return alliance;
-    }
-
     ///@dev this is a view funtion that will return the team for a country
     ///@param countryId this is the ID for the nation being queried
     function getTeam(uint256 countryId) public view returns (uint256) {
@@ -527,13 +503,10 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         string name;
         uint256 founderNationId;
         mapping(uint256 => bool) admins; // Stores nationIds as admins
-        mapping(uint256 => uint256) nationToPlatoon; // Maps nation ID to sub-platoon ID
+        mapping(uint256 => bool) isMember; // ** NEW: Fast membership check **
+        mapping(uint256 => string) nationToPlatoon; // Maps nation ID to sub-platoon ID
         uint256[] members;
         uint256[] joinRequests;
-    }
-
-    function isNationAllianceAdmin(uint256 allianceId, uint256 nationId) external view returns (bool) {
-        return alliances[allianceId].admins[nationId];
     }
 
     mapping(uint256 => Alliance) public alliances;
@@ -546,7 +519,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
     event NationRequestedToJoin(uint256 indexed allianceId, uint256 indexed nationId);
     event NationApprovedToJoin(uint256 indexed allianceId, uint256 indexed nationId);
     event NationRemovedFromAlliance(uint256 indexed allianceId, uint256 indexed nationId);
-    event NationAssignedToPlatoon(uint256 indexed allianceId, uint256 indexed nationId, uint256 platoonId);
+    event NationAssignedToPlatoon(uint256 indexed allianceId, uint256 indexed nationId, string platoonId);
 
     modifier onlyAllianceFounderOrAdmin(uint256 allianceId, uint256 nationId) {
         require(
@@ -556,11 +529,19 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         _;
     }
 
-    function getNationAllianceAndPlatoon(uint256 nationId) external view returns (uint256 allianceId, uint256 platoonId, string memory name) {
+    function getNationAllianceAndPlatoon(uint256 nationId) external view returns (uint256 allianceId, string memory platoonId, string memory name) {
         uint256 alliance = nationToAlliance[nationId];
-        uint256 platoon = alliance > 0 ? alliances[alliance].nationToPlatoon[nationId] : 0;
+        string memory platoon = alliance > 0 ? alliances[alliance].nationToPlatoon[nationId] : "";
         string memory allianceName = alliance > 0 ? alliances[alliance].name : "";
         return (alliance, platoon, allianceName);
+    }
+
+    function isNationAllianceAdmin(uint256 allianceId, uint256 nationId) external view returns (bool) {
+        return alliances[allianceId].admins[nationId];
+    }
+
+    function isMemberOfAlliance(uint256 allianceId, uint256 nationId) public view returns (bool) {
+        return alliances[allianceId].isMember[nationId];
     }
 
     function createAlliance(string memory name, uint256 founderNationId) external {
@@ -572,6 +553,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         newAlliance.name = name;
         newAlliance.founderNationId = founderNationId;
         newAlliance.admins[founderNationId] = true;
+        newAlliance.isMember[founderNationId] = true;
         newAlliance.members.push(founderNationId);
         nationToAlliance[founderNationId] = allianceCounter;
         allianceExists[allianceCounter] = true;
@@ -579,10 +561,12 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         emit AllianceCreated(allianceCounter, name, founderNationId);
     }
 
+
     function addAdmin(uint256 allianceId, uint256 adminNationId, uint256 callerNationId)
         external
         onlyAllianceFounderOrAdmin(allianceId, callerNationId)
     {
+        require(alliances[allianceId].isMember[adminNationId], "Nominee must be a member of the alliance");
         alliances[allianceId].admins[adminNationId] = true;
         emit AllianceAdminAdded(allianceId, adminNationId);
     }
@@ -596,13 +580,10 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         emit AllianceAdminRemoved(allianceId, adminNationId);
     }
 
-    // In requestToJoinAlliance function
     function requestToJoinAlliance(uint256 allianceId, uint256 nationId) external {
         require(nationToAlliance[nationId] == 0, "Nation already in an alliance");
 
         alliances[allianceId].joinRequests.push(nationId);
-        console.log(allianceId, "alliance Id", nationId, "nation Id");
-        console.log("joinRequests length after push:", alliances[allianceId].joinRequests.length);
 
         emit NationRequestedToJoin(allianceId, nationId);
     }
@@ -611,7 +592,6 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         external
         onlyAllianceFounderOrAdmin(allianceId, callerNationId)
     {
-        console.log("nationToAlliance[nationId]: %d", nationToAlliance[nationId]);
         require(nationToAlliance[nationId] == 0, "Nation already in an alliance");
 
         uint256[] storage requests = alliances[allianceId].joinRequests;
@@ -625,13 +605,11 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
                 break;
             }
         }
-
         require(found, "Nation did not request to join");
 
         alliances[allianceId].members.push(nationId);
+        alliances[allianceId].isMember[nationId] = true;
         nationToAlliance[nationId] = allianceId;
-
-        console.log(allianceId, "alliance Id", nationId, "nation Id");
 
         emit NationApprovedToJoin(allianceId, nationId);
     }
@@ -643,6 +621,9 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         require(nationToAlliance[nationId] == allianceId, "Nation not in this alliance");
 
         delete nationToAlliance[nationId];
+        delete alliances[allianceId].isMember[nationId];
+        delete alliances[allianceId].admins[nationId];
+        delete alliances[allianceId].nationToPlatoon[nationId];
 
         uint256[] storage members = alliances[allianceId].members;
         for (uint256 i = 0; i < members.length; i++) {
@@ -656,7 +637,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         emit NationRemovedFromAlliance(allianceId, nationId);
     }
 
-    function assignNationToPlatoon(uint256 allianceId, uint256 nationId, uint256 platoonId, uint256 callerNationId)
+    function assignNationToPlatoon(uint256 allianceId, uint256 nationId, string memory platoonId, uint256 callerNationId)
         external
         onlyAllianceFounderOrAdmin(allianceId, callerNationId)
     {

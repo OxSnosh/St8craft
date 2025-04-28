@@ -154,7 +154,7 @@ const ManageAid = () => {
     }
 
     const handleAcceptAid = async (proposalId: string) => {
-        if (!selectedNationId || !aidPartnerId) return;
+        if (!selectedNationId) return;
 
         const contractData = contractsData.AidContract;
         const abi = contractData.abi;

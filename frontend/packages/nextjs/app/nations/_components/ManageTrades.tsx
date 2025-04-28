@@ -29,6 +29,11 @@ const ManageTrades = () => {
     const [proposedTrades, setProposedTrades] = useState<any[]>([]);
     const [tradingPartners, setTradingPartners] = useState<any[]>([]);
 
+    const resourceNames = [
+        "Aluminium", "Cattle", "Coal", "Fish", "Furs", "Gems", "Gold", "Iron", "Lead", "Lumber", "Marble",
+        "Oil", "Pigs", "Rubber", "Silver", "Spices", "Sugar", "Uranium", "Water", "Wheat", "Wine"
+    ];
+
     useEffect(() => {
         const fetchMintedNations = async () => {
             setLoading(true);
@@ -65,7 +70,6 @@ const ManageTrades = () => {
     useEffect(() => {
         if (selectedNationId) {
             fetchProposedTrades();
-            fetchTradingPartners();
         }
     }, [selectedNationId]);
 
@@ -75,12 +79,18 @@ const ManageTrades = () => {
         setSelectedNationResources(resources);
     };
 
-    const handleTradingPartnerFetch = async () => {
-        if (tradingPartnerId) {
-            const resources = await fetchIndividualResources(tradingPartnerId);
-            setTradingPartnerResources(resources);
-        }
-    };
+    useEffect(() => {
+        const fetchResourcesForTradingPartner = async () => {
+            if (tradingPartnerId) {
+                const resources = await fetchIndividualResources(tradingPartnerId);
+                setTradingPartnerResources(resources);
+            } else {
+                setTradingPartnerResources(null);
+            }
+        };
+    
+        fetchResourcesForTradingPartner();
+    }, [tradingPartnerId, selectedNationId, ResourcesContract, publicClient]);
 
     const fetchIndividualResources = async (nationId: string) => {
         if (!ResourcesContract || !publicClient) {
@@ -189,7 +199,6 @@ const ManageTrades = () => {
                 setErrorMessage("Selected nation ID or trading partner ID is missing.");
             }
             fetchProposedTrades();
-            fetchTradingPartners();
             setSuccessMessage("Trade accepted successfully.");
         } catch (error: any) {
             const errorMessage = parseRevertReason(error) || error.message || "Failed to accept trade.";
@@ -246,28 +255,39 @@ const ManageTrades = () => {
         }
     };
 
-    const fetchTradingPartners = async () => {
-        if (selectedNationId) {
-            const partners = await getTradingPartners(selectedNationId, ResourcesContract, publicClient);
-            setTradingPartners(partners);
-        } else {
-            console.error("Selected nation ID is null.");
-        }
-    };
+    useEffect(() => {
+        const fetchTradingPartners = async () => {
+            if (!selectedNationId || !ResourcesContract || !publicClient) {
+                setTradingPartners([]);
+                return;
+            }
+    
+            setTradingPartners([]); // Clear immediately for clean switch
+    
+            const partnerIds = await getTradingPartners(selectedNationId, ResourcesContract, publicClient);
+    
+            const partnerData = await Promise.all(
+                partnerIds.map(async (id: string) => {
 
-    const handleRemoveTradingPartner = async () => {
+                    const resources = await getPlayerResources(id.toString(), ResourcesContract, publicClient);
+
+                    return { id, resources };
+                })
+            );
+    
+            setTradingPartners(partnerData);
+        };
+    
+        fetchTradingPartners();
+    }, [selectedNationId, ResourcesContract, publicClient]);
+
+    const handleRemoveTradingPartner = async (partnerId: string) => {
         setLoading(true);
         setErrorMessage("");
         setSuccessMessage("");
     
-        // Early validation checks
         if (!selectedNationId) {
             setErrorMessage("Selected nation ID is missing.");
-            setLoading(false);
-            return;
-        }
-        if (!tradingPartnerId) {
-            setErrorMessage("Trading partner ID is missing.");
             setLoading(false);
             return;
         }
@@ -283,9 +303,8 @@ const ManageTrades = () => {
         }
     
         try {
-            await removeTradingPartner(selectedNationId, tradingPartnerId, ResourcesContract, writeContractAsync);
-            fetchTradingPartners();
-            setSuccessMessage("Trading partner removed successfully.");
+            await removeTradingPartner(selectedNationId, partnerId, ResourcesContract, writeContractAsync);
+            setSuccessMessage(`Trading partner ${partnerId} removed successfully.`);
         } catch (error: any) {
             const errorMessage = parseRevertReason(error) || error.message || "Failed to remove trading partner.";
             setErrorMessage(errorMessage);
@@ -329,12 +348,6 @@ const ManageTrades = () => {
                                     onChange={(e) => setTradingPartnerId(e.target.value)}
                                     className="input input-bordered w-full bg-base-100 text-base-content"
                                 />
-                                <button 
-                                    onClick={handleTradingPartnerFetch} 
-                                    className="btn btn-primary"
-                                >
-                                    Fetch Resources
-                                </button>
                             </div>
                         </td>
                     </tr>
@@ -399,13 +412,13 @@ const ManageTrades = () => {
                     {tradingPartners.length > 0 ? (
                         tradingPartners.map((partner) => (
                             <tr key={partner.id} className="border-b border-neutral">
-                                <td className="p-3">{partner.name}</td>
+                                <td className="p-3">Nation {partner.id.toString()}</td>
                                 <td>
                                     <button 
-                                        onClick={() => handleRemoveTradingPartner()} 
+                                        onClick={() => handleRemoveTradingPartner(partner.id)} 
                                         className="btn btn-warning"
                                     >
-                                        Remove Partner
+                                        Remove Nation {partner.id.toString()} ({partner.resources?.[0]}, {partner.resources?.[1]})
                                     </button>
                                 </td>
                             </tr>

@@ -18,7 +18,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 contract SenateContract is ChainlinkClient, KeeperCompatibleInterface, Ownable {
     using Chainlink for Chainlink.Request;
 
-    uint256 public epoch;
+    uint256 public epoch = 1;
     uint256 public interval;
     uint256 public dayOfLastElection;
     uint256 maximumSanctions = 25;

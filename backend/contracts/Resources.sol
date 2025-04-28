@@ -496,14 +496,23 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     function proposeTrade(uint256 requestorId, uint256 recipientId) public {
         bool isOwner = mint.checkOwnership(requestorId, msg.sender);
         require(isOwner, "!nation owner");
+
+        require(requestorId != recipientId, "cannot trade with self");
+
+        bool isAlreadyTrading = isActiveTrade(requestorId, recipientId);
+        require(!isAlreadyTrading, "Already active trading partners");
+
         bool isPossibleRequestor = isTradePossibleForRequestor(requestorId);
         bool isPossibleRecipient = isTradePossibleForRecipient(recipientId);
         require(isPossibleRequestor == true, "trade is not possible");
         require(isPossibleRecipient == true, "trade is not possible");
+
         bool sanctioned = sen.isSanctioned(requestorId, recipientId);
         require(sanctioned == false, "trade is sanctioned");
+
         idToProposedTradingPartners[recipientId].push(requestorId);
         idToProposedTradingPartners[requestorId].push(recipientId);
+
         emit TradeProposed(requestorId, recipientId);
     }
 
