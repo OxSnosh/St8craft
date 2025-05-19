@@ -291,10 +291,11 @@ contract SenateContract is ChainlinkClient, KeeperCompatibleInterface, Ownable {
 
     ///@dev 
     function completeElection(
+        bytes32 _requestId,
         bytes memory winners,
         uint256 team,
         uint256 _epoch
-    ) public {
+    ) public recordChainlinkFulfillment(_requestId) {
         uint256[] memory _winners = abi.decode(winners, (uint256[]));
         if(epoch > 0) {
             uint256[] memory currentSenators = epochToTeamToWinners[_epoch-1][team];

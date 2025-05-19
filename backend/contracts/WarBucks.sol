@@ -15,7 +15,7 @@ contract WarBucks is ERC20, Ownable {
 
     /// @param initialSupply is the inital supply of WarBucks currency
     /// @dev The initial supply is minted to the deployer of the contract
-    constructor(uint256 initialSupply) ERC20("WarBucks", "WB") {
+    constructor(uint256 initialSupply) ERC20("WarBucks", "WBX") {
         _mint(msg.sender, initialSupply);
     }
 

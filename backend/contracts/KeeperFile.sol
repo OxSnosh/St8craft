@@ -23,8 +23,8 @@ contract KeeperContract is Ownable, KeeperCompatibleInterface {
 
     event GameDayIncremented(uint256 indexed gameDay);
 
-    constructor(uint updateInterval) {
-        interval = updateInterval;
+    constructor(uint _updateInterval) {
+        interval = _updateInterval;
         lastTimeStamp = block.timestamp;
         gameDay = 0;
     }
@@ -37,7 +37,7 @@ contract KeeperContract is Ownable, KeeperCompatibleInterface {
         override
         returns (bool upkeepNeeded, bytes memory /* performData */)
     {
-        upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
+        upkeepNeeded = (block.timestamp - lastTimeStamp) >= interval;
         return (upkeepNeeded, "");
     }
 
@@ -61,7 +61,7 @@ contract KeeperContract is Ownable, KeeperCompatibleInterface {
         keeperRegistry = _keeperRegistry;
     }
 
-    function ipdateInterval(uint _interval) public onlyOwner {
+    function updateInterval(uint _interval) public onlyOwner {
         interval = _interval;
     }
 
