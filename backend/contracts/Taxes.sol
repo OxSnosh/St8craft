@@ -155,7 +155,6 @@ contract TaxesContract is Ownable, ReentrancyGuard {
         (, uint256 taxesCollectible) = getTaxesCollectible(id);
         inf.toggleCollectionNeededToChangeRate(id);
         tsy.increaseBalanceOnTaxCollection(id, taxesCollectible);
-        //need to reduce taxes collectible by a percentage for each blockade against
         emit TaxesCollected(id, taxesCollectible);
     }
 

@@ -13,11 +13,12 @@ import "./Crime.sol";
 import "./Forces.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title InfrastructureContract
 ///@author OxSnosh
 ///@notice this contract will store a nations land, technology, infrastructure and tax rate
-contract InfrastructureContract is Ownable {
+contract InfrastructureContract is Ownable, ReentrancyGuard {
     address public countryMinter;
     address public resources;
     address public infrastructureMarket;
@@ -413,27 +414,27 @@ contract InfrastructureContract is Ownable {
         return areaOfInfluence;
     }
 
-    ///@dev this is a public function only callable from a nation owner
-    ///@dev this function will allow a nation owner to sell land
-    ///@notice this function will allow a nation owner to sell land
-    ///@notice land can be sold for 100/mile (300 with rubber)
-    ///@param id is the nation id of the nation selling land
-    ///@param amount is the amount of land being sold
-    function sellLand(uint256 id, uint256 amount) public {
-        bool owner = mint.checkOwnership(id, msg.sender);
-        require(owner, "!nation owner");
-        uint256 currentLand = idToInfrastructure[id].landArea;
-        require(amount < (currentLand - 20), "cannot sell land below 20 miles");
-        idToInfrastructure[id].landArea -= amount;
-        uint256 costPerMile = 100 * (10**18);
-        bool rubber = res.viewRubber(id);
-        if (rubber) {
-            costPerMile = 300 * (10**18);
-        }
-        uint256 totalCost = (amount * costPerMile);
-        TreasuryContract(treasury).returnBalance(id, totalCost);
-        emit LandSold(id, amount, totalCost);
-    }
+    // ///@dev this is a public function only callable from a nation owner
+    // ///@dev this function will allow a nation owner to sell land
+    // ///@notice this function will allow a nation owner to sell land
+    // ///@notice land can be sold for 100/mile (300 with rubber)
+    // ///@param id is the nation id of the nation selling land
+    // ///@param amount is the amount of land being sold
+    // function sellLand(uint256 id, uint256 amount) public nonReentrant {
+    //     bool owner = mint.checkOwnership(id, msg.sender);
+    //     require(owner, "!nation owner");
+    //     uint256 currentLand = idToInfrastructure[id].landArea;
+    //     require(amount < (currentLand - 20), "cannot sell land below 20 miles");
+    //     idToInfrastructure[id].landArea -= amount;
+    //     uint256 costPerMile = 100 * (10**18);
+    //     bool rubber = res.viewRubber(id);
+    //     if (rubber) {
+    //         costPerMile = 300 * (10**18);
+    //     }
+    //     uint256 totalCost = (amount * costPerMile);
+    //     TreasuryContract(treasury).returnBalance(id, totalCost);
+    //     emit LandSold(id, amount, totalCost);
+    // }
 
     ///@dev this is a public function that is only callable from the spy contract
     ///@dev this function will decrease land area after a successful spy attack

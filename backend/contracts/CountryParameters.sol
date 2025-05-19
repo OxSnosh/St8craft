@@ -242,6 +242,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
     function setRulerName(string memory newRulerName, uint256 id) public {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
+        require(bytes(newRulerName).length <= 64, "Ruler Name too long");
         tres.spendBalance(id, 20000000 * (10**18));
         idToCountryParameters[id].rulerName = newRulerName;
         emit RulerNameChanged(id, newRulerName);
@@ -255,6 +256,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
     function setNationName(string memory newNationName, uint256 id) public {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
+        require(bytes(newNationName).length <= 64, "Nation Name too long");
         tres.spendBalance(id, 20000000 * (10**18));
         idToCountryParameters[id].nationName = newNationName;
         emit NationNameChanged(id, newNationName);
@@ -268,6 +270,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
     function setCapitalCity(string memory newCapitalCity, uint256 id) public {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
+        require(bytes(newCapitalCity).length <= 64, "Capital Name too long");
         idToCountryParameters[id].capitalCity = newCapitalCity;
         emit CapitalCityChanged(id, newCapitalCity);
     }
@@ -280,6 +283,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
     function setNationSlogan(string memory newNationSlogan, uint256 id) public {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
+        require(bytes(newNationSlogan).length <= 128, "Slogan too long");
         idToCountryParameters[id].nationSlogan = newNationSlogan;
         emit NationSloganChanged(id, newNationSlogan);
     }
@@ -287,13 +291,13 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
     ///@dev this is public function that will allow a nation ruler to set a team membership for the nation
     ///@notice use this function to set a team membership for the nation
     ///@notice this function is only callable by the nation owner
-    ///@notice there are only 15 teams in the game, each team has senators that can sanction nations on that team from trading and send sending aid to eachother
+    ///@notice there are only 9 teams in the game, each team has senators that can sanction nations on that team from trading and send sending aid to eachother
     ///@param newTeam is the updated name for the nation ruler
     ///@param id is the nation ID for the update
     function setTeam(uint256 id, uint256 newTeam) public {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
-        require(newTeam <= 15, "invalid team selection");
+        require(newTeam <= 8, "invalid team selection");
         bool isSenator = senate.isSenator(id);
         require(isSenator == false, "cannot chenge teams as a senator");
         senate.updateTeam(id, newTeam);

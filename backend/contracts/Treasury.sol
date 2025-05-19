@@ -14,7 +14,7 @@ import "./KeeperFile.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-///@title TreasuyContract
+///@title TreasuryContract
 ///@author OxSnosh
 ///@dev this contract allows a nation owner to withdraw game revenues from their nation
 ///@dev this contract allows a nation owner to deposit game revenues into their nation
@@ -57,7 +57,7 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
     address public parameters;
     uint256 public daysToInactive = 30;
     uint256 public maxDaysOfTaxes = 20;
-    uint256 private milf = 0;
+    uint256 private silt = 0;
     uint256 public seedMoney = 2000000 * (10 ** 18);
 
     CountryMinter mint;
@@ -416,7 +416,7 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
         idToTreasury[id].balance -= cost;
         totalGameBalance -= cost;
         //TAXES here
-        uint256 taxLevied = ((cost * milf) / 100);
+        uint256 taxLevied = ((cost * silt) / 100);
         if (taxLevied > 0) {
             IWarBucks(warBucksAddress).mintFromTreasury(
                 address(this),
@@ -428,13 +428,13 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
 
     ///@dev this function will show the balance of warbucks within the contract
     ///@dev when money is spent within the game it can be taxed an deposited within this contract
-    function viewMilfRevenues() public view returns (uint256) {
+    function viewSiltRevenues() public view returns (uint256) {
         return (WarBucks(warBucksAddress).balanceOf(address(this)));
     }
 
     ///@dev when money is spent within the game it can be taxed an deposited within this contract
     ///@dev this function will allow the contract owner to withdraw the warbucks from this contract into the owners wallet
-    function withdrawMilfRevenues(uint256 amount) public onlyOwner {
+    function withdrawSiltRevenues(uint256 amount) public onlyOwner {
         WarBucks(warBucksAddress).transfer(msg.sender, amount);
         emit OwnerWithdrawMilfRevenues(amount);
     }
@@ -457,14 +457,14 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
 
     ///@dev this function allows the contract owner to set the tax rate in game purchases are taxed at
     ///@dev the tax rate will be the % of the purchase price that is minted into this contract that can be withdrawn later
-    function setMilf(uint256 newPercentage) public onlyOwner {
-        milf = newPercentage;
+    function setSilt(uint256 newPercentage) public onlyOwner {
+        silt = newPercentage;
     }
 
     ///@dev this funtion will reuturn the game tax rate
     ///@return uint256 will be the tax rate at which purchases in the game are taxed at
-    function getMilf() public view returns (uint256) {
-        return milf;
+    function getSilt() public view returns (uint256) {
+        return silt;
     }
 
     function demonetizeNation(uint256 id) public onlyOwner {
@@ -481,22 +481,6 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
 
     function getTotalGameBalance() public view returns (uint256) {
         return totalGameBalance;
-    }
-
-    modifier onlySpyContract() {
-        require(msg.sender == spyOperations, "only callable from spy contract");
-        _;
-    }
-
-    ///@dev this function is only callable from the spy contract
-    ///@dev this function will allow the spy contract to transfer a nations balance to an attacking nation upon a successful spy attack
-    ///@param id is the nation id of the nation recieving the balance (receiving nation)
-    ///@param amount is the amount of balance being transferred
-    function destroyBalance(
-        uint256 id,
-        uint256 amount
-    ) public onlySpyContract {
-        idToTreasury[id].balance -= amount;
     }
 
     modifier onlyAidContract() {
@@ -520,67 +504,82 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
         idToTreasury[idRecipient].balance += amount;
     }
 
-    modifier onlyGroundBattle() {
-        require(
-            msg.sender == groundBattle,
-            "function only callable from ground battle"
-        );
-        _;
-    }
+    // modifier onlySpyContract() {
+    //     require(msg.sender == spyOperations, "only callable from spy contract");
+    //     _;
+    // }
 
-    uint256 MAX_TRANSFER = 1000000 * (10**18);
+    // ///@dev this function is only callable from the spy contract
+    // ///@dev this function will allow the spy contract to transfer a nations balance to an attacking nation upon a successful spy attack
+    // ///@param id is the nation id of the nation recieving the balance (receiving nation)
+    // ///@param amount is the amount of balance being transferred
+    // function destroyBalance(
+    //     uint256 id,
+    //     uint256 amount
+    // ) public onlySpyContract {
+    //     idToTreasury[id].balance -= amount;
+    // }
+
+    // modifier onlyGroundBattle() {
+    //     require(
+    //         msg.sender == groundBattle,
+    //         "function only callable from ground battle"
+    //     );
+    //     _;
+    // }
+
+    // uint256 MAX_TRANSFER = 1000000 * (10**18);
     
-    ///@dev this function is only callable from the ground battle contract
-    ///@dev this function will transfer the balance lost in a ground battle to the winning nation
-    ///@param randomNumber is the amount of balance being transferred
-    ///@param attackerId is the nation id of the attacking nation
-    ///@param defenderId is the nation id of the defending nation
-    function transferSpoils(
-        uint256 randomNumber,
-        uint256 battleId,
-        uint256 attackerId,
-        uint256 defenderId
-    ) public onlyGroundBattle {
-        uint256 defenderBalance = idToTreasury[defenderId].balance;
-        (
-            ,
-            ,
-            ,
-            ,
-            uint256 defenderSoldierLosses,
-            uint256 defenderTankLosses
-        ) = ground.returnBattleResults(battleId);
-        uint256 maximumFundsToTransfer = ((defenderSoldierLosses * 4) +
-            (defenderTankLosses * 150) * (10**18));
-        uint256 fundsToTransfer = ((defenderBalance * randomNumber) / 100);
-        if (fundsToTransfer >= maximumFundsToTransfer) {
-            fundsToTransfer = maximumFundsToTransfer;
-        }
-        if (fundsToTransfer < (1000000 * (10**18))) {
-            idToTreasury[attackerId].balance += fundsToTransfer;
-        } else {
-            idToTreasury[attackerId].balance += (1000000 * (10**18));
-            fundsToTransfer = (1000000 * (10**18));
-        }
-        emit SpoilsTransferred(
-            attackerId,
-            defenderId,
-            fundsToTransfer
-        );
-    }
+    // ///@dev this function is only callable from the ground battle contract
+    // ///@dev this function will transfer the balance lost in a ground battle to the winning nation
+    // ///@param randomNumber is the amount of balance being transferred
+    // ///@param attackerId is the nation id of the attacking nation
+    // ///@param defenderId is the nation id of the defending nation
+    // function transferSpoils(
+    //     uint256 randomNumber,
+    //     uint256 battleId,
+    //     uint256 attackerId,
+    //     uint256 defenderId
+    // ) public onlyGroundBattle {
+    //     uint256 defenderBalance = idToTreasury[defenderId].balance;
+    //     (
+    //         ,
+    //         ,
+    //         ,
+    //         ,
+    //         uint256 defenderSoldierLosses,
+    //         uint256 defenderTankLosses
+    //     ) = ground.returnBattleResults(battleId);
+    //     uint256 maximumFundsToTransfer = ((defenderSoldierLosses * 4 * 1e18) +
+    //         (defenderTankLosses * 150 * 1e18));
+    //     uint256 fundsToTransfer = ((defenderBalance * randomNumber) / 100);
+    //     if (fundsToTransfer >= maximumFundsToTransfer) {
+    //         fundsToTransfer = maximumFundsToTransfer;
+    //     }
+    //     if (fundsToTransfer < (1000000 * (10**18))) {
+    //         idToTreasury[attackerId].balance += fundsToTransfer;
+    //     } else {
+    //         idToTreasury[attackerId].balance += (1000000 * (10**18));
+    //         fundsToTransfer = (1000000 * (10**18));
+    //     }
+    //     emit SpoilsTransferred(
+    //         attackerId,
+    //         defenderId,
+    //         fundsToTransfer
+    //     );
+    // }
 
-    modifier onlyInfrastructure() {
-        require(
-            msg.sender == infrastructure,
-            "only callable from infrastructure contract"
-        );
-        _;
-    }
+    // modifier onlyInfrastructure() {
+    //     require(
+    //         msg.sender == infrastructure,
+    //         "only callable from infrastructure contract"
+    //     );
+    //     _;
+    // }
 
-    ///@dev this function is only callable from the infrastructure contract
-    ///@dev this function will compensate a nation when they sell land, tech or infrastructure
-    function returnBalance(uint256 id, uint256 cost) public onlyInfrastructure {
-        //need a way to only allow the nation owner to do this
-        idToTreasury[id].balance += cost;
-    }
+    // ///@dev this function is only callable from the infrastructure contract
+    // ///@dev this function will compensate a nation when they sell land, tech or infrastructure
+    // function returnBalance(uint256 id, uint256 cost) public onlyInfrastructure {
+    //     idToTreasury[id].balance += cost;
+    // }
 }

@@ -230,7 +230,7 @@ contract SpyOperationsContract is Ownable {
         _;
     }
 
-    function spyAttack(bool success, uint256 attackType, uint256 defenderId, uint256 attackerId, uint256 cost, uint256 randomNumber) public {
+    function spyAttack(bool success, uint256 attackType, uint256 defenderId, uint256 attackerId, uint256 cost, uint256 randomNumber) public onlyRelayer {
         console.log("success", success);
         console.log("defenderId", defenderId);
         console.log("attackerId", attackerId);
@@ -296,8 +296,8 @@ contract SpyOperationsContract is Ownable {
                 captueTechnology(defenderId, randomNumber);
             } else if (attackType == 10) {
                 sabotogeTaxes(defenderId, randomNumber);
-            } else if (attackType == 11) {
-                destroyMoneyReserves(defenderId);
+            // } else if (attackType == 11) {
+            //     destroyMoneyReserves(defenderId);
             } else if (attackType == 12) {
                 captureInfrastructure(defenderId, randomNumber);
             } else {
@@ -409,17 +409,17 @@ contract SpyOperationsContract is Ownable {
         inf.setTaxRateFromSpyContract(defenderId, randomNumberToSetTaxes);
     }
 
-    function destroyMoneyReserves(uint256 defenderId) internal {
-        //max 5% or $10 million
-        uint256 defenderBalance = tsy.checkBalance(defenderId);
-        uint256 amountToDestroy;
-        if (defenderBalance <= (20000000 * (10 ** 18))) {
-            amountToDestroy = ((defenderBalance * 5) / 100);
-        } else {
-            amountToDestroy = (1000000 * (10 ** 18));
-        }
-        tsy.destroyBalance(defenderId, amountToDestroy);
-    }
+    // function destroyMoneyReserves(uint256 defenderId) internal {
+    //     //max 5% or $10 million
+    //     uint256 defenderBalance = tsy.checkBalance(defenderId);
+    //     uint256 amountToDestroy;
+    //     if (defenderBalance <= (20000000 * (10 ** 18))) {
+    //         amountToDestroy = ((defenderBalance * 5) / 100);
+    //     } else {
+    //         amountToDestroy = (1000000 * (10 ** 18));
+    //     }
+    //     tsy.destroyBalance(defenderId, amountToDestroy);
+    // }
 
     function captureInfrastructure(
         uint256 defenderId,

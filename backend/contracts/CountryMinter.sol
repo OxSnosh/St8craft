@@ -147,6 +147,10 @@ contract CountryMinter is ERC721, Ownable, ReentrancyGuard {
             ownerCountryCount[msg.sender] < MAX_NATIONS_PER_WALLET,
             "Cannot own more than 20 nations"
         );
+        require(bytes(ruler).length <= 64, "Ruler Name too long");
+        require(bytes(nationName).length <= 64, "Nation Name too long");
+        require(bytes(capitalCity).length <= 64, "Capital Name too long");
+        require(bytes(nationSlogan).length <= 128, "Slogan too long");
         uint256 seedMoney = TreasuryContract(treasury).getSeedMoney();
         IWarBucks(warbucks).burnFromMint(msg.sender, seedMoney);
         _safeMint(msg.sender, countryId);
@@ -231,8 +235,14 @@ contract CountryMinter is ERC721, Ownable, ReentrancyGuard {
         delete idToOwner[nationId];
 
         _burn(nationId);
+
+        emit Transfer(owner, address(0), nationId);
     }
 
+    ///@dev this function will transfer the ownership of a nation to another address
+    ///@param nationId this is the id of the nation that will be transferred
+    ///@param newOwner this is the address of the new owner of the nation
+    ///@notice this function will only transfer the ownership of the nation to another address
     function transferNation(uint256 nationId, address newOwner) public {
         require(newOwner != address(0), "Cannot transfer to zero address");
         require(newOwner != msg.sender, "Cannot transfer to yourself");
@@ -255,5 +265,11 @@ contract CountryMinter is ERC721, Ownable, ReentrancyGuard {
         }
 
         ownerCountryIds[newOwner].push(nationId);
+
+        emit Transfer(
+            previousOwner,
+            newOwner,
+            nationId
+        );
     }
 }
