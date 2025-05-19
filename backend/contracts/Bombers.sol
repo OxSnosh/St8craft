@@ -585,7 +585,7 @@ contract BombersContract is Ownable, ReentrancyGuard {
 
 ///@title BombersMarketplace1
 ///@author OxSnosh
-///@notice this is the contract that will allow nation owners to purchase AH! Cobras, AH64 Apaches, Bristol Blenheims, B52 Mitchells and B17 Flying Fortresses
+///@notice this is the contract that will allow nation owners to purchase AH1 Cobras, AH64 Apaches, Bristol Blenheims, B52 Mitchells and B17 Flying Fortresses
 contract BombersMarketplace1 is Ownable, ReentrancyGuard {
     address public countryMinter;
     address public bombers1;

@@ -143,7 +143,6 @@ contract BillsContract is Ownable, ReentrancyGuard {
         require(
             tsy.decreaseBalanceOnBillsPaid(id, billsPayable), "Payment failed"
         );
-        tsy.decreaseBalanceOnBillsPaid(id, billsPayable);
         emit BillsPaid(id, billsPayable);
     }
 
@@ -225,7 +224,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
             infrastructureCostPerLevel = (((18 * infrastructureAmount) / 100) +
                 20);
         }
-        uint256 adjustedInfrastructureCostPerLevel = calculateModifiedInfrastrucureUpkeep(
+        uint256 adjustedInfrastructureCostPerLevel = calculateModifiedInfrastructureUpkeep(
                 infrastructureCostPerLevel,
                 id
             );
@@ -236,7 +235,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
     ///@param baseDailyInfrastructureCostPerLevel this parameter will be the daily cost of infrastructure before adjustments
     ///@param id is the nation ID for the nation that the bills are being calculated
     ///@return uint256 this is daily cost per level for infrastructure upkeep after adjusting for resources, improvements and wonders
-    function calculateModifiedInfrastrucureUpkeep(
+    function calculateModifiedInfrastructureUpkeep(
         uint256 baseDailyInfrastructureCostPerLevel,
         uint256 id
     ) public view returns (uint256) {
@@ -378,7 +377,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
     }
 
     ///@notice this function claculates daily bills for a nations cruise missiles
-    ///@param id this is the nation ID of the calulation for daily cruise missile upkeep costs
+    ///@param id this is the nation ID of the calculation for daily cruise missile upkeep costs
     ///@return uint256 this is the daily cruise missile upkeep cost for the nation
     function getCruiseMissileUpkeep(uint256 id) public view returns (uint256) {
         uint256 cruiseMissileCount = mis.getCruiseMissileCount(id);
@@ -418,7 +417,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
     }
 
     ///@notice this function calculates daily bills for a nations navy
-    ///@param id this is the nation ID for the calulation of navy upkeep costs
+    ///@param id this is the nation ID for the calculation of navy upkeep costs
     ///@return navyUpkeep this is the daily cost of upkeep for a nations navy
     function getNavyUpkeep(
         uint256 id
@@ -441,7 +440,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
         return dailyNavyUpkeep * (10 ** 18);
     }
 
-    ///@notice this function calculates additional nacy upkeep for a nation
+    ///@notice this function calculates additional navy upkeep for a nation
     ///@param id this is the nation ID of the nation where the additional navy upkeep is being calculated
     ///@return uint256 this is additional navy upkeep costs that will be added to the daily navy upkeep costs
     function getNavyUpkeepAppended(uint256 id) internal view returns (uint256) {
@@ -468,7 +467,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
     ///@notice this function will adjust a nations navy bills based on resources, improvements and wonders that reduce navy upkeep
     ///@param id this is the nation ID for the countey whose navy upkeep is being calculated
     ///@param baseNavyUpkeep this is the base daily cost of navy bills before adjustments
-    ///@return uint256 this is a nations daily navy upkeep adjusted for resources, improvements and woneers
+    ///@return uint256 this is a nations daily navy upkeep adjusted for resources, improvements and wonders
     function getAdjustedNavyUpkeep(
         uint256 id,
         uint256 baseNavyUpkeep
@@ -493,7 +492,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
 
     ///@notice this function will calculate the upkeep cost per improvement for a given nation
     ///@param id this is the nation ID for the country for the daily improvement upkeep calculation
-    ///@return improvementBillsPerLevel is the daily cost of imprvements per level for the nation
+    ///@return improvementBillsPerLevel is the daily cost of improvements per level for the nation
     function calculateImprovementCostPerLevel(
         uint256 id
     ) public view returns (uint256 improvementBillsPerLevel) {
@@ -533,7 +532,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
         if (nuclearPowerPlant) {
             modifiers -= 5;
         }
-        bool accomodativeGovernment = checkAccomodativeGovernmentForImprovementsAndWonders(
+        bool accomodativeGovernment = checkAccommodativeGovernmentForImprovementsAndWonders(
                 id
             );
         if (accomodativeGovernment) {
@@ -557,7 +556,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
         if (nuclearPowerPlant) {
             modifiers -= 5;
         }
-        bool accomodativeGovernment = checkAccomodativeGovernmentForImprovementsAndWonders(
+        bool accomodativeGovernment = checkAccommodativeGovernmentForImprovementsAndWonders(
                 id
             );
         if (accomodativeGovernment) {
@@ -568,10 +567,10 @@ contract BillsContract is Ownable, ReentrancyGuard {
     }
 
     ///@dev this is a public view function that will return a boolean value if a nations government type accomodates a reduced upkeep for wonders and improvements
-    ///@notice this function will check if the given nation has a governemnt type that accomodate a lower the upkeep for improvements and wonders by 5%
+    ///@notice this function will check if the given nation has a government type that accomodate a lower the upkeep for improvements and wonders by 5%
     ///@param countryId is the nation ID of the country being queried
     ///@return bool will be true if the nation's government type accomodates a lower infrastructure cost
-    function checkAccomodativeGovernmentForImprovementsAndWonders(
+    function checkAccommodativeGovernmentForImprovementsAndWonders(
         uint256 countryId
     ) public view returns (bool) {
         uint256 governmentType = param.getGovernmentType(countryId);
@@ -587,7 +586,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
     }
 
     ///@dev this is a public view function that will return a boolean value if a nations government type accomodates a reduced upkeep for wonders and improvements
-    ///@notice this function will check if the given nation has a governemnt type that accomodate a lower the upkeep for improvements and wonders by 5%
+    ///@notice this function will check if the given nation has a government type that accomodate a lower the upkeep for improvements and wonders by 5%
     ///@param countryId is the nation ID of the country being queried
     ///@return bool will be true if the nation's government type accomodates a lower infrastructure cost
     function checkAccomodativeGovernmentForMilitaryUpkeep(
