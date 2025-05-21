@@ -296,7 +296,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
             navyUpkeep +
             nukeUpkeep +
             cruiseMissileUpkeep;
-        bool accomodativeGov = checkAccomodativeGovernmentForMilitaryUpkeep(id);
+        bool accomodativeGov = checkAccommodativeGovernmentForMilitaryUpkeep(id);
         if (accomodativeGov) {
             dailyMilitaryUpkeep = ((dailyMilitaryUpkeep * 95) / 100);
         }
@@ -589,7 +589,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
     ///@notice this function will check if the given nation has a government type that accomodate a lower the upkeep for improvements and wonders by 5%
     ///@param countryId is the nation ID of the country being queried
     ///@return bool will be true if the nation's government type accomodates a lower infrastructure cost
-    function checkAccomodativeGovernmentForMilitaryUpkeep(
+    function checkAccommodativeGovernmentForMilitaryUpkeep(
         uint256 countryId
     ) public view returns (bool) {
         uint256 governmentType = param.getGovernmentType(countryId);
