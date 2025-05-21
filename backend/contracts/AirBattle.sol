@@ -177,8 +177,6 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
             attackerFighterArray
         );
         uint256 attackerBomberSum = getAttackerBomberSum(attackerBomberArray);
-        // airBattleIdToAttackerFighterSum[airBattleId] = attackerFighterSum;
-        // airBattleIdToAttackerBomberSum[airBattleId] = attackerBomberSum;
         uint256 attackSum = (attackerFighterSum + attackerBomberSum);
         require(attackSum <= 25, "cannot send more than 25 planes on a sortie");
         bool fighterCheck = verifyAttackerFighterArrays(
@@ -275,6 +273,7 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
             fighter.getF22RaptorCount(attackerId) >= attackerFighterArray[8],
             "not enough f22s"
         );
+        require(attackerFighterArray.length == 9, "Invalid fighter array length");
         return true;
     }
 
@@ -341,6 +340,7 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
             bomber.getTupolevTu160Count(attackerId) >= attackerBomberArray[8],
             "not enough tupolev's"
         );
+        require(attackerBomberArray.length == 9, "Invalid bomber array length");
         return true;
     }
 
@@ -366,6 +366,26 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
     mapping(uint256 => bool) public pendingRequests;
     mapping(uint256 => uint256) public pendingRequestTimestamp;
     uint256 public constant RETRY_TIMEOUT = 5 minutes;
+
+    function retryFulfillRequest(uint256 battleId) public {
+        require(pendingRequests[battleId], "No pending request");
+        require(
+            block.timestamp > pendingRequestTimestamp[battleId] + RETRY_TIMEOUT,
+            "Retry not allowed yet"
+        );
+
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+            i_gasLane,
+            i_subscriptionId,
+            REQUEST_CONFIRMATIONS,
+            i_callbackGasLimit,
+            NUM_WORDS
+        );
+
+        s_requestIdToRequestIndex[requestId] = battleId;
+        pendingRequests[battleId] = true;
+        pendingRequestTimestamp[battleId] = block.timestamp;
+    }
 
     function fulfillRequest(uint256 battleId) internal {
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
@@ -405,7 +425,7 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
         uint256 requestId,
         uint256[] memory randomWords
     ) internal override {
-        require(s_requestIdToRequestIndex[requestId] != 0 || requestId == 0, "Invalid VRF response");
+        require(pendingRequests[s_requestIdToRequestIndex[requestId]], "Request not pending");
         uint256 requestNumber = s_requestIdToRequestIndex[requestId];
         delete pendingRequests[requestNumber];
         delete pendingRequestTimestamp[requestNumber];
@@ -434,30 +454,9 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient, Reent
         req.addUint("attackerId", attackerId);
         req.addUint("defenderId", defenderId);
         req.addUint("attackId", attackId);
-        console.log("arrived to sendOperatorRequest()");
         sendOperatorRequest(req, fee);
-        console.log("arrived to fulfillRandomWords()");
     }
 
-    function retryFulfillRequest(uint256 battleId) public {
-        require(pendingRequests[battleId], "No pending request");
-        require(
-            block.timestamp > pendingRequestTimestamp[battleId] + RETRY_TIMEOUT,
-            "Retry not allowed yet"
-        );
-
-        uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_gasLane,
-            i_subscriptionId,
-            REQUEST_CONFIRMATIONS,
-            i_callbackGasLimit,
-            NUM_WORDS
-        );
-
-        s_requestIdToRequestIndex[requestId] = battleId;
-        pendingRequests[battleId] = true;
-        pendingRequestTimestamp[battleId] = block.timestamp;
-    }
 
     function completeAirBattle(
         bytes memory attackerFighterCasualtiesBytes,

@@ -273,7 +273,6 @@ contract SenateContract is ChainlinkClient, KeeperCompatibleInterface, Ownable {
         uint256 team,
         uint256 _epoch
     ) internal returns (bytes32 _requestId) {
-        console.log("election called for", team);
         Chainlink.Request memory req = buildOperatorRequest(
             jobId,
             this.completeElection.selector
@@ -286,19 +285,26 @@ contract SenateContract is ChainlinkClient, KeeperCompatibleInterface, Ownable {
         req.addBytes("teamVotes", abi.encode(teamVotes));
         req.addUint("epoch", _epoch);
         orderId++;
-        console.log("sending election for team", team);
         bytes32 requestId = sendOperatorRequest(req, fee);
-        console.log("operator request sent for", team);
         return requestId;
     }
 
-    ///@dev 
+    ///@dev this is a public function that will be called from an off chain source
+    ///@notice this function is only callable from the keeper performUpkeep()
+    ///@notice this function will be called when the election is complete
+    ///@param _requestId is the request id of the election
+    ///@param winners is the winners of the election
+    ///@param team is the team for which the election was conducted
+    ///@param _epoch is the epoch for which the election was conducted
+    ///@notice this function will set the winners of the election as senators
+    ///@notice this function will set the previous senators to false
     function completeElection(
         bytes32 _requestId,
         bytes memory winners,
         uint256 team,
         uint256 _epoch
     ) public recordChainlinkFulfillment(_requestId) {
+        require(epochToTeamToWinners[_epoch][team].length == 0, "Election already completed");
         uint256[] memory _winners = abi.decode(winners, (uint256[]));
         if(epoch > 0) {
             uint256[] memory currentSenators = epochToTeamToWinners[_epoch-1][team];
@@ -354,6 +360,7 @@ contract SenateContract is ChainlinkClient, KeeperCompatibleInterface, Ownable {
         );
         sanctioned.sanctionsByTeam[sanctionedTeam] = true;
         sanctioned.dayOfSanctionByTeam[sanctionedTeam] = gameDay;
+        teamToCurrentSanctions[sanctionedTeam].push(idSanctioned);
         res.removeTradingPartnersFromSanction(idSanctioned, sanctionedTeam);
         emit Sanction(idSenator, senatorTeam, idSanctioned);
     }
