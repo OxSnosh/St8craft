@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  automation-bot:
+    build: 
+      context: .
+      dockerfile: bot/Dockerfile
+    container_name: automation-bot
+    # working_dir: /app  
+    env_file:
+      - bot/.env      
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"

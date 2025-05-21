@@ -6,7 +6,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { INITIAL_SUPPLY } from "../helper-hardhat-config"
 import { 
     WarBucks, 
-    MetaNationsGovToken,
+    St8craftGovToken,
     AidContract,
     AirBattleContract,
     AdditionalAirBattle,
@@ -110,7 +110,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     signer1 = signers[1];
 
     let warbucks: WarBucks  
-    let metanationsgovtoken: MetaNationsGovToken
+    let st8craftgovtoken: St8craftGovToken
     let aidcontract: AidContract
     let airbattlecontract: AirBattleContract
     let additionalairbattle: AdditionalAirBattle
@@ -169,8 +169,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     warbucks = await deploy("WarBucks", { from: deployer, args: [INITIAL_SUPPLY], log: true });
     let warbucksContract = await ethers.getContractAt("WarBucks", warbucks.address);
 
-    metanationsgovtoken = await deploy("MetaNationsGovToken", { from: deployer, args: [INITIAL_SUPPLY], log: true });
-    let metanationsgovtokenContract = await ethers.getContractAt("MetaNationsGovToken", metanationsgovtoken.address);
+    st8craftgovtoken = await deploy("St8craftGovToken", { from: deployer, args: [INITIAL_SUPPLY], log: true });
+    let st8craftgovtokenContract = await ethers.getContractAt("St8craftGovToken", st8craftgovtoken.address);
 
     aidcontract = await deploy("AidContract", { from: deployer, args: [], log: true });
     let deployedAidContract = await ethers.getContractAt("AidContract", aidcontract.address);
@@ -1031,8 +1031,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         let warbucksArtifact = await artifacts.readArtifact("WarBucks");
         let warbucksAbi = warbucksArtifact.abi;
 
-        let MetaNationsGovTokenArtifact = await artifacts.readArtifact("MetaNationsGovToken")
-        let MetaNationsGovTokenAbi = MetaNationsGovTokenArtifact.abi
+        let St8craftGovTokenArtifact = await artifacts.readArtifact("St8craftGovToken")
+        let St8craftGovTokenAbi = St8craftGovTokenArtifact.abi
 
         let AidContractArtifact = await artifacts.readArtifact("AidContract")
         let AidContractAbi = AidContractArtifact.abi
@@ -1283,9 +1283,9 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 address: warbucks.address,
                 ABI: warbucksAbi,
             },
-            metanationsgovtoken: {
-                address: metanationsgovtoken.address,
-                ABI: MetaNationsGovTokenAbi
+            st8craftgovtoken: {
+                address: st8craftgovtoken.address,
+                ABI: St8craftGovTokenAbi
             },
             aidcontract: {
                 address: aidcontract.address,

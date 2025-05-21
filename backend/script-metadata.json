@@ -3015,24 +3015,6 @@
           "type": "function"
         },
         {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "id",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "amount",
-              "type": "uint256"
-            }
-          ],
-          "name": "destroyBalance",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
           "inputs": [],
           "name": "fighters",
           "outputs": [
@@ -3163,7 +3145,7 @@
         },
         {
           "inputs": [],
-          "name": "getMilf",
+          "name": "getSeedMoney",
           "outputs": [
             {
               "internalType": "uint256",
@@ -3176,7 +3158,7 @@
         },
         {
           "inputs": [],
-          "name": "getSeedMoney",
+          "name": "getSilt",
           "outputs": [
             {
               "internalType": "uint256",
@@ -3487,24 +3469,6 @@
           "type": "function"
         },
         {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "id",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "cost",
-              "type": "uint256"
-            }
-          ],
-          "name": "returnBalance",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
           "inputs": [],
           "name": "seedMoney",
           "outputs": [
@@ -3574,7 +3538,7 @@
               "type": "uint256"
             }
           ],
-          "name": "setMilf",
+          "name": "setSilt",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
@@ -3869,34 +3833,6 @@
           "inputs": [
             {
               "internalType": "uint256",
-              "name": "randomNumber",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "battleId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "attackerId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "defenderId",
-              "type": "uint256"
-            }
-          ],
-          "name": "transferSpoils",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
               "name": "newSeedMoney",
               "type": "uint256"
             }
@@ -3908,7 +3844,7 @@
         },
         {
           "inputs": [],
-          "name": "viewMilfRevenues",
+          "name": "viewSiltRevenues",
           "outputs": [
             {
               "internalType": "uint256",
@@ -3958,7 +3894,7 @@
               "type": "uint256"
             }
           ],
-          "name": "withdrawMilfRevenues",
+          "name": "withdrawSiltRevenues",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
@@ -4941,24 +4877,6 @@
             }
           ],
           "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "id",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "amount",
-              "type": "uint256"
-            }
-          ],
-          "name": "sellLand",
-          "outputs": [],
-          "stateMutability": "nonpayable",
           "type": "function"
         },
         {
@@ -9160,7 +9078,7 @@
               "type": "uint256"
             }
           ],
-          "name": "getFederalAidEligability",
+          "name": "getFederalAidEligibility",
           "outputs": [
             {
               "internalType": "bool",
@@ -9792,6 +9710,19 @@
           "type": "event"
         },
         {
+          "inputs": [],
+          "name": "RETRY_TIMEOUT",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
           "inputs": [
             {
               "internalType": "uint256",
@@ -9894,6 +9825,44 @@
           "inputs": [
             {
               "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "pendingRequestTimestamp",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "pendingRequests",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
               "name": "requestId",
               "type": "uint256"
             },
@@ -9911,6 +9880,19 @@
         {
           "inputs": [],
           "name": "renounceOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "battleId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retryFulfillRequest",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
@@ -10435,7 +10417,7 @@
               "type": "uint256"
             }
           ],
-          "name": "calculateModifiedInfrastrucureUpkeep",
+          "name": "calculateModifiedInfrastructureUpkeep",
           "outputs": [
             {
               "internalType": "uint256",
@@ -10473,7 +10455,7 @@
               "type": "uint256"
             }
           ],
-          "name": "checkAccomodativeGovernmentForImprovementsAndWonders",
+          "name": "checkAccommodativeGovernmentForImprovementsAndWonders",
           "outputs": [
             {
               "internalType": "bool",
@@ -13922,9 +13904,9 @@
             },
             {
               "indexed": false,
-              "internalType": "uint256",
+              "internalType": "string",
               "name": "platoonId",
-              "type": "uint256"
+              "type": "string"
             }
           ],
           "name": "NationAssignedToPlatoon",
@@ -14202,9 +14184,9 @@
               "type": "uint256"
             },
             {
-              "internalType": "uint256",
+              "internalType": "string",
               "name": "platoonId",
-              "type": "uint256"
+              "type": "string"
             },
             {
               "internalType": "uint256",
@@ -14279,25 +14261,6 @@
           "name": "generateCountryParameters",
           "outputs": [],
           "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "countryId",
-              "type": "uint256"
-            }
-          ],
-          "name": "getAlliance",
-          "outputs": [
-            {
-              "internalType": "string",
-              "name": "",
-              "type": "string"
-            }
-          ],
-          "stateMutability": "view",
           "type": "function"
         },
         {
@@ -14473,9 +14436,9 @@
               "type": "uint256"
             },
             {
-              "internalType": "uint256",
+              "internalType": "string",
               "name": "platoonId",
-              "type": "uint256"
+              "type": "string"
             },
             {
               "internalType": "string",
@@ -14668,11 +14631,6 @@
               "type": "uint256"
             },
             {
-              "internalType": "string",
-              "name": "alliance",
-              "type": "string"
-            },
-            {
               "internalType": "uint256",
               "name": "nationTeam",
               "type": "uint256"
@@ -14717,6 +14675,30 @@
           "name": "inflictAnarchy",
           "outputs": [],
           "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "allianceId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nationId",
+              "type": "uint256"
+            }
+          ],
+          "name": "isMemberOfAlliance",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
           "type": "function"
         },
         {
@@ -14925,24 +14907,6 @@
             }
           ],
           "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "string",
-              "name": "newAlliance",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "id",
-              "type": "uint256"
-            }
-          ],
-          "name": "setAlliance",
-          "outputs": [],
-          "stateMutability": "nonpayable",
           "type": "function"
         },
         {
@@ -24767,7 +24731,7 @@
           "inputs": [
             {
               "internalType": "uint256",
-              "name": "updateInterval",
+              "name": "_updateInterval",
               "type": "uint256"
             }
           ],
@@ -24877,19 +24841,6 @@
           "type": "function"
         },
         {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "_interval",
-              "type": "uint256"
-            }
-          ],
-          "name": "ipdateInterval",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
           "inputs": [],
           "name": "keeperRegistry",
           "outputs": [
@@ -24957,6 +24908,19 @@
             }
           ],
           "name": "transferOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "_interval",
+              "type": "uint256"
+            }
+          ],
+          "name": "updateInterval",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
@@ -32394,6 +32358,11 @@
         {
           "inputs": [
             {
+              "internalType": "bytes32",
+              "name": "_requestId",
+              "type": "bytes32"
+            },
+            {
               "internalType": "bytes",
               "name": "winners",
               "type": "bytes"
@@ -38300,6 +38269,12 @@
               "internalType": "string",
               "name": "message",
               "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
             }
           ],
           "name": "MessageSent",
@@ -38319,9 +38294,53 @@
               "internalType": "string",
               "name": "post",
               "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
             }
           ],
           "name": "PostSent",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "nationId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "blockedNationId",
+              "type": "uint256"
+            }
+          ],
+          "name": "SenderBlocked",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "nationId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "unblockedNationId",
+              "type": "uint256"
+            }
+          ],
+          "name": "SenderUnblocked",
           "type": "event"
         },
         {
@@ -38351,6 +38370,24 @@
           "type": "function"
         },
         {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "nationId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "blockedNationId",
+              "type": "uint256"
+            }
+          ],
+          "name": "blockSender",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
           "inputs": [],
           "name": "countryMinter",
           "outputs": [
@@ -38369,14 +38406,19 @@
               "internalType": "uint256",
               "name": "",
               "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
             }
           ],
-          "name": "messages",
+          "name": "isBlocked",
           "outputs": [
             {
-              "internalType": "string",
+              "internalType": "bool",
               "name": "",
-              "type": "string"
+              "type": "bool"
             }
           ],
           "stateMutability": "view",
@@ -38404,25 +38446,6 @@
           "inputs": [
             {
               "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "name": "posts",
-          "outputs": [
-            {
-              "internalType": "string",
-              "name": "",
-              "type": "string"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
               "name": "nationId",
               "type": "uint256"
             },
@@ -38438,6 +38461,362 @@
             }
           ],
           "name": "sendMessage",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "nationId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "blockedNationId",
+              "type": "uint256"
+            }
+          ],
+          "name": "unblockSender",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]
+    },
+    "st8craftgovtoken": {
+      "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+      "ABI": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "initialSupply",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "Approval",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "Transfer",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            }
+          ],
+          "name": "allowance",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "approve",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "decimals",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "subtractedValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "decreaseAllowance",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "addedValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "increaseAllowance",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "name",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "renounceOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "symbol",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "totalSupply",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transfer",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transferFrom",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"

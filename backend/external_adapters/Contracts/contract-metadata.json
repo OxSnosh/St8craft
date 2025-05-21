@@ -2901,24 +2901,6 @@
           "type": "function"
         },
         {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "id",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "amount",
-              "type": "uint256"
-            }
-          ],
-          "name": "destroyBalance",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
           "inputs": [],
           "name": "fighters",
           "outputs": [
@@ -3049,7 +3031,7 @@
         },
         {
           "inputs": [],
-          "name": "getMilf",
+          "name": "getSeedMoney",
           "outputs": [
             {
               "internalType": "uint256",
@@ -3062,7 +3044,7 @@
         },
         {
           "inputs": [],
-          "name": "getSeedMoney",
+          "name": "getSilt",
           "outputs": [
             {
               "internalType": "uint256",
@@ -3373,24 +3355,6 @@
           "type": "function"
         },
         {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "id",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "cost",
-              "type": "uint256"
-            }
-          ],
-          "name": "returnBalance",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
           "inputs": [],
           "name": "seedMoney",
           "outputs": [
@@ -3460,7 +3424,7 @@
               "type": "uint256"
             }
           ],
-          "name": "setMilf",
+          "name": "setSilt",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
@@ -3755,34 +3719,6 @@
           "inputs": [
             {
               "internalType": "uint256",
-              "name": "randomNumber",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "battleId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "attackerId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "defenderId",
-              "type": "uint256"
-            }
-          ],
-          "name": "transferSpoils",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
               "name": "newSeedMoney",
               "type": "uint256"
             }
@@ -3794,7 +3730,7 @@
         },
         {
           "inputs": [],
-          "name": "viewMilfRevenues",
+          "name": "viewSiltRevenues",
           "outputs": [
             {
               "internalType": "uint256",
@@ -3844,7 +3780,7 @@
               "type": "uint256"
             }
           ],
-          "name": "withdrawMilfRevenues",
+          "name": "withdrawSiltRevenues",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"

@@ -189,7 +189,10 @@ contract SenateContract is ChainlinkClient, KeeperCompatibleInterface, Ownable {
             teamOfVote == voterTeam,
             "you can only vote for a fellow team member"
         );
-        
+        require(
+            epochToTeamToSenatorVotes[epoch][voterTeam].length < 15000,
+            "Vote limit reached for this team in this epoch"
+        );
         epochToTeamToSenatorVotes[epoch][voterTeam].push(idOfSenateVote);
         
         bool lobbyists = won3.getPoliticalLobbyists(idVoter);
