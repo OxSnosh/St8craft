@@ -230,6 +230,20 @@ contract SpyOperationsContract is Ownable {
         _;
     }
 
+    mapping(uint256 => mapping(uint256 => bool)) public dayToDefenderIdToAttackedToday;
+
+    function attackedAlready(
+        uint256 defenderId
+    )
+        public
+        view
+        returns (bool)
+    {
+        uint256 day = keep.getGameDay();
+        return dayToDefenderIdToAttackedToday[day][defenderId];
+    }
+    
+
     function spyAttack(bool success, uint256 attackType, uint256 defenderId, uint256 attackerId, uint256 cost, uint256 randomNumber) public onlyRelayer {
         console.log("success", success);
         console.log("defenderId", defenderId);
@@ -237,6 +251,10 @@ contract SpyOperationsContract is Ownable {
         console.log("attackType", attackType);
         console.log("cost", cost);
         console.log("randomNumber", randomNumber);
+        uint256 day = keep.getGameDay();
+        if (dayToDefenderIdToAttackedToday[day][defenderId]) {
+            revert("Defender has already been attacked today");
+        }
         if (success) {
             tsy.spendBalance(attackerId, cost);
             emit SpyAttackResults (
@@ -296,9 +314,7 @@ contract SpyOperationsContract is Ownable {
                 captueTechnology(defenderId, randomNumber);
             } else if (attackType == 10) {
                 sabotogeTaxes(defenderId, randomNumber);
-            // } else if (attackType == 11) {
-            //     destroyMoneyReserves(defenderId);
-            } else if (attackType == 12) {
+            } else if (attackType == 11) {
                 captureInfrastructure(defenderId, randomNumber);
             } else {
                 destroyNukes(defenderId);
@@ -409,18 +425,6 @@ contract SpyOperationsContract is Ownable {
         inf.setTaxRateFromSpyContract(defenderId, randomNumberToSetTaxes);
     }
 
-    // function destroyMoneyReserves(uint256 defenderId) internal {
-    //     //max 5% or $10 million
-    //     uint256 defenderBalance = tsy.checkBalance(defenderId);
-    //     uint256 amountToDestroy;
-    //     if (defenderBalance <= (20000000 * (10 ** 18))) {
-    //         amountToDestroy = ((defenderBalance * 5) / 100);
-    //     } else {
-    //         amountToDestroy = (1000000 * (10 ** 18));
-    //     }
-    //     tsy.destroyBalance(defenderId, amountToDestroy);
-    // }
-
     function captureInfrastructure(
         uint256 defenderId,
         uint256 randomNumber
@@ -433,7 +437,6 @@ contract SpyOperationsContract is Ownable {
     }
 
     function destroyNukes(uint256 defenderId) internal {
-        //max 1
         mis.decreaseNukeCountFromSpyContract(defenderId);
     }
 }

@@ -2,12 +2,7 @@ import { ethers, artifacts } from "hardhat";
 import { Defender } from "@openzeppelin/defender-sdk"
 import { CountryMinter, NationStrengthContract, SpyOperationsContract } from "../typechain-types";
 import { HARDHAT } from "../script-metadata.json"
-
 import * as dotenv from 'dotenv';
-import { Signer } from "ethers";
-import Provider from '@ethersproject/providers';
-
-
 dotenv.config()
 
 type Input = {
@@ -72,13 +67,16 @@ export async function relaySpyOperation( data : Input ) {
 
     const spyoperations = new ethers.Contract(spyOperationsAddress, spyOperationsAbi, signer) as SpyOperationsContract
 
+    var attackedToday = await spyoperations.attackedAlready(data.defenderNationId)
+
+    if (attackedToday) {
+        throw new Error("nation has already attacked today")
+    }    
+
     var attackerSuccessScore = await spyoperations.getAttackerSuccessScore(data.callerNationId)
     var defenderSuccessScore = await spyoperations.getDefenseSuccessScore(data.defenderNationId)
 
     var strengthTotal = (attackerSuccessScore.toNumber() + defenderSuccessScore.toNumber())
-    // console.log(attackerSuccessScore.toNumber())
-    // console.log(defenderSuccessScore.toNumber())
-    // console.log(strengthTotal)
 
     const randomNumber = Math.floor(Math.random() * strengthTotal);
 
