@@ -377,16 +377,16 @@ contract ImprovementsContract1 is Ownable, ReentrancyGuard {
             "population not high enough for purchase"
         );
         uint256 balance = TreasuryContract(treasury).checkBalance(countryId);
+        uint256 purchasePrice;
         if (improvementId == 1) {
-            uint256 purchasePrice = airportCost * amount;
+            purchasePrice = airportCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId].airportCount;
             require((existingCount + amount) <= 3, "Cannot own more than 3");
             idToImprovements1[countryId].airportCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 2) {
-            uint256 purchasePrice = bankCost * amount;
+            purchasePrice = bankCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId].bankCount;
             uint256 maxAmount = 5;
@@ -400,17 +400,15 @@ contract ImprovementsContract1 is Ownable, ReentrancyGuard {
             );
             idToImprovements1[countryId].bankCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 3) {
-            uint256 purchasePrice = barracksCost * amount;
+            purchasePrice = barracksCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId].barracksCount;
             require((existingCount + amount) <= 3, "Cannot own more than 3");
             idToImprovements1[countryId].barracksCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 4) {
-            uint256 purchasePrice = borderFortificationCost * amount;
+            purchasePrice = borderFortificationCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId]
                 .borderFortificationCount;
@@ -429,22 +427,20 @@ contract ImprovementsContract1 is Ownable, ReentrancyGuard {
             );
             idToImprovements1[countryId].borderFortificationCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 5) {
             require(
                 amount == 1,
                 "Boarder walls can only be purchased 1 at a time"
             );
-            uint256 purchasePrice = borderWallCost * amount;
+            purchasePrice = borderWallCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId]
                 .borderWallCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
             idToImprovements1[countryId].borderWallCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 6) {
-            uint256 purchasePrice = bunkerCost * amount;
+            purchasePrice = bunkerCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId].bunkerCount;
             require((existingCount + amount) <= 3, "Cannot own more than 3");
@@ -467,33 +463,29 @@ contract ImprovementsContract1 is Ownable, ReentrancyGuard {
             );
             idToImprovements1[countryId].bunkerCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 7) {
-            uint256 purchasePrice = casinoCost * amount;
+            purchasePrice = casinoCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId].casinoCount;
             require((existingCount + amount) <= 2, "Cannot own more than 2");
             idToImprovements1[countryId].casinoCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 8) {
-            uint256 purchasePrice = churchCost * amount;
+            purchasePrice = churchCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId].churchCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
             idToImprovements1[countryId].churchCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 9) {
-            uint256 purchasePrice = clinicCost * amount;
+            purchasePrice = clinicCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId].clinicCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
             idToImprovements1[countryId].clinicCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 10) {
-            uint256 purchasePrice = drydockCost * amount;
+            purchasePrice = drydockCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId].drydockCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
@@ -502,16 +494,15 @@ contract ImprovementsContract1 is Ownable, ReentrancyGuard {
             require(harborCount > 0, "Must own a harbor first");
             idToImprovements1[countryId].drydockCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else {
-            uint256 purchasePrice = factoryCost * amount;
+            purchasePrice = factoryCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements1[countryId].factoryCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
             idToImprovements1[countryId].factoryCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         }
+        TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         emit Improvement1Purchased(countryId, improvementId, amount);
     }
 
@@ -991,8 +982,9 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
         );
         require(improvementId <= 12, "Invalid improvement ID");
         uint256 balance = TreasuryContract(treasury).checkBalance(countryId);
+        uint256 purchasePrice;
         if (improvementId == 1) {
-            uint256 purchasePrice = foreignMinistryCost * amount;
+            purchasePrice = foreignMinistryCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements2[countryId]
                 .foreignMinistryCount;
@@ -1006,9 +998,8 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 2) {
-            uint256 purchasePrice = forwardOperatingBaseCost * amount;
+            purchasePrice = forwardOperatingBaseCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements2[countryId]
                 .forwardOperatingBaseCount;
@@ -1032,9 +1023,8 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 3) {
-            uint256 purchasePrice = guerillaCampCost * amount;
+            purchasePrice = guerillaCampCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements2[countryId]
                 .guerillaCampCount;
@@ -1048,9 +1038,8 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 4) {
-            uint256 purchasePrice = harborCost * amount;
+            purchasePrice = harborCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements2[countryId].harborCount;
             require((existingCount + amount) <= 1, "Cannot own more than 1");
@@ -1063,9 +1052,8 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 5) {
-            uint256 purchasePrice = hospitalCost * amount;
+            purchasePrice = hospitalCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements2[countryId].hospitalCount;
             require((existingCount + amount) <= 1, "Cannot own more than 1");
@@ -1081,9 +1069,8 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 6) {
-            uint256 purchasePrice = intelligenceAgencyCost * amount;
+            purchasePrice = intelligenceAgencyCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements2[countryId]
                 .intelligenceAgencyCount;
@@ -1097,9 +1084,8 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 7) {
-            uint256 purchasePrice = jailCost * amount;
+            purchasePrice = jailCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements2[countryId].jailCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
@@ -1112,9 +1098,8 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 8) {
-            uint256 purchasePrice = laborCampCost * amount;
+            purchasePrice = laborCampCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements2[countryId].laborCampCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
@@ -1127,8 +1112,8 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         }
+        TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         emit Improvement2Purchased(countryId, improvementId, amount);
     }
 
@@ -1576,8 +1561,9 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
         );
         require(improvementId <= 12, "Invalid improvement ID");
         uint256 balance = TreasuryContract(treasury).checkBalance(countryId);
+        uint256 purchasePrice;
         if (improvementId == 1) {
-            uint256 purchasePrice = missileDefenseCost * amount;
+            purchasePrice = missileDefenseCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements4[countryId]
                 .missileDefenseCount;
@@ -1591,9 +1577,8 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 2) {
-            uint256 purchasePrice = munitionsFactoryCost * amount;
+            purchasePrice = munitionsFactoryCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements4[countryId]
                 .munitionsFactoryCount;
@@ -1611,9 +1596,8 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 3) {
-            uint256 purchasePrice = navalAcademyCost * amount;
+            purchasePrice = navalAcademyCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements4[countryId]
                 .navalAcademyCount;
@@ -1629,9 +1613,8 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 4) {
-            uint256 purchasePrice = navalConstructionYardCost * amount;
+            purchasePrice = navalConstructionYardCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements4[countryId]
                 .navalConstructionYardCount;
@@ -1647,9 +1630,8 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 5) {
-            uint256 purchasePrice = officeOfPropagandaCost * amount;
+            purchasePrice = officeOfPropagandaCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements4[countryId]
                 .officeOfPropagandaCount;
@@ -1670,9 +1652,8 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 6) {
-            uint256 purchasePrice = policeHeadquartersCost * amount;
+            purchasePrice = policeHeadquartersCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements4[countryId]
                 .policeHeadquartersCount;
@@ -1686,8 +1667,8 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         }
+        TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         emit Improvement4Purchased(countryId, improvementId, amount);
     }
 
@@ -2143,8 +2124,9 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
         );
         require(improvementId <= 12, "Invalid improvement ID");
         uint256 balance = TreasuryContract(treasury).checkBalance(countryId);
+        uint256 purchasePrice;
         if (improvementId == 1) {
-            uint256 purchasePrice = prisonCost * amount;
+            purchasePrice = prisonCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements3[countryId].prisonCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
@@ -2157,9 +2139,8 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 2) {
-            uint256 purchasePrice = radiationContainmentChamberCost * amount;
+            purchasePrice = radiationContainmentChamberCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements3[countryId]
                 .radiationContainmentChamberCount;
@@ -2185,9 +2166,8 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 3) {
-            uint256 purchasePrice = redLightDistrictCost * amount;
+            purchasePrice = redLightDistrictCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements3[countryId]
                 .redLightDistrictCount;
@@ -2201,9 +2181,8 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 4) {
-            uint256 purchasePrice = rehabilitationFacilityCost * amount;
+            purchasePrice = rehabilitationFacilityCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements3[countryId]
                 .rehabilitationFacilityCount;
@@ -2217,9 +2196,8 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 5) {
-            uint256 purchasePrice = satteliteCost * amount;
+            purchasePrice = satteliteCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements3[countryId].satelliteCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
@@ -2232,9 +2210,8 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 6) {
-            uint256 purchasePrice = schoolCost * amount;
+            purchasePrice = schoolCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements3[countryId].schoolCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
@@ -2247,9 +2224,8 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 7) {
-            uint256 purchasePrice = shipyardCost * amount;
+            purchasePrice = shipyardCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements3[countryId].shipyardCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
@@ -2262,9 +2238,8 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else if (improvementId == 8) {
-            uint256 purchasePrice = stadiumCost * amount;
+            purchasePrice = stadiumCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements3[countryId].stadiumCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");
@@ -2277,9 +2252,8 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         } else {
-            uint256 purchasePrice = universityCost * amount;
+            purchasePrice = universityCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements3[countryId]
                 .universityCount;
@@ -2298,8 +2272,8 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 countryId,
                 newImprovementTotal
             );
-            TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         }
+        TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
         emit Improvement3Purchased(countryId, improvementId, amount);
     }
 
