@@ -523,7 +523,6 @@ contract AidContract is Ownable, ReentrancyGuard {
             idSender,
             idRecipient
         );
-
     }
 
     ///@dev this is public view function that allows a caller to return the items in a proposal struct

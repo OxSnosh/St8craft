@@ -9,7 +9,6 @@ import "./Treasury.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 
 ///@title CountryParametersContract
 ///@author OxSnosh
@@ -102,8 +101,6 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
     mapping(uint256 => uint256[]) public s_requestIndexToRandomWords;
     mapping(uint256 => uint256) private idToReligionPreference;
     mapping(uint256 => uint256) private idToGovernmentPreference;
-
-    // mapping(uint256 => address) public idToOwnerParameters;
 
     modifier onlyNukeAndGroundBattle() {
         require(
@@ -500,22 +497,32 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         return (daysSinceGovChange, daysSinceReligionChange);
     }
 
-    uint256 public allianceCounter; // Unique ID counter for alliances
+}
+
+///@title AllianceManager
+///@author OxSnosh
+///@notice this contract will manage the alliances in the game
+///@dev this contract will allow nations to create alliances, add admins, approve join requests, and manage members
+///@dev this contract will also allow nations to assign platoons to members
+///@dev this contract will also allow nations to remove members and admins
+///@dev this contract will also allow nations to get the members of an alliance
+contract AllianceManager {
+    uint256 public allianceCounter;
 
     struct Alliance {
         uint256 id;
         string name;
         uint256 founderNationId;
-        mapping(uint256 => bool) admins; // Stores nationIds as admins
-        mapping(uint256 => bool) isMember; // ** NEW: Fast membership check **
-        mapping(uint256 => string) nationToPlatoon; // Maps nation ID to sub-platoon ID
+        mapping(uint256 => bool) admins;
+        mapping(uint256 => bool) isMember;
+        mapping(uint256 => string) nationToPlatoon;
         uint256[] members;
         uint256[] joinRequests;
     }
 
     mapping(uint256 => Alliance) public alliances;
-    mapping(uint256 => uint256) public nationToAlliance; // Maps nation ID to alliance ID
-    mapping(uint256 => bool) public allianceExists; // Tracks if an alliance exists
+    mapping(uint256 => uint256) public nationToAlliance;
+    mapping(uint256 => bool) public allianceExists;
 
     event AllianceCreated(uint256 indexed allianceId, string name, uint256 founderNationId);
     event AllianceAdminAdded(uint256 indexed allianceId, uint256 indexed adminNationId);
@@ -662,5 +669,66 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
 
     function getNationAlliance(uint256 nationId) external view returns (uint256) {
         return nationToAlliance[nationId];
+    }
+
+    function leaveAlliance(uint256 nationId) external {
+        uint256 allianceId = nationToAlliance[nationId];
+        require(allianceId != 0, "Nation not in any alliance");
+        Alliance storage alliance = alliances[allianceId];
+
+        require(alliance.isMember[nationId], "Not a member");
+
+        if (alliance.admins[nationId]) {
+            bool hasOtherAdmin = false;
+            for (uint256 i = 0; i < alliance.members.length; i++) {
+                uint256 memberId = alliance.members[i];
+                if (memberId != nationId && alliance.admins[memberId]) {
+                    hasOtherAdmin = true;
+                    break;
+                }
+            }
+            require(hasOtherAdmin, "No other admin in alliance");
+        }
+
+        require(alliance.founderNationId != nationId, "Transfer founder role before leaving");
+
+        delete alliance.admins[nationId];
+        delete alliance.isMember[nationId];
+        delete alliance.nationToPlatoon[nationId];
+        delete nationToAlliance[nationId];
+
+        uint256[] storage members = alliance.members;
+        for (uint256 i = 0; i < members.length; i++) {
+            if (members[i] == nationId) {
+                members[i] = members[members.length - 1];
+                members.pop();
+                break;
+            }
+        }
+
+        emit NationRemovedFromAlliance(allianceId, nationId);
+    }
+
+    function transferFounder(uint256 allianceId, uint256 newFounderNationId, uint256 callerNationId) external {
+        Alliance storage alliance = alliances[allianceId];
+        require(alliance.founderNationId == callerNationId, "Only founder can transfer ownership");
+        require(alliance.isMember[newFounderNationId], "New founder must be a member");
+
+        alliance.founderNationId = newFounderNationId;
+    }
+
+    function deleteAlliance(uint256 allianceId, uint256 callerNationId) external {
+        Alliance storage alliance = alliances[allianceId];
+
+        require(alliance.founderNationId == callerNationId, "Only founder can delete alliance");
+        require(alliance.members.length == 1 && alliance.members[0] == callerNationId, "Must be sole member");
+
+        delete nationToAlliance[callerNationId];
+        delete alliance.admins[callerNationId];
+        delete alliance.isMember[callerNationId];
+        delete alliance.nationToPlatoon[callerNationId];
+
+        delete alliances[allianceId];
+        delete allianceExists[allianceId];
     }
 }

@@ -16,6 +16,7 @@ import {
     BombersMarketplace2,
     CountryMinter,
     CountryParametersContract,
+    AllianceManager,
     CrimeContract,
     CruiseMissileContract,
     EnvironmentContract,
@@ -62,7 +63,6 @@ import {
     BonusResourcesContract,
     Messenger
 } from "../typechain-types"
-// import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { networkConfig } from "../helper-hardhat-config"
 import fs from "fs"
 
@@ -120,6 +120,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     let bomberscontract: BombersContract
     let countryminter: CountryMinter
     let countryparameterscontract: CountryParametersContract
+    let allianceManager: AllianceManager
     let crimecontract: CrimeContract
     let cruisemissilecontract: CruiseMissileContract
     let environmentcontract: EnvironmentContract
@@ -198,6 +199,9 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     countryparameterscontract = await deploy("CountryParametersContract", { from: deployer, args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit], log: true });
     let deployedCountryParametersContract = await ethers.getContractAt("CountryParametersContract", countryparameterscontract.address);
+
+    allianceManager = await deploy("AllianceManager", { from: deployer, args: [], log: true });
+    let deployedAllianceManager = await ethers.getContractAt("AllianceManager", allianceManager.address);
     
     crimecontract = await deploy("CrimeContract", { from: deployer, args: [], log: true });
     let deployedCrimeContract = await ethers.getContractAt("CrimeContract", crimecontract.address);
@@ -1058,6 +1062,9 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         let CountryParametersContractArtifact = await artifacts.readArtifact("CountryParametersContract")
         let countryParametersAbi = CountryParametersContractArtifact.abi
 
+        let AllianceManagerArtifact = await artifacts.readArtifact("AllianceManager")
+        let allianceManagerAbi = AllianceManagerArtifact.abi
+
         let CrimeContractArtifact = await artifacts.readArtifact("CrimeContract")
         let crimeAbi = CrimeContractArtifact.abi
 
@@ -1318,6 +1325,10 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             countryparameterscontract: {
                 address: countryparameterscontract.address,
                 ABI: countryParametersAbi
+            },
+            alliancemanger: {
+                address: allianceManager.address,
+                ABI: allianceManagerAbi
             },
             crimecontract: {
                 address: crimecontract.address,

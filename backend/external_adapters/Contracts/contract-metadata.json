@@ -1078,7 +1078,7 @@
       ]
     },
     "forcescontract": {
-      "address": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+      "address": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1",
       "ABI": [
         {
           "anonymous": false,
@@ -2261,7 +2261,7 @@
       ]
     },
     "nationstrengthcontract": {
-      "address": "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
+      "address": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
       "ABI": [
         {
           "anonymous": false,
@@ -2593,7 +2593,7 @@
       ]
     },
     "treasurycontract": {
-      "address": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
+      "address": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
       "ABI": [
         {
           "anonymous": false,
@@ -4997,7 +4997,7 @@
       ]
     },
     "spyoperationscontract": {
-      "address": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
+      "address": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
       "ABI": [
         {
           "anonymous": false,
@@ -5085,6 +5085,25 @@
           "inputs": [
             {
               "internalType": "uint256",
+              "name": "defenderId",
+              "type": "uint256"
+            }
+          ],
+          "name": "attackedAlready",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
               "name": "countryId",
               "type": "uint256"
             }
@@ -5132,6 +5151,30 @@
               "internalType": "address",
               "name": "",
               "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "dayToDefenderIdToAttackedToday",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
             }
           ],
           "stateMutability": "view",
@@ -5505,7 +5548,7 @@
       ]
     },
     "groundbattlecontract": {
-      "address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+      "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
       "ABI": [
         {
           "inputs": [
