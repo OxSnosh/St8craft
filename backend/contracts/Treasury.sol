@@ -266,8 +266,8 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
         uint256 id
     ) public view returns (uint256) {
         uint256 gameDay = keep.getGameDay();
-        uint256 dayOfLastBillPaid = idToTreasury[id].dayOfLastTaxCollection;
-        uint256 daysSince = (gameDay - dayOfLastBillPaid);
+        uint256 dayOfLastTaxCollected = idToTreasury[id].dayOfLastTaxCollection;
+        uint256 daysSince = (gameDay - dayOfLastTaxCollected);
         if (daysSince > maxDaysOfTaxes) {
             daysSince = maxDaysOfTaxes;
         }

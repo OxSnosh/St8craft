@@ -24,7 +24,7 @@ contract AidContract is Ownable, ReentrancyGuard {
     address public senate;
     address public countryParameters;
     uint256 public aidProposalId;
-    uint256 proposalExpirationDays = 7;
+    uint256 public proposalExpirationDays = 7;
 
     CountryMinter mint;
     WondersContract1 won1;
@@ -135,19 +135,19 @@ contract AidContract is Ownable, ReentrancyGuard {
         require(aidAvailable, "aid not available");
         bool sanctioned = sen.isSanctioned(idSender, idRecipient);
         require(!sanctioned, "trade not possible");
-        bool federalAidEligable = getFederalAidEligibility(
+        bool federalAidEligible = getFederalAidEligibility(
             idSender,
             idRecipient
         );
         uint256[3] memory maximums;
-        if (!federalAidEligable) {
+        if (!federalAidEligible) {
             maximums = [
                 uint256(100),
                 uint256(6000000 * (10 ** 18)),
                 uint256(4000)
             ];
         }
-        if (federalAidEligable) {
+        if (federalAidEligible) {
             maximums = [
                 uint256(150),
                 uint256(9000000 * (10 ** 18)),
@@ -155,8 +155,8 @@ contract AidContract is Ownable, ReentrancyGuard {
             ];
         }
         require(techAid <= maximums[0], "max tech exceeded");
-        require(balanceAid <= maximums[1], "max balance excedded");
-        require(soldiersAid <= maximums[2], "max soldier aid is excedded");
+        require(balanceAid <= maximums[1], "max balance exceeded");
+        require(soldiersAid <= maximums[2], "max soldier aid is exceeded");
         completeProposal(
             aidProposalId,
             day,
@@ -205,9 +205,9 @@ contract AidContract is Ownable, ReentrancyGuard {
 
     ///@dev this function is public but called by the proposeAid() function to check the availabiliy of proposing aid
     ///@notice nations can only send one aid proposal per day without a Disaster Relief Agency
-    ///@notice nations can send 2 aid porposals per day with a disaster relief agency
+    ///@notice nations can send 2 aid proposals per day with a disaster relief agency
     ///@param idSender id the nation ID of the nation proposing aid
-    ///@return bool returns a boolean value if there is an aid slot available for the prpoposal
+    ///@return bool returns a boolean value if there is an aid slot available for the propposal
     function checkAidSlots(uint256 idSender) public view returns (bool) {
         uint256 maxAidSlots = getMaxAidSlots(idSender);
         uint256 aidProposalsLast10Days = getAidProposalsLast10Days(idSender);
@@ -284,11 +284,11 @@ contract AidContract is Ownable, ReentrancyGuard {
         require(techAvailable >= techAid, "not enough tech for this proposal");
         require(
             balanceAvailable >= balanceAid,
-            "not enough funds for this porposal"
+            "not enough funds for this proposal"
         );
         require(
             soldiersAvailable >= soldiersAid,
-            "not enough soldiers for this porposal"
+            "not enough soldiers for this proposal"
         );
         return true;
     }
@@ -311,14 +311,14 @@ contract AidContract is Ownable, ReentrancyGuard {
         }
     }
 
-    ///@dev this finction is only callable by the owner of the contract
+    ///@dev this function is only callable by the owner of the contract
     ///@dev this function allows the contract owner to set how long aid proposals stay active for
     function setProposalExpiration(uint256 newExpiration) public onlyOwner {
         proposalExpirationDays = newExpiration;
     }
 
     ///@dev this is a view function that allows anyone to view the duration aid proposals have untile they expire
-    ///@return uint256 the number of days a proposal has to be exepted otherwise it expires
+    ///@return uint256 the number of days a proposal has to be expected otherwise it expires
     function getProposalExpiration() public view returns (uint256) {
         return proposalExpirationDays;
     }
@@ -403,7 +403,7 @@ contract AidContract is Ownable, ReentrancyGuard {
                 senderProposals.pop();
             }
             Proposal memory proposal = idToProposal[proposalId];
-            if (day - proposal.dayProposed > 10) {
+            if (day - proposal.dayProposed > proposalExpirationDays) {
                 senderProposals[i] = senderProposals[senderProposals.length - 1];
                 senderProposals.pop();                    
             }
@@ -415,7 +415,7 @@ contract AidContract is Ownable, ReentrancyGuard {
                 recipientProposals.pop();
             }
             Proposal memory proposal = idToProposal[proposalId];
-            if (day - proposal.dayProposed > 10) {
+            if (day - proposal.dayProposed > proposalExpirationDays) {
                 recipientProposals[i] = recipientProposals[recipientProposals
                     .length - 1];
                 recipientProposals.pop();                    
@@ -500,7 +500,7 @@ contract AidContract is Ownable, ReentrancyGuard {
                 senderProposals.pop();
             }
             Proposal memory proposal = idToProposal[proposalId];
-            if (day - proposal.dayProposed > 10) {
+            if (day - proposal.dayProposed > proposalExpirationDays) {
                 senderProposals[i] = senderProposals[senderProposals.length - 1];
                 senderProposals.pop();                    
             }
@@ -512,7 +512,7 @@ contract AidContract is Ownable, ReentrancyGuard {
                 recipientProposals.pop();
             }
             Proposal memory proposal = idToProposal[proposalId];
-            if (day - proposal.dayProposed > 10) {
+            if (day - proposal.dayProposed > proposalExpirationDays) {
                 recipientProposals[i] = recipientProposals[recipientProposals
                     .length - 1];
                 recipientProposals.pop();                    

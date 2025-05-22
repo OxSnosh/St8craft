@@ -179,6 +179,9 @@ contract TaxesContract is Ownable, ReentrancyGuard {
         uint256 mod = 100;
         uint256 percentageReductionForBlockades = blk
             .getBlockadePercentageReduction(id);
+        if (percentageReductionForBlockades > 100) {
+            percentageReductionForBlockades = 100;
+        }
         mod = mod - percentageReductionForBlockades;
         taxesCollectible = ((taxesCollectible * mod) / 100);
         return (dailyTaxesCollectiblePerCitizen, taxesCollectible);
@@ -855,17 +858,15 @@ contract AdditionalTaxesContract is Ownable {
 
     function getPointsFromMilitary(uint256 id) public view returns (uint256) {
         (uint256 ratio, , ) = soldierToPopulationRatio(id);
-        uint256 pointsFromMilitaryToSubtract;
         if (ratio > 70) {
-            pointsFromMilitaryToSubtract = 10;
+            return 10;
+        } else if (ratio < 10) {
+            return 14;
+        } else if (ratio < 20) {
+            return 5;
+        } else {
+            return 0;
         }
-        if (ratio < 20) {
-            pointsFromMilitaryToSubtract = 5;
-        }
-        if (ratio < 10) {
-            pointsFromMilitaryToSubtract = 14;
-        }
-        return pointsFromMilitaryToSubtract;
     }
 
     function soldierToPopulationRatio(
