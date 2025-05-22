@@ -9,11 +9,16 @@ import "./Treasury.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title CountryParametersContract
 ///@author OxSnosh
 ///@dev this contract will inferit from Chainlink VRF and OpenZeppelin Ownable
-contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
+contract CountryParametersContract is
+    VRFConsumerBaseV2,
+    Ownable,
+    ReentrancyGuard
+{
     address public spyAddress;
     address public senateAddress;
     uint256[] private s_randomWords;
@@ -180,6 +185,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         string memory capitalCity,
         string memory nationSlogan
     ) public onlyCountryMinter {
+        require(idToCountryParameters[id].id == 0, "Already initialized");
         CountryParameters memory newCountryParameters = CountryParameters(
             id,
             rulerName,
@@ -231,7 +237,8 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
     function retryFulfillRequest(uint256 countryId) public {
         require(pendingRequests[countryId], "No pending request");
         require(
-            block.timestamp > pendingRequestTimestamp[countryId] + RETRY_TIMEOUT,
+            block.timestamp >
+                pendingRequestTimestamp[countryId] + RETRY_TIMEOUT,
             "Retry not allowed yet"
         );
 
@@ -268,26 +275,32 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         idToGovernmentPreference[requestNumber] = governmentPreference;
     }
 
-    ///@dev this is public function that will allow a nation ruler to reset a nations ruler name
-    ///@notice use this function to reset a nations ruler name
-    ///@notice this function is only callable by the nation owner
-    ///@param newRulerName is the updated name for the nation ruler
-    ///@param id is the nation ID for the update
-    function setRulerName(string memory newRulerName, uint256 id) public {
-        bool isOwner = mint.checkOwnership(id, msg.sender);
-        require(isOwner, "!nation owner");
-        require(bytes(newRulerName).length <= 64, "Ruler Name too long");
-        tres.spendBalance(id, 20000000 * (10 ** 18));
-        idToCountryParameters[id].rulerName = newRulerName;
-        emit RulerNameChanged(id, newRulerName);
-    }
+    // ///@dev this is public function that will allow a nation ruler to reset a nations ruler name
+    // ///@notice use this function to reset a nations ruler name
+    // ///@notice this function is only callable by the nation owner
+    // ///@param newRulerName is the updated name for the nation ruler
+    // ///@param id is the nation ID for the update
+    // function setRulerName(
+    //     string memory newRulerName,
+    //     uint256 id
+    // ) public nonReentrant {
+    //     bool isOwner = mint.checkOwnership(id, msg.sender);
+    //     require(isOwner, "!nation owner");
+    //     require(bytes(newRulerName).length <= 64, "Ruler Name too long");
+    //     tres.spendBalance(id, 20000000 * (10 ** 18));
+    //     idToCountryParameters[id].rulerName = newRulerName;
+    //     emit RulerNameChanged(id, newRulerName);
+    // }
 
     ///@dev this is public function that will allow a nation ruler to reset a nations name
     ///@notice use this function to reset a nations name
     ///@notice this function is only callable by the nation owner
     ///@param newNationName is the updated name for the nation ruler
     ///@param id is the nation ID for the update
-    function setNationName(string memory newNationName, uint256 id) public {
+    function setNationName(
+        string memory newNationName,
+        uint256 id
+    ) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         require(bytes(newNationName).length <= 64, "Nation Name too long");
@@ -388,9 +401,9 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
     }
 
     ///@dev this is a public function but it is only callable from the spy contract
-    ///@notice this is the function that the spy contract calls when a successful spy attack updates your desired governemnt
+    ///@notice this is the function that the spy contract calls when a successful spy attack updates your desired government
     ///@param id is the nation id of the updated desired government
-    ///@param newType is the updated governemnt type
+    ///@param newType is the updated government type
     function updateDesiredGovernment(
         uint256 id,
         uint256 newType
@@ -522,7 +535,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         return idToReligionPreference[id];
     }
 
-    ///@dev this is a view funtion that will return the days since a religion and governemnt change for a nation
+    ///@dev this is a view funtion that will return the days since a religion and government change for a nation
     ///@param id this is the ID for the nation being queried
     ///@return uint256 will return an array with [0] as the days since governemtn change and [1] as days since religion change
     function getDaysSince(uint256 id) public view returns (uint256, uint256) {
