@@ -5,7 +5,7 @@ import "./CountryMinter.sol";
 import "./Senate.sol";
 import "./KeeperFile.sol";
 import "./Wonders.sol";
-import "./Treasury.sol";    
+import "./Treasury.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -202,9 +202,15 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         fulfillRequest(id);
     }
 
+    mapping(uint256 => bool) public pendingRequests;
+    mapping(uint256 => uint256) public pendingRequestTimestamp;
+    uint256 public constant RETRY_TIMEOUT = 10 minutes;
+
     ///@dev this is an internal function that will initalize the call for randomness from the chainlink VRF contract
     ///@param id is the nation ID of the nation being minted
     function fulfillRequest(uint256 id) internal {
+        require(!pendingRequests[id], "Randomness already requested");
+
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
@@ -212,7 +218,35 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
             i_callbackGasLimit,
             NUM_WORDS
         );
+
         s_requestIdToRequestIndex[requestId] = id;
+        pendingRequests[id] = true;
+        pendingRequestTimestamp[id] = block.timestamp;
+
+        emit VRFRequestSent(id, requestId);
+    }
+
+    event VRFRequestSent(uint256 indexed id, uint256 indexed requestId);
+
+    function retryFulfillRequest(uint256 countryId) public {
+        require(pendingRequests[countryId], "No pending request");
+        require(
+            block.timestamp > pendingRequestTimestamp[countryId] + RETRY_TIMEOUT,
+            "Retry not allowed yet"
+        );
+
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+            i_gasLane,
+            i_subscriptionId,
+            REQUEST_CONFIRMATIONS,
+            i_callbackGasLimit,
+            NUM_WORDS
+        );
+
+        s_requestIdToRequestIndex[requestId] = countryId;
+        pendingRequestTimestamp[countryId] = block.timestamp;
+
+        emit VRFRequestSent(countryId, requestId);
     }
 
     ///@dev this is the function that gets called by the chainlink VRF contract
@@ -223,10 +257,13 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         uint256[] memory randomWords
     ) internal override {
         uint256 requestNumber = s_requestIdToRequestIndex[requestId];
+
         s_requestIndexToRandomWords[requestNumber] = randomWords;
         s_randomWords = s_requestIndexToRandomWords[requestNumber];
+
         uint256 religionPreference = ((randomWords[0] % 14) + 1);
         uint256 governmentPreference = ((randomWords[1] % 9) + 1);
+
         idToReligionPreference[requestNumber] = religionPreference;
         idToGovernmentPreference[requestNumber] = governmentPreference;
     }
@@ -240,7 +277,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         require(bytes(newRulerName).length <= 64, "Ruler Name too long");
-        tres.spendBalance(id, 20000000 * (10**18));
+        tres.spendBalance(id, 20000000 * (10 ** 18));
         idToCountryParameters[id].rulerName = newRulerName;
         emit RulerNameChanged(id, newRulerName);
     }
@@ -254,7 +291,7 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         require(bytes(newNationName).length <= 64, "Nation Name too long");
-        tres.spendBalance(id, 20000000 * (10**18));
+        tres.spendBalance(id, 20000000 * (10 ** 18));
         idToCountryParameters[id].nationName = newNationName;
         emit NationNameChanged(id, newNationName);
     }
@@ -496,18 +533,18 @@ contract CountryParametersContract is VRFConsumerBaseV2, Ownable {
         uint256 daysSinceReligionChange = gameDay - dayReligionChanged;
         return (daysSinceGovChange, daysSinceReligionChange);
     }
-
 }
 
-///@title AllianceManager
-///@author OxSnosh
-///@notice this contract will manage the alliances in the game
-///@dev this contract will allow nations to create alliances, add admins, approve join requests, and manage members
-///@dev this contract will also allow nations to assign platoons to members
-///@dev this contract will also allow nations to remove members and admins
-///@dev this contract will also allow nations to get the members of an alliance
-contract AllianceManager {
+/// @title AllianceManager
+/// @author OxSnosh
+/// @notice Manages alliances in the game with capped size and efficient member tracking.
+contract AllianceManager is Ownable {
+    uint256 public constant MAX_ALLIANCE_MEMBERS = 1000;
+    uint256 public constant MAX_JOIN_REQUESTS = 1000;
+
     uint256 public allianceCounter;
+    address public countryMinter;
+    CountryMinter mint;
 
     struct Alliance {
         uint256 id;
@@ -515,167 +552,260 @@ contract AllianceManager {
         uint256 founderNationId;
         mapping(uint256 => bool) admins;
         mapping(uint256 => bool) isMember;
+        mapping(uint256 => uint256) memberIndex;
         mapping(uint256 => string) nationToPlatoon;
         uint256[] members;
         uint256[] joinRequests;
+        mapping(uint256 => bool) isJoinRequested;
     }
 
     mapping(uint256 => Alliance) public alliances;
     mapping(uint256 => uint256) public nationToAlliance;
     mapping(uint256 => bool) public allianceExists;
 
-    event AllianceCreated(uint256 indexed allianceId, string name, uint256 founderNationId);
-    event AllianceAdminAdded(uint256 indexed allianceId, uint256 indexed adminNationId);
-    event AllianceAdminRemoved(uint256 indexed allianceId, uint256 indexed adminNationId);
-    event NationRequestedToJoin(uint256 indexed allianceId, uint256 indexed nationId);
-    event NationApprovedToJoin(uint256 indexed allianceId, uint256 indexed nationId);
-    event NationRemovedFromAlliance(uint256 indexed allianceId, uint256 indexed nationId);
-    event NationAssignedToPlatoon(uint256 indexed allianceId, uint256 indexed nationId, string platoonId);
+    event AllianceCreated(
+        uint256 indexed allianceId,
+        string name,
+        uint256 founderNationId
+    );
+    event AllianceAdminAdded(
+        uint256 indexed allianceId,
+        uint256 indexed adminNationId
+    );
+    event AllianceAdminRemoved(
+        uint256 indexed allianceId,
+        uint256 indexed adminNationId
+    );
+    event NationRequestedToJoin(
+        uint256 indexed allianceId,
+        uint256 indexed nationId
+    );
+    event NationApprovedToJoin(
+        uint256 indexed allianceId,
+        uint256 indexed nationId
+    );
+    event NationRemovedFromAlliance(
+        uint256 indexed allianceId,
+        uint256 indexed nationId
+    );
+    event NationAssignedToPlatoon(
+        uint256 indexed allianceId,
+        uint256 indexed nationId,
+        string platoonId
+    );
+    event NationJoinRequestRejected(
+        uint256 indexed allianceId,
+        uint256 indexed nationId
+    );
+
+    function settings(address _countryMinter) public onlyOwner {
+        countryMinter = _countryMinter;
+        mint = CountryMinter(_countryMinter);
+    }
 
     modifier onlyAllianceFounderOrAdmin(uint256 allianceId, uint256 nationId) {
+        Alliance storage alliance = alliances[allianceId];
         require(
-            nationId == alliances[allianceId].founderNationId || alliances[allianceId].admins[nationId],
+            nationId == alliance.founderNationId || alliance.admins[nationId],
             "Not authorized"
         );
         _;
     }
 
-    function getNationAllianceAndPlatoon(uint256 nationId) external view returns (uint256 allianceId, string memory platoonId, string memory name) {
-        uint256 alliance = nationToAlliance[nationId];
-        string memory platoon = alliance > 0 ? alliances[alliance].nationToPlatoon[nationId] : "";
-        string memory allianceName = alliance > 0 ? alliances[alliance].name : "";
-        return (alliance, platoon, allianceName);
-    }
+    function createAlliance(
+        string memory name,
+        uint256 founderNationId
+    ) external {
+        require(
+            mint.checkOwnership(founderNationId, msg.sender),
+            "Not the owner of the nation"
+        );
+        require(bytes(name).length <= 64, "Alliance name too long");
+        require(
+            nationToAlliance[founderNationId] == 0,
+            "Nation already in an alliance"
+        );
 
-    function isNationAllianceAdmin(uint256 allianceId, uint256 nationId) external view returns (bool) {
-        return alliances[allianceId].admins[nationId];
-    }
-
-    function isMemberOfAlliance(uint256 allianceId, uint256 nationId) public view returns (bool) {
-        return alliances[allianceId].isMember[nationId];
-    }
-
-    function createAlliance(string memory name, uint256 founderNationId) external {
-        require(nationToAlliance[founderNationId] == 0, "Nation already in an alliance");
         allianceCounter++;
+        uint256 id = allianceCounter;
 
-        Alliance storage newAlliance = alliances[allianceCounter];
-        newAlliance.id = allianceCounter;
+        Alliance storage newAlliance = alliances[id];
+        newAlliance.id = id;
         newAlliance.name = name;
         newAlliance.founderNationId = founderNationId;
         newAlliance.admins[founderNationId] = true;
         newAlliance.isMember[founderNationId] = true;
+        newAlliance.memberIndex[founderNationId] = 0;
         newAlliance.members.push(founderNationId);
-        nationToAlliance[founderNationId] = allianceCounter;
-        allianceExists[allianceCounter] = true;
 
-        emit AllianceCreated(allianceCounter, name, founderNationId);
+        nationToAlliance[founderNationId] = id;
+        allianceExists[id] = true;
+
+        emit AllianceCreated(id, name, founderNationId);
     }
 
-
-    function addAdmin(uint256 allianceId, uint256 adminNationId, uint256 callerNationId)
-        external
-        onlyAllianceFounderOrAdmin(allianceId, callerNationId)
-    {
-        require(alliances[allianceId].isMember[adminNationId], "Nominee must be a member of the alliance");
+    function addAdmin(
+        uint256 allianceId,
+        uint256 adminNationId,
+        uint256 callerNationId
+    ) external onlyAllianceFounderOrAdmin(allianceId, callerNationId) {
+        require(
+            mint.checkOwnership(callerNationId, msg.sender),
+            "Not the owner of the nation"
+        );
+        require(
+            alliances[allianceId].isMember[adminNationId],
+            "Nominee must be a member of the alliance"
+        );
         alliances[allianceId].admins[adminNationId] = true;
         emit AllianceAdminAdded(allianceId, adminNationId);
     }
 
-    function removeAdmin(uint256 allianceId, uint256 adminNationId, uint256 callerNationId)
-        external
-        onlyAllianceFounderOrAdmin(allianceId, callerNationId)
-    {
-        require(adminNationId != alliances[allianceId].founderNationId, "Cannot remove founder");
+    function removeAdmin(
+        uint256 allianceId,
+        uint256 adminNationId,
+        uint256 callerNationId
+    ) external onlyAllianceFounderOrAdmin(allianceId, callerNationId) {
+        require(
+            mint.checkOwnership(callerNationId, msg.sender),
+            "Not the owner of the nation"
+        );
+        require(
+            adminNationId != alliances[allianceId].founderNationId,
+            "Cannot remove founder"
+        );
         alliances[allianceId].admins[adminNationId] = false;
         emit AllianceAdminRemoved(allianceId, adminNationId);
     }
 
-    function requestToJoinAlliance(uint256 allianceId, uint256 nationId) external {
-        require(nationToAlliance[nationId] == 0, "Nation already in an alliance");
+    function requestToJoinAlliance(
+        uint256 allianceId,
+        uint256 nationId
+    ) external {
+        require(
+            mint.checkOwnership(nationId, msg.sender),
+            "Not the owner of the nation"
+        );
+        Alliance storage alliance = alliances[allianceId];
+        require(nationToAlliance[nationId] == 0, "Already in an alliance");
+        require(
+            alliance.joinRequests.length < MAX_JOIN_REQUESTS,
+            "Join request limit reached"
+        );
+        require(!alliance.isJoinRequested[nationId], "Already requested");
 
-        alliances[allianceId].joinRequests.push(nationId);
+        alliance.joinRequests.push(nationId);
+        alliance.isJoinRequested[nationId] = true;
 
         emit NationRequestedToJoin(allianceId, nationId);
     }
 
-    function approveNationJoin(uint256 allianceId, uint256 nationId, uint256 callerNationId)
-        external
-        onlyAllianceFounderOrAdmin(allianceId, callerNationId)
-    {
-        require(nationToAlliance[nationId] == 0, "Nation already in an alliance");
+    function approveNationJoin(
+        uint256 allianceId,
+        uint256 nationId,
+        uint256 callerNationId
+    ) external onlyAllianceFounderOrAdmin(allianceId, callerNationId) {
+        require(
+            mint.checkOwnership(callerNationId, msg.sender),
+            "Not the owner of the nation"
+        );
 
-        uint256[] storage requests = alliances[allianceId].joinRequests;
-        bool found = false;
+        Alliance storage alliance = alliances[allianceId];
+        require(
+            nationToAlliance[nationId] == 0,
+            "Nation already in an alliance"
+        );
+        require(alliance.isJoinRequested[nationId], "No join request");
+        require(
+            alliance.members.length < MAX_ALLIANCE_MEMBERS,
+            "Alliance full"
+        );
 
+        uint256[] storage requests = alliance.joinRequests;
         for (uint256 i = 0; i < requests.length; i++) {
             if (requests[i] == nationId) {
-                found = true;
                 requests[i] = requests[requests.length - 1];
                 requests.pop();
                 break;
             }
         }
-        require(found, "Nation did not request to join");
+        delete alliance.isJoinRequested[nationId];
 
-        alliances[allianceId].members.push(nationId);
-        alliances[allianceId].isMember[nationId] = true;
+        alliance.memberIndex[nationId] = alliance.members.length;
+        alliance.members.push(nationId);
+        alliance.isMember[nationId] = true;
         nationToAlliance[nationId] = allianceId;
 
         emit NationApprovedToJoin(allianceId, nationId);
     }
 
-    function removeNationFromAlliance(uint256 allianceId, uint256 nationId, uint256 callerNationId)
-        external
-        onlyAllianceFounderOrAdmin(allianceId, callerNationId)
-    {
-        require(nationToAlliance[nationId] == allianceId, "Nation not in this alliance");
+    function rejectJoinRequest(
+        uint256 allianceId,
+        uint256 nationId,
+        uint256 callerNationId
+    ) external onlyAllianceFounderOrAdmin(allianceId, callerNationId) {
+        require(
+            mint.checkOwnership(callerNationId, msg.sender),
+            "Not the owner of the nation"
+        );
 
-        delete nationToAlliance[nationId];
-        delete alliances[allianceId].isMember[nationId];
-        delete alliances[allianceId].admins[nationId];
-        delete alliances[allianceId].nationToPlatoon[nationId];
+        Alliance storage alliance = alliances[allianceId];
+        require(
+            alliance.isJoinRequested[nationId],
+            "Nation did not request to join"
+        );
 
-        uint256[] storage members = alliances[allianceId].members;
-        for (uint256 i = 0; i < members.length; i++) {
-            if (members[i] == nationId) {
-                members[i] = members[members.length - 1];
-                members.pop();
+        uint256[] storage requests = alliance.joinRequests;
+        for (uint256 i = 0; i < requests.length; i++) {
+            if (requests[i] == nationId) {
+                requests[i] = requests[requests.length - 1];
+                requests.pop();
                 break;
             }
         }
+        delete alliance.isJoinRequested[nationId];
+
+        emit NationJoinRequestRejected(allianceId, nationId);
+    }
+
+    function removeNationFromAlliance(
+        uint256 allianceId,
+        uint256 nationId,
+        uint256 callerNationId
+    ) external onlyAllianceFounderOrAdmin(allianceId, callerNationId) {
+        require(
+            mint.checkOwnership(callerNationId, msg.sender),
+            "Not the owner of the nation"
+        );
+        Alliance storage alliance = alliances[allianceId];
+        require(
+            nationToAlliance[nationId] == allianceId,
+            "Nation not in this alliance"
+        );
+
+        uint256 index = alliance.memberIndex[nationId];
+        uint256 lastMemberId = alliance.members[alliance.members.length - 1];
+        alliance.members[index] = lastMemberId;
+        alliance.memberIndex[lastMemberId] = index;
+        alliance.members.pop();
+
+        delete nationToAlliance[nationId];
+        delete alliance.isMember[nationId];
+        delete alliance.admins[nationId];
+        delete alliance.nationToPlatoon[nationId];
+        delete alliance.memberIndex[nationId];
 
         emit NationRemovedFromAlliance(allianceId, nationId);
     }
 
-    function assignNationToPlatoon(uint256 allianceId, uint256 nationId, string memory platoonId, uint256 callerNationId)
-        external
-        onlyAllianceFounderOrAdmin(allianceId, callerNationId)
-    {
-        require(nationToAlliance[nationId] == allianceId, "Nation not in this alliance");
-        alliances[allianceId].nationToPlatoon[nationId] = platoonId;
-        emit NationAssignedToPlatoon(allianceId, nationId, platoonId);
-    }
-
-    function getAllianceMembers(uint256 allianceId) external view returns (uint256[] memory) {
-        return alliances[allianceId].members;
-    }
-
-    function getJoinRequests(uint256 allianceId) external view returns (uint256[] memory) {
-        uint256[] storage requests = alliances[allianceId].joinRequests;
-        console.log("requests length:", requests.length);  // Add this line to log the length
-        return requests;
-    }
-
-    function getNationAlliance(uint256 nationId) external view returns (uint256) {
-        return nationToAlliance[nationId];
-    }
-
     function leaveAlliance(uint256 nationId) external {
+        require(
+            mint.checkOwnership(nationId, msg.sender),
+            "Not the owner of the nation"
+        );
         uint256 allianceId = nationToAlliance[nationId];
         require(allianceId != 0, "Nation not in any alliance");
         Alliance storage alliance = alliances[allianceId];
-
         require(alliance.isMember[nationId], "Not a member");
 
         if (alliance.admins[nationId]) {
@@ -690,38 +820,85 @@ contract AllianceManager {
             require(hasOtherAdmin, "No other admin in alliance");
         }
 
-        require(alliance.founderNationId != nationId, "Transfer founder role before leaving");
+        require(
+            alliance.founderNationId != nationId,
+            "Transfer founder role before leaving"
+        );
+
+        uint256 index = alliance.memberIndex[nationId];
+        uint256 lastMemberId = alliance.members[alliance.members.length - 1];
+        alliance.members[index] = lastMemberId;
+        alliance.memberIndex[lastMemberId] = index;
+        alliance.members.pop();
 
         delete alliance.admins[nationId];
         delete alliance.isMember[nationId];
+        delete alliance.memberIndex[nationId];
         delete alliance.nationToPlatoon[nationId];
         delete nationToAlliance[nationId];
-
-        uint256[] storage members = alliance.members;
-        for (uint256 i = 0; i < members.length; i++) {
-            if (members[i] == nationId) {
-                members[i] = members[members.length - 1];
-                members.pop();
-                break;
-            }
-        }
 
         emit NationRemovedFromAlliance(allianceId, nationId);
     }
 
-    function transferFounder(uint256 allianceId, uint256 newFounderNationId, uint256 callerNationId) external {
+    function assignNationToPlatoon(
+        uint256 allianceId,
+        uint256 nationId,
+        string memory platoonId,
+        uint256 callerNationId
+    ) external onlyAllianceFounderOrAdmin(allianceId, callerNationId) {
+        require(
+            mint.checkOwnership(callerNationId, msg.sender),
+            "Not the owner of the nation"
+        );
+        require(
+            nationToAlliance[nationId] == allianceId,
+            "Nation not in this alliance"
+        );
+
+        alliances[allianceId].nationToPlatoon[nationId] = platoonId;
+        emit NationAssignedToPlatoon(allianceId, nationId, platoonId);
+    }
+
+    function transferFounder(
+        uint256 allianceId,
+        uint256 newFounderNationId,
+        uint256 callerNationId
+    ) external {
+        require(
+            mint.checkOwnership(callerNationId, msg.sender),
+            "Not the owner of the nation"
+        );
         Alliance storage alliance = alliances[allianceId];
-        require(alliance.founderNationId == callerNationId, "Only founder can transfer ownership");
-        require(alliance.isMember[newFounderNationId], "New founder must be a member");
+        require(
+            alliance.founderNationId == callerNationId,
+            "Only founder can transfer ownership"
+        );
+        require(
+            alliance.isMember[newFounderNationId],
+            "New founder must be a member"
+        );
 
         alliance.founderNationId = newFounderNationId;
     }
 
-    function deleteAlliance(uint256 allianceId, uint256 callerNationId) external {
+    function deleteAlliance(
+        uint256 allianceId,
+        uint256 callerNationId
+    ) external {
+        require(
+            mint.checkOwnership(callerNationId, msg.sender),
+            "Not the owner of the nation"
+        );
         Alliance storage alliance = alliances[allianceId];
-
-        require(alliance.founderNationId == callerNationId, "Only founder can delete alliance");
-        require(alliance.members.length == 1 && alliance.members[0] == callerNationId, "Must be sole member");
+        require(
+            alliance.founderNationId == callerNationId,
+            "Only founder can delete alliance"
+        );
+        require(
+            alliance.members.length == 1 &&
+                alliance.members[0] == callerNationId,
+            "Must be sole member"
+        );
 
         delete nationToAlliance[callerNationId];
         delete alliance.admins[callerNationId];
@@ -730,5 +907,50 @@ contract AllianceManager {
 
         delete alliances[allianceId];
         delete allianceExists[allianceId];
+    }
+
+    function getAllianceMembers(
+        uint256 allianceId
+    ) external view returns (uint256[] memory) {
+        return alliances[allianceId].members;
+    }
+
+    function getJoinRequests(
+        uint256 allianceId
+    ) external view returns (uint256[] memory) {
+        return alliances[allianceId].joinRequests;
+    }
+
+    function getNationAlliance(
+        uint256 nationId
+    ) external view returns (uint256) {
+        return nationToAlliance[nationId];
+    }
+
+    function getNationAllianceAndPlatoon(
+        uint256 nationId
+    ) external view returns (uint256, string memory, string memory) {
+        uint256 alliance = nationToAlliance[nationId];
+        string memory platoon = alliance > 0
+            ? alliances[alliance].nationToPlatoon[nationId]
+            : "";
+        string memory allianceName = alliance > 0
+            ? alliances[alliance].name
+            : "";
+        return (alliance, platoon, allianceName);
+    }
+
+    function isNationAllianceAdmin(
+        uint256 allianceId,
+        uint256 nationId
+    ) external view returns (bool) {
+        return alliances[allianceId].admins[nationId];
+    }
+
+    function isMemberOfAlliance(
+        uint256 allianceId,
+        uint256 nationId
+    ) public view returns (bool) {
+        return alliances[allianceId].isMember[nationId];
     }
 }
