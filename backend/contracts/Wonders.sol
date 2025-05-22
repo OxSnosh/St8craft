@@ -38,69 +38,69 @@ contract WondersContract1 is Ownable {
         uint256 wonderCount;
         //Agriculture Development Program
         //$30,000,000
-        //DONE //Increases land size by 15%
-        //DONE //Increases citizen income +$2.00,
+        //Increases land size by 15%
+        //Increases citizen income +$2.00,
         //Increases the citizen-bonus for land from 0.2 to 0.5.
         //Requires 3,000 land purchased, 500 technology.
         bool agricultureDevelopmentProgram;
         //Anti-Air Defense Network
         //$50,000,000
         //Reduces odds of incoming aircraft attacks against your nation -25%.
-        //DONE //Reduces aircraft attack damages against your nation -15%.
+        //Reduces aircraft attack damages against your nation -15%.
         bool antiAirDefenseNetwork;
         //Central Intelligence Agency
         //$40,000,000
-        //DONE //Increases the number of spies that your nation can support +250 and
-        //DONE //increases your nation's spy attack strength +10%.
+        //Increases the number of spies that your nation can support +250 and
+        //increases your nation's spy attack strength +10%.
         //Only viewable by the user who owns it.
         bool centralIntelligenceAgency;
         //Disaster Relief Agency
         //$40,000,000
         //The disaster relief agency helps restore your nation and its people after emergency situations
-        //DONE //Increases population +3%
-        //DONE //and opens one extra foreign aid slot.
+        //Increases population +3%
+        //and opens one extra foreign aid slot.
         bool disasterReliefAgency;
         //EMP Weaponization
         //$200,000,000 + (Nation Strength * 2,000)
         //Provides attackers with 5,000 or more technology the option to launch a targeted EMP nuclear attack.
-        //DONE //Nuclear weapons can target higher infrastructure, higher land, or higher technology damage based on player choice when launching nukes.
+        //Nuclear weapons can target higher infrastructure, higher land, or higher technology damage based on player choice when launching nukes.
         //When you choose to target infrastructure, land, or technology you are trading more damage to your target for less damage for the other two.
         //For instance, if you choose to target infrastructure you will do more base damage to infrastructure but less damage to land and technology.
         //Requires 5,000 technology and a Weapons Research Complex to purchase.
         bool empWeaponization;
         //Fallout Shelter System
         //$40,000,000
-        //DONE //Allows 50% of your defending soldiers to survive a nuclear strike
+        //Allows 50% of your defending soldiers to survive a nuclear strike
         //(Does not prevent nuclear Anarchy but does prevent troops from being totally depleted),
-        //DONE (not aircraft) //Reduces tank, cruise missile, and aircraft, losses from a nuclear strike by -25%,
-        //DONE //Reduces nuclear vulnerable navy losses by 12%,
+        //Reduces tank, cruise missile, and aircraft, losses from a nuclear strike by -25%,
+        //Reduces nuclear vulnerable navy losses by 12%,
         //Reduces nuclear anarchy effects by 1 day.
         //Requires 6,000 infrastructure, 2,000 technology.
         bool falloutShelterSystem;
         //Federal Aid Commission
         //$25,000,000
-        //DONE //Raises the cap on foreign money aid +50% provided that the foreign aid recipient also has a Federal Aid Commission wonder.
+        //Raises the cap on foreign money aid +50% provided that the foreign aid recipient also has a Federal Aid Commission wonder.
         //Allows two nations with the Federal Aid Commission wonder to send secret foreign aid.
         //Secret foreign aid costs the sender 200% the value of the items that are sent.
         bool federalAidCommission;
         //Federal Reserve
         //$100,000,000 + (Nation Strength * 1,000)
-        //DONE //Increases the number of banks that can be purchased +2.
+        //Increases the number of banks that can be purchased +2.
         //Requires Stock Market.
         bool federalReserve;
         //Foreign Air Force Base -
         //$35,000,000 -
-        //DONE //Raises the aircraft limit +20 for your nation and
+        //Raises the aircraft limit +20 for your nation and
         //increases the number of aircraft that can be sent in each attack mission +20.
         bool foreignAirForceBase;
         //Foreign Army Base -
         //$200,000,000 -
-        //DONE //Adds an extra +1 offensive war slot.
+        //Adds an extra +1 offensive war slot.
         //Requires 8,000 technology to purchase.
         bool foreignArmyBase;
         //Foreign Naval Base -
         //$200,000,000 -
-        //DONE //Allows +2 naval vessels to be purchased per day (+1 in Peace Mode)
+        //Allows +2 naval vessels to be purchased per day (+1 in Peace Mode)
         //and also allows +1 naval deployment per day.
         //Requires 20,000 infrastructure.
         bool foreignNavalBase;
@@ -697,50 +697,50 @@ contract WondersContract2 is Ownable {
     struct Wonders2 {
         //Great Monument -
         //$35,000,000 -
-        //DONE //The great monument is a testament to your great leadership.
-        //DONE //Increases happiness +4 and your population will always be happy with your government choice.
+        //The great monument is a testament to your great leadership.
+        //Increases happiness +4 and your population will always be happy with your government choice.
         bool greatMonument;
         //Great Temple -
         //$35,000,000 -
-        //DONE //The great temple is a dedicated shrine to your national religion.
-        //DONE //Increases happiness +5 and your population will always be happy with your religion choice.
+        //The great temple is a dedicated shrine to your national religion.
+        //Increases happiness +5 and your population will always be happy with your religion choice.
         bool greatTemple;
         //Great University -
         //$35,000,000 -
         //The great university is a central location for scholars within your nation.
-        //DONE //Decreases technology costs -10% and
-        //DONE //increases population happiness +.2% (+2 for every 1000) of your nation's technology level over 200 up to 3,000 tech.
+        //Decreases technology costs -10% and
+        //increases population happiness +.2% (+2 for every 1000) of your nation's technology level over 200 up to 3,000 tech.
         bool greatUniversity;
         //Hidden Nuclear Missile Silo -
         //$30,000,000 -
-        //DONE //Allows your nation to develop +5 nuclear missiles that cannot be destroyed in spy attacks.
+        //Allows your nation to develop +5 nuclear missiles that cannot be destroyed in spy attacks.
         //(Nations must first be nuclear capable in order to purchase nukes.)
         bool hiddenNuclearMissileSilo;
         //Interceptor Missile System (IMS) -
         //$50,000,000 -
-        //DONE //Thwarts Cruise Missile Attacks, 50% of the time (removes 1 attackers CM strike chance for that day when successful).
+        //Thwarts Cruise Missile Attacks, 50% of the time (removes 1 attackers CM strike chance for that day when successful).
         //Requires 5,000 technology and a Strategic Defense Initiative (SDI).
         bool interceptorMissileSystem;
         //Internet -
         //$35,000,000 -
-        //DONE //Provides Internet infrastructure throughout your nation.
+        //Provides Internet infrastructure throughout your nation.
         //Increases population happiness +5.
         bool internet;
         //Interstate System -
         //$45,000,000 -
         //The interstate system allows goods and materials to be transported throughout your nation with greater ease.
-        //DONE //Decreases initial infrastructure cost -8% and
-        //DONE //decreases infrastructure upkeep costs -8%.
+        //Decreases initial infrastructure cost -8% and
+        //decreases infrastructure upkeep costs -8%.
         bool interstateSystem;
         //Manhattan Project -
         //$100,000,000 -
-        //DONE //The Manhattan Project allows nations below (150k strength) 5% of the top nations in the game to develop nuclear weapons.
+        //The Manhattan Project allows nations below (150k strength) 5% of the top nations in the game to develop nuclear weapons.
         //The Manhattan Project cannot be destroyed once it is created.
         //The wonder requires 3,000 infrastructure, 300 technology, and a uranium resource.
         bool manhattanProject;
         //Mining Industry Consortium -
         //$25,000,000 -
-        //DONE //Increases population income by $2.00 for the resources Coal, Lead, Oil, Uranium that your nation has access to.
+        //Increases population income by $2.00 for the resources Coal, Lead, Oil, Uranium that your nation has access to.
         //Requires 5,000 infrastructure, 3,000 land purchased, 1,000 technology.
         bool miningIndustryConsortium;
     }
@@ -1236,62 +1236,62 @@ contract WondersContract3 is Ownable {
         //Movie Industry -
         //$26,000,000 -
         //The movie industry provides a great source of entertainment to your people.
-        //DONE //Increases population happiness +3.
+        //Increases population happiness +3.
         bool movieIndustry;
         //National Cemetery -
         //$150,000,000 -
-        //DONE //Provides +0.20 Happiness per 1,000,000 soldier casualties up to +5 happiness.
+        //Provides +0.20 Happiness per 1,000,000 soldier casualties up to +5 happiness.
         //Requires 5 million soldier casualties and a National War Memorial.
         bool nationalCemetary;
         //National Environment Office -
         //$100,000,000 -
-        //DONE //The national environment office removes the penalties for Coal, Oil, and Uranium,
-        //DONE //improves environment by 1 point,
-        //DONE //increases population +3%,
-        //DONE //and reduces infrastructure upkeep -3%.
+        //The national environment office removes the penalties for Coal, Oil, and Uranium,
+        //improves environment by 1 point,
+        //increases population +3%,
+        //and reduces infrastructure upkeep -3%.
         //Requires 13,000 infrastructure.
         bool nationalEnvironmentOffice;
         //National Research Lab -
         //$35,000,000 -
         //The national research lab is a central location for scientists seeking cures for common diseases among your population.
-        //DONE //Increases population +5% and
-        //DONE //decreases technology costs -3%.
+        //Increases population +5% and
+        //decreases technology costs -3%.
         bool nationalResearchLab;
         //National War Memorial -
         //$27,000,000 -
         //The war memorial allows your citizens to remember its fallen soldiers.
         //This wonder is only available to nations that have lost over 50,000 soldiers during war throughout the life of your nation.
-        //DONE //Increases population happiness +4.
+        //Increases population happiness +4.
         bool nationalWarMemorial;
         //Nuclear Power Plant -
         //$75,000,000 -
         //The nuclear power plant allows nations to receive Uranium financial bonus
-        //DONE //(+$3 citizen income +$0.15 per technology level up to 30 technology levels. Requires an active Uranium trade.)
+        //(+$3 citizen income +$0.15 per technology level up to 30 technology levels. Requires an active Uranium trade.)
         //even when maintaining nuclear weaponry.
-        //DONE //The nuclear power plant by itself, even without a Uranium trade, reduces infrastructure upkeep -5%,
-        //DONE //national wonder upkeep -5%,
-        //DONE //and improvement upkeep -5%.
+        //The nuclear power plant by itself, even without a Uranium trade, reduces infrastructure upkeep -5%,
+        //national wonder upkeep -5%,
+        //and improvement upkeep -5%.
         //Requires 12,000 infrastructure, 1,000 technology, and a Uranium resource to build.
         //Nations that develop the Nuclear Power Plant must keep their government position on nuclear weapons set to option 2 or 3.
         bool nuclearPowerPlant;
         //Pentagon -
         //$30,000,000 -
         //The Pentagon serves as your nation's headquarters for military operations.
-        //DONE //Increases attacking and defending ground battle strength +20%.
+        //Increases attacking and defending ground battle strength +20%.
         bool pentagon;
         //Political Lobbyists -
         //$50,000,000 -
-        //DONE //Your vote counts as two votes in your team's senate.
+        //Your vote counts as two votes in your team's senate.
         //Must be re-purchased every time you switch teams.
         bool politicalLobbyists;
         //Scientific Development Center -
         //$150,000,000 -
-        //DONE //The scientific development center increases the productivity of your factories from
-        //DONE //-8% infrastructure cost to -10% infrastructure cost,
-        //DONE //increases the productivity of your universities from
-        //DONE //+8% citizen income to +10% citizen income,
-        //DONE //allows the Great University to give its technology happiness bonus up to 5,000 technology levels
-        //DONE //(+2 happiness each 1,000 technology levels).
+        //The scientific development center increases the productivity of your factories from
+        //-8% infrastructure cost to -10% infrastructure cost,
+        //increases the productivity of your universities from
+        //+8% citizen income to +10% citizen income,
+        //allows the Great University to give its technology happiness bonus up to 5,000 technology levels
+        //(+2 happiness each 1,000 technology levels).
         //Requires 14,000 infrastructure, 3,000 technology, Great University, National Research Lab.
         bool scientificDevelopmentCenter;
     }
@@ -1803,44 +1803,44 @@ contract WondersContract4 is Ownable {
         //Social Security System -
         //$40,000,000-
         //The social security system provides benefits to aging members of your nation.
-        //DONE //Allows you to raise taxes above 28% up to 30% without additional happiness penalties.
+        //Allows you to raise taxes above 28% up to 30% without additional happiness penalties.
         bool socialSecuritySystem;
         //Space Program -
         //$30,000,000 -
         //The space program sends your astronauts to the moon and beyond.
-        //DONE //Increases happiness +3, lowers technology cost -3% and lowers aircraft cost -5%.
+        //Increases happiness +3, lowers technology cost -3% and lowers aircraft cost -5%.
         bool spaceProgram;
         //Stock Market -
         //$30,000,000 -
         //The stock market provides a boost to your economy.
-        //DONE //Increases citizen income +$10.00
+        //Increases citizen income +$10.00
         bool stockMarket;
         //Strategic Defense Initiative (SDI) -
         //$75,000,000 -
-        //DONE //Reduces odds of a successful nuclear attack against your nation by 60%.
+        //Reduces odds of a successful nuclear attack against your nation by 60%.
         //The SDI wonder also requires 3 satellites and 3 missile defenses
         //and those satellites and missile defenses cannot be deleted once the wonder is developed.
         bool strategicDefenseInitiative;
         //Superior Logistical Support -
         //$80,000,000 -
         //Provides supplies more efficiently to your nation's military.
-        //DONE //Reduces Aircraft and Naval Maintenance Cost by -10% and
-        //DONE //Tank Maintenance Cost by -5%.
-        //DONE //Increases attacking and defending ground battle strength +10%.
+        //Reduces Aircraft and Naval Maintenance Cost by -10% and
+        //Tank Maintenance Cost by -5%.
+        //Increases attacking and defending ground battle strength +10%.
         //Requires Pentagon.
         bool superiorLogisticalSupport;
         //Universal Health Care -
         //$100,000,000 -
         //A Universal Health Care program
-        //DONE //increases population +3% and
-        //DONE //increases population happiness +2.
+        //increases population +3% and
+        //increases population happiness +2.
         //Requires 11,000 infrastructure, Hospital, National Research Lab.
         bool universalHealthcare;
         //Weapons Research Complex -
         //$150,000,000 -
         //Increases the technology bonus to damage from 0.01% to 0.02% per technology level,
-        //DONE //Increases the number of nukes that can be purchased per day to 2,
-        //DONE //hurts environment by +1,
+        //Increases the number of nukes that can be purchased per day to 2,
+        //hurts environment by +1,
         //Increases the purchase costs of all military by 0.01% per technology level.
         //Requires 8,500 infrastructure, 2,000 technology, National Research Lab, Pentagon Wonder.
         bool weaponsResearchCenter;
