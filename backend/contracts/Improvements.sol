@@ -430,7 +430,7 @@ contract ImprovementsContract1 is Ownable, ReentrancyGuard {
         } else if (improvementId == 5) {
             require(
                 amount == 1,
-                "Boarder walls can only be purchased 1 at a time"
+                "Border walls can only be purchased 1 at a time"
             );
             purchasePrice = borderWallCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
@@ -1362,6 +1362,7 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
     address public forces;
     address public countryMinter;
     address public wonders4;
+    address public resources;
     uint256 public missileDefenseCost = 90000 * (10 ** 18);
     uint256 public munitionsFactoryCost = 200000 * (10 ** 18);
     uint256 public navalAcademyCost = 300000 * (10 ** 18);
@@ -1370,10 +1371,12 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
     uint256 public policeHeadquartersCost = 75000 * (10 ** 18);
 
     WondersContract1 won1;
+    ImprovementsContract1 imp1;
     ImprovementsContract2 imp2;
     CountryMinter mint;
     TreasuryContract tres;
     WondersContract4 won4;
+    ResourcesContract res;
 
     struct Improvements4 {
         //Missile Defense
@@ -1389,7 +1392,6 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
         //Requires having Lead as a resource to purchase.
         //Limit 5.
         //Cannot build if Bunkers owned.
-        //Collection required to delete.
         uint256 munitionsFactoryCount;
         //Naval Academy
         //$300,000
@@ -1400,7 +1402,6 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
         //Naval Construction Yard
         //$300,000
         //Increases the daily purchase limit for navy vessels +1.
-        //Your nation must have pre-existing navy support capabilities (via Drydocks and Shipyards) to actually purchase navy vessels.
         //Limit 3 per nation.
         //requires Harbor
         uint256 navalConstructionYardCount;
@@ -1409,7 +1410,6 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
         //Decreases the effectiveness of enemy defending soldiers 3%.
         //Requires maintaining a Forward Operating Base for each Office of Propaganda
         //Limit 2
-        //Collection required to delete.
         uint256 officeOfPropagandaCount;
         //Police Headquarters
         //$75,000
@@ -1439,18 +1439,22 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
         address _improvements1,
         address _improvements2,
         address _countryMinter,
-        address _wonders4
+        address _wonders4,
+        address _resources
     ) public onlyOwner {
         treasury = _treasury;
         tres = TreasuryContract(_treasury);
         forces = _forces;
         improvements1 = _improvements1;
+        imp1 = ImprovementsContract1(_improvements1);
         improvements2 = _improvements2;
         imp2 = ImprovementsContract2(_improvements2);
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
         wonders4 = _wonders4;
         won4 = WondersContract4(_wonders4);
+        resources = _resources;
+        res = ResourcesContract(_resources);
     }
 
     modifier onlyCountryMinter() {
@@ -1586,7 +1590,15 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
             uint256 bunkerAmount = ImprovementsContract1(improvements1)
                 .getBunkerCount(countryId);
             require(bunkerAmount == 0, "Cannot own if bunker is owned");
-            //require owning lead as a resource
+            uint256 factoryCount = imp1.getFactoryCount(countryId);
+            require(
+                factoryCount >= 3,
+                "Must own at least 3 factories to purchase"
+            );
+            require(
+                res.viewLead(countryId) == true,
+                "Must possess lead to purchase"
+            );
             idToImprovements4[countryId].munitionsFactoryCount += amount;
             uint256 existingImprovementTotal = ImprovementsContract1(
                 improvements1
@@ -1862,7 +1874,7 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
     uint256 public radiationContainmentChamberCost = 200000 * (10 ** 18);
     uint256 public redLightDistrictCost = 50000 * (10 ** 18);
     uint256 public rehabilitationFacilityCost = 500000 * (10 ** 18);
-    uint256 public satteliteCost = 90000 * (10 ** 18);
+    uint256 public satelliteCost = 90000 * (10 ** 18);
     uint256 public schoolCost = 85000 * (10 ** 18);
     uint256 public shipyardCost = 100000 * (10 ** 18);
     uint256 public stadiumCost = 110000 * (10 ** 18);
@@ -2024,7 +2036,7 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
             radiationContainmentChamberCost,
             redLightDistrictCost,
             rehabilitationFacilityCost,
-            satteliteCost,
+            satelliteCost,
             schoolCost,
             shipyardCost,
             stadiumCost,
@@ -2063,7 +2075,7 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
     ///@dev this function is only callable by the contract owner
     ///@dev this function will allow the owner of the contract to update the cost of a satellite
     function updateSatelliteCost(uint256 newPrice) public onlyOwner {
-        satteliteCost = newPrice;
+        satelliteCost = newPrice;
     }
 
     ///@dev this function is only callable by the contract owner
@@ -2197,7 +2209,7 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 newImprovementTotal
             );
         } else if (improvementId == 5) {
-            purchasePrice = satteliteCost * amount;
+            purchasePrice = satelliteCost * amount;
             require(balance >= purchasePrice, "Insufficient balance");
             uint256 existingCount = idToImprovements3[countryId].satelliteCount;
             require((existingCount + amount) <= 5, "Cannot own more than 5");

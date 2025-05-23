@@ -13976,6 +13976,38 @@
           "type": "event"
         },
         {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "VRFRequestSent",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "RETRY_TIMEOUT",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
           "inputs": [],
           "name": "countryMinter",
           "outputs": [
@@ -14392,6 +14424,44 @@
           "inputs": [
             {
               "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "pendingRequestTimestamp",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "pendingRequests",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
               "name": "requestId",
               "type": "uint256"
             },
@@ -14409,6 +14479,19 @@
         {
           "inputs": [],
           "name": "renounceOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "countryId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retryFulfillRequest",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
@@ -14559,24 +14642,6 @@
             }
           ],
           "name": "setReligion",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "string",
-              "name": "newRulerName",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "id",
-              "type": "uint256"
-            }
-          ],
-          "name": "setRulerName",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
@@ -21222,7 +21287,7 @@
               "type": "uint256"
             }
           ],
-          "name": "checkCitzenCountForImprovementPurchase",
+          "name": "checkCitizenCountForImprovementPurchase",
           "outputs": [
             {
               "internalType": "bool",
@@ -21365,7 +21430,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -21460,7 +21525,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -21479,7 +21544,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -22282,7 +22347,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -22320,7 +22385,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -23036,7 +23101,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -23055,7 +23120,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -23074,7 +23139,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -23093,7 +23158,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -23131,7 +23196,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -23914,7 +23979,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -23933,7 +23998,7 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "count",
               "type": "uint256"
             }
           ],
@@ -24109,6 +24174,19 @@
           "type": "function"
         },
         {
+          "inputs": [],
+          "name": "resources",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
           "inputs": [
             {
               "internalType": "address",
@@ -24138,6 +24216,11 @@
             {
               "internalType": "address",
               "name": "_wonders4",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_resources",
               "type": "address"
             }
           ],
@@ -38490,6 +38573,25 @@
               "type": "uint256"
             }
           ],
+          "name": "NationJoinRequestRejected",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "allianceId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "nationId",
+              "type": "uint256"
+            }
+          ],
           "name": "NationRemovedFromAlliance",
           "type": "event"
         },
@@ -38511,6 +38613,51 @@
           ],
           "name": "NationRequestedToJoin",
           "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "MAX_ALLIANCE_MEMBERS",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "MAX_JOIN_REQUESTS",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
         },
         {
           "inputs": [
@@ -38648,6 +38795,19 @@
           "type": "function"
         },
         {
+          "inputs": [],
+          "name": "countryMinter",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
           "inputs": [
             {
               "internalType": "string",
@@ -38752,17 +38912,17 @@
           "outputs": [
             {
               "internalType": "uint256",
-              "name": "allianceId",
+              "name": "",
               "type": "uint256"
             },
             {
               "internalType": "string",
-              "name": "platoonId",
+              "name": "",
               "type": "string"
             },
             {
               "internalType": "string",
-              "name": "name",
+              "name": "",
               "type": "string"
             }
           ],
@@ -38850,6 +39010,42 @@
           "type": "function"
         },
         {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "allianceId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nationId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "callerNationId",
+              "type": "uint256"
+            }
+          ],
+          "name": "rejectJoinRequest",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
           "inputs": [
             {
               "internalType": "uint256",
@@ -38896,6 +39092,13 @@
           "type": "function"
         },
         {
+          "inputs": [],
+          "name": "renounceOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
           "inputs": [
             {
               "internalType": "uint256",
@@ -38909,6 +39112,19 @@
             }
           ],
           "name": "requestToJoinAlliance",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "_countryMinter",
+              "type": "address"
+            }
+          ],
+          "name": "settings",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
@@ -38932,6 +39148,19 @@
             }
           ],
           "name": "transferFounder",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
