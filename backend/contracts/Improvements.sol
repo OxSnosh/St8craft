@@ -502,7 +502,10 @@ contract ImprovementsContract1 is Ownable, ReentrancyGuard {
             idToImprovements1[countryId].factoryCount += amount;
             idToImprovements1[countryId].improvementCount += amount;
         }
-        TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
+        require(
+            TreasuryContract(treasury).spendBalance(countryId, purchasePrice),
+            "Unable to spend balance"
+        );
         emit Improvement1Purchased(countryId, improvementId, amount);
     }
 
@@ -1113,7 +1116,9 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
                 newImprovementTotal
             );
         }
-        TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
+        require(TreasuryContract(treasury).spendBalance(countryId, purchasePrice),
+            "Unable to spend balance"
+        );
         emit Improvement2Purchased(countryId, improvementId, amount);
     }
 
@@ -1680,7 +1685,9 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
                 newImprovementTotal
             );
         }
-        TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
+        require(TreasuryContract(treasury).spendBalance(countryId, purchasePrice),
+            "Unable to spend balance"
+        );
         emit Improvement4Purchased(countryId, improvementId, amount);
     }
 
@@ -2285,7 +2292,9 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
                 newImprovementTotal
             );
         }
-        TreasuryContract(treasury).spendBalance(countryId, purchasePrice);
+        require(TreasuryContract(treasury).spendBalance(countryId, purchasePrice),
+            "Unable to spend balance"
+        );
         emit Improvement3Purchased(countryId, improvementId, amount);
     }
 

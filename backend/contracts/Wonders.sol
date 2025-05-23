@@ -7,13 +7,13 @@ import "./Improvements.sol";
 import "./Forces.sol";
 import "./CountryMinter.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title WondersContract1
 ///@author OxSnosh
 ///@dev this contract inherits from openzeppelin's ownable contract
 ///@notice this contract will strore information about a nations wonders
-contract WondersContract1 is Ownable {
+contract WondersContract1 is Ownable, ReentrancyGuard {
     address public treasuryAddress;
     address public wondersContract2Address;
     address public wondersContract3Address;
@@ -61,7 +61,7 @@ contract WondersContract1 is Ownable {
         //and opens one extra foreign aid slot.
         bool disasterReliefAgency;
         //EMP Weaponization
-        //$200,000,000 + (Nation Strength * 2,000)
+        //$200,000,000
         //Provides attackers with 5,000 or more technology the option to launch a targeted EMP nuclear attack.
         //Nuclear weapons can target higher infrastructure, higher land, or higher technology damage based on player choice when launching nukes.
         //When you choose to target infrastructure, land, or technology you are trading more damage to your target for less damage for the other two.
@@ -84,7 +84,7 @@ contract WondersContract1 is Ownable {
         //Secret foreign aid costs the sender 200% the value of the items that are sent.
         bool federalAidCommission;
         //Federal Reserve
-        //$100,000,000 + (Nation Strength * 1,000)
+        //$100,000,000
         //Increases the number of banks that can be purchased +2.
         //Requires Stock Market.
         bool federalReserve;
@@ -179,6 +179,10 @@ contract WondersContract1 is Ownable {
     ///@dev this function is only callable from the country minter contract
     ///@notice this function will be called when a nation is minted and allow a nation to buy the wonders in this contract
     function generateWonders1(uint256 id) public onlyCountryMinter {
+        require(
+            idToWonders1[id].wonderCount == 0,
+            "Nation already has wonders"
+        );
         Wonders1 memory newWonders1 = Wonders1(
             0,
             false,
@@ -274,7 +278,7 @@ contract WondersContract1 is Ownable {
      * 10. foreign army base
      * 11. foreign naval base
     */
-    function buyWonder1(uint256 countryId, uint256 wonderId) public {
+    function buyWonder1(uint256 countryId, uint256 wonderId) public nonReentrant {
         bool isOwner = mint.checkOwnership(countryId, msg.sender);
         require(isOwner, "!nation owner");
         require(wonderId <= 11, "Invalid wonder ID");
@@ -297,10 +301,10 @@ contract WondersContract1 is Ownable {
             require(landAmount >= 3000, "Requires 3000 Land");
             idToWonders1[countryId].agricultureDevelopmentProgram = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 agricultureDevelopmentCost
-            );
+            ));
         } else if (wonderId == 2) {
             require(
                 balance >= antiAirDefenseNetworkCost,
@@ -310,10 +314,10 @@ contract WondersContract1 is Ownable {
             require(existingWonder == false, "Already owned");
             idToWonders1[countryId].antiAirDefenseNetwork = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 antiAirDefenseNetworkCost
-            );
+            ));
         } else if (wonderId == 3) {
             require(
                 balance >= centralIntelligenceAgencyCost,
@@ -324,10 +328,10 @@ contract WondersContract1 is Ownable {
             require(existingWonder == false, "Already owned");
             idToWonders1[countryId].centralIntelligenceAgency = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 centralIntelligenceAgencyCost
-            );
+            ));
         } else if (wonderId == 4) {
             require(
                 balance >= disasterReliefAgencyCost,
@@ -337,10 +341,10 @@ contract WondersContract1 is Ownable {
             require(existingWonder == false, "Already owned");
             idToWonders1[countryId].disasterReliefAgency = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 disasterReliefAgencyCost
-            );
+            ));
         } else if (wonderId == 5) {
             require(balance >= empWeaponizationCost, "Insufficient balance");
             bool existingWonder = idToWonders1[countryId].empWeaponization;
@@ -359,10 +363,10 @@ contract WondersContract1 is Ownable {
             );
             idToWonders1[countryId].empWeaponization = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 empWeaponizationCost
-            );
+            ));
         } else if (wonderId == 6) {
             require(
                 balance >= falloutShelterSystemCost,
@@ -383,10 +387,10 @@ contract WondersContract1 is Ownable {
             require(technologyAmount >= 2000, "Requires 2000 Tech to purchase");
             idToWonders1[countryId].falloutShelterSystem = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 falloutShelterSystemCost
-            );
+            ));
         } else if (wonderId == 7) {
             require(
                 balance >= federalAidCommissionCost,
@@ -396,10 +400,10 @@ contract WondersContract1 is Ownable {
             require(existingWonder == false, "Already owned");
             idToWonders1[countryId].federalAidCommission = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 federalAidCommissionCost
-            );
+            ));
         } else if (wonderId == 8) {
             require(balance >= federalReserveCost, "Insufficient balance");
             bool existingWonder = idToWonders1[countryId].federalReserve;
@@ -412,20 +416,20 @@ contract WondersContract1 is Ownable {
             );
             idToWonders1[countryId].federalReserve = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 federalReserveCost
-            );
+            ));
         } else if (wonderId == 9) {
             require(balance >= foreignAirForceBaseCost, "Insufficient balance");
             bool existingWonder = idToWonders1[countryId].foreignAirForceBase;
             require(existingWonder == false, "Already owned");
             idToWonders1[countryId].foreignAirForceBase = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 foreignAirForceBaseCost
-            );
+            ));
         } else if (wonderId == 10) {
             require(balance >= foreignArmyBaseCost, "Insufficient balance");
             bool existingWonder = idToWonders1[countryId].foreignArmyBase;
@@ -438,10 +442,10 @@ contract WondersContract1 is Ownable {
             );
             idToWonders1[countryId].foreignArmyBase = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 foreignArmyBaseCost
-            );
+            ));
         } else {
             require(balance >= foreignNavalBaseCost, "Insufficient balance");
             bool existingWonder = idToWonders1[countryId].foreignNavalBase;
@@ -455,10 +459,10 @@ contract WondersContract1 is Ownable {
             );
             idToWonders1[countryId].foreignNavalBase = true;
             idToWonders1[countryId].wonderCount += 1;
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 foreignNavalBaseCost
-            );
+            ));
         }
         emit Wonder1Purchased(countryId, wonderId);
     }
@@ -480,7 +484,7 @@ contract WondersContract1 is Ownable {
      * 10. foreign army base
      * 11. foreign naval base
     */
-    function deleteWonder1(uint256 countryId, uint256 wonderId) public {
+    function deleteWonder1(uint256 countryId, uint256 wonderId) public nonReentrant {
         bool isOwner = mint.checkOwnership(countryId, msg.sender);
         require(isOwner, "!nation owner");
         require(wonderId <= 11, "Invalid wonder ID");
@@ -559,7 +563,7 @@ contract WondersContract1 is Ownable {
     ///@dev this function will return true if a nation has the anti air defense network wonder
     ///@param id is the nation id of the nation being queried
     ///@return bool will be true if the nation has the wonder
-    function getAntiAirDefenseNewtwork(uint256 id) public view returns (bool) {
+    function getAntiAirDefenseNetwork(uint256 id) public view returns (bool) {
         return idToWonders1[id].antiAirDefenseNetwork;
     }
 
@@ -598,10 +602,10 @@ contract WondersContract1 is Ownable {
     }
 
     ///@dev this is a public view function that will return true if a nation has the federal aig commission wonder
-    ///@dev this function will return true if a nation has the federal aig commission wonder
+    ///@dev this function will return true if a nation has the federal aid commission wonder
     ///@param id is the nation id of the nation being queried
     ///@return bool will be true if the nation has the wonder
-    function getFederalAidComission(uint256 id) public view returns (bool) {
+    function getFederalAidCommission(uint256 id) public view returns (bool) {
         return idToWonders1[id].federalAidCommission;
     }
 
@@ -675,7 +679,7 @@ contract WondersContract1 is Ownable {
 ///@author OxSnosh
 ///@dev this contract inherits from openzeppelin's ownable contract
 ///@notice this contract will strore information about a nations wonders
-contract WondersContract2 is Ownable {
+contract WondersContract2 is Ownable, ReentrancyGuard {
     address public treasuryAddress;
     address public infrastructureAddress;
     address public wonderContract1Address;
@@ -695,6 +699,7 @@ contract WondersContract2 is Ownable {
     CountryMinter mint;
 
     struct Wonders2 {
+        bool initialized;
         //Great Monument -
         //$35,000,000 -
         //The great monument is a testament to your great leadership.
@@ -780,7 +785,12 @@ contract WondersContract2 is Ownable {
     ///@dev this function is only callable from the country minter contract
     ///@notice this function will be called when a nation is minted and allow a nation to buy the wonders in this contract
     function generateWonders2(uint256 id) public onlyCountryMinter {
+        require(
+            idToWonders2[id].initialized == false,
+            "Nation already initialized"
+        );
         Wonders2 memory newWonders2 = Wonders2(
+            true,
             false,
             false,
             false,
@@ -859,7 +869,7 @@ contract WondersContract2 is Ownable {
      * 8. manhattan project
      * 9. minimg industry consortium
     */
-    function buyWonder2(uint256 countryId, uint256 wonderId) public {
+    function buyWonder2(uint256 countryId, uint256 wonderId) public nonReentrant {
         bool isOwner = mint.checkOwnership(countryId, msg.sender);
         require(isOwner, "!nation owner");
         require(wonderId <= 9, "Invalid wonder ID");
@@ -872,30 +882,30 @@ contract WondersContract2 is Ownable {
             require(existingWonder == false, "Already owned");
             idToWonders2[countryId].greatMonument = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 greatMonumentCost
-            );
+            ));
         } else if (wonderId == 2) {
             require(balance >= greatTempleCost, "Insufficient balance");
             bool existingWonder = idToWonders2[countryId].greatTemple;
             require(existingWonder == false, "Already owned");
             idToWonders2[countryId].greatTemple = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 greatTempleCost
-            );
+            ));
         } else if (wonderId == 3) {
             require(balance >= greatUniversityCost, "Insufficient balance");
             bool existingWonder = idToWonders2[countryId].greatUniversity;
             require(existingWonder == false, "Already owned");
             idToWonders2[countryId].greatUniversity = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 greatUniversityCost
-            );
+            ));
         } else if (wonderId == 4) {
             require(
                 balance >= hiddenNuclearMissileSiloCost,
@@ -906,10 +916,10 @@ contract WondersContract2 is Ownable {
             require(existingWonder == false, "Already owned");
             idToWonders2[countryId].hiddenNuclearMissileSilo = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 hiddenNuclearMissileSiloCost
-            );
+            ));
         } else if (wonderId == 5) {
             require(
                 balance >= interceptorMissileSystemCost,
@@ -933,30 +943,30 @@ contract WondersContract2 is Ownable {
             );
             idToWonders2[countryId].interceptorMissileSystem = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 interceptorMissileSystemCost
-            );
+            ));
         } else if (wonderId == 6) {
             require(balance >= internetCost, "Insufficient balance");
             bool existingWonder = idToWonders2[countryId].internet;
             require(existingWonder == false, "Already owned");
             idToWonders2[countryId].internet = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 internetCost
-            );
+            ));
         } else if (wonderId == 7) {
             require(balance >= interstateSystemCost, "Insufficient balance");
             bool existingWonder = idToWonders2[countryId].interstateSystem;
             require(existingWonder == false, "Already owned");
             idToWonders2[countryId].interstateSystem = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 interstateSystemCost
-            );
+            ));
         } else if (wonderId == 8) {
             require(balance >= manhattanProjectCost, "Insufficient balance");
             bool existingWonder = idToWonders2[countryId].manhattanProject;
@@ -974,10 +984,10 @@ contract WondersContract2 is Ownable {
             require(techAmount >= 300, "Must have 300 Technology to purchase");
             idToWonders2[countryId].manhattanProject = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 manhattanProjectCost
-            );
+            ));
         } else {
             require(
                 balance >= miningIndustryConsortiumCost,
@@ -1004,10 +1014,10 @@ contract WondersContract2 is Ownable {
             require(landAmount >= 3000, "Must have 3000 Land to purchase");
             idToWonders2[countryId].miningIndustryConsortium = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 miningIndustryConsortiumCost
-            );
+            ));
         }
         emit Wonder2Purchased(countryId, wonderId);
     }
@@ -1027,7 +1037,7 @@ contract WondersContract2 is Ownable {
      * 8. manhattan project
      * 9. minimg industry consortium
     */
-    function deleteWonder2(uint256 countryId, uint256 wonderId) public {
+    function deleteWonder2(uint256 countryId, uint256 wonderId) public nonReentrant {
         bool isOwner = mint.checkOwnership(countryId, msg.sender);
         require(isOwner, "!nation owner");
         require(wonderId <= 9, "Invalid wonder ID");
@@ -1083,14 +1093,12 @@ contract WondersContract2 is Ownable {
                 countryId
             );
         } else if (wonderId == 8) {
-            // unable to delete Manhattan Project once purchased
-            // bool existingWonder = idToWonders2[countryId].manhattanProject;
-            // require(existingWonder == true, "No wonder to delete");
-            // idToWonders2[countryId].manhattanProject = false;
-            // WondersContract1(wonderContract1Address).subtractWonderCount(
-            //     countryId
-            // );
-            revert("Unable to delete Manhattan Project");
+            bool existingWonder = idToWonders2[countryId].manhattanProject;
+            require(existingWonder == true, "No wonder to delete");
+            idToWonders2[countryId].manhattanProject = false;
+            WondersContract1(wonderContract1Address).subtractWonderCount(
+                countryId
+            );
         } else {
             bool existingWonder = idToWonders2[countryId]
                 .miningIndustryConsortium;
@@ -1211,7 +1219,7 @@ contract WondersContract2 is Ownable {
 ///@author OxSnosh
 ///@dev this contract inherits from openzeppelin's ownable contract
 ///@notice this contract will strore information about a nations wonders
-contract WondersContract3 is Ownable {
+contract WondersContract3 is Ownable, ReentrancyGuard {
     address public treasuryAddress;
     address public infrastructureAddress;
     address public wonderContract1Address;
@@ -1233,6 +1241,7 @@ contract WondersContract3 is Ownable {
     CountryMinter mint;
 
     struct Wonders3 {
+        bool initialized;
         //Movie Industry -
         //$26,000,000 -
         //The movie industry provides a great source of entertainment to your people.
@@ -1334,7 +1343,12 @@ contract WondersContract3 is Ownable {
     ///@dev this function is only callable from the country minter contract
     ///@notice this function will be called when a nation is minted and allow a nation to buy the wonders in this contract
     function generateWonders3(uint256 id) public onlyCountryMinter {
+        require(
+            idToWonders3[id].initialized == false,
+            "Nation already initialized"
+        );
         Wonders3 memory newWonders3 = Wonders3(
+            true,
             false,
             false,
             false,
@@ -1413,7 +1427,7 @@ contract WondersContract3 is Ownable {
      * 8. political lobbyists
      * 9. scientific development center
     */
-    function buyWonder3(uint256 countryId, uint256 wonderId) public {
+    function buyWonder3(uint256 countryId, uint256 wonderId) public nonReentrant {
         bool isOwner = mint.checkOwnership(countryId, msg.sender);
         require(isOwner, "!nation owner");
         require(wonderId <= 9, "Invalid wonder ID");
@@ -1426,10 +1440,10 @@ contract WondersContract3 is Ownable {
             require(existingWonder == false, "Already owned");
             idToWonders3[countryId].movieIndustry = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 movieIndustryCost
-            );
+            ));
         } else if (wonderId == 2) {
             require(balance >= nationalCemetaryCost, "Insufficient balance");
             bool existingWonder = idToWonders3[countryId].nationalCemetary;
@@ -1444,10 +1458,10 @@ contract WondersContract3 is Ownable {
             );
             idToWonders3[countryId].nationalCemetary = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 nationalCemetaryCost
-            );
+            ));
         } else if (wonderId == 3) {
             require(
                 balance >= nationalEnvironmentOfficeCost,
@@ -1465,20 +1479,20 @@ contract WondersContract3 is Ownable {
             );
             idToWonders3[countryId].nationalEnvironmentOffice = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 nationalEnvironmentOfficeCost
-            );
+            ));
         } else if (wonderId == 4) {
             require(balance >= nationalResearchLabCost, "Insufficient balance");
             bool existingWonder = idToWonders3[countryId].nationalResearchLab;
             require(existingWonder == false, "Already owned");
             idToWonders3[countryId].nationalResearchLab = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 nationalResearchLabCost
-            );
+            ));
         } else if (wonderId == 5) {
             require(balance >= nationalWarMemorialCost, "Insufficient balance");
             bool existingWonder = idToWonders3[countryId].nationalWarMemorial;
@@ -1487,10 +1501,10 @@ contract WondersContract3 is Ownable {
             require(casualties >= 50000, "not enough casualties");
             idToWonders3[countryId].nationalWarMemorial = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 nationalWarMemorialCost
-            );
+            ));
         } else if (wonderId == 6) {
             require(balance >= nuclearPowerPlantCost, "Insufficient balance");
             bool existingWonder = idToWonders3[countryId].nuclearPowerPlant;
@@ -1511,30 +1525,30 @@ contract WondersContract3 is Ownable {
             //require Uranium
             idToWonders3[countryId].nuclearPowerPlant = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 nuclearPowerPlantCost
-            );
+            ));
         } else if (wonderId == 7) {
             require(balance >= pentagonCost, "Insufficient balance");
             bool existingWonder = idToWonders3[countryId].pentagon;
             require(existingWonder == false, "Already owned");
             idToWonders3[countryId].pentagon = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 pentagonCost
-            );
+            ));
         } else if (wonderId == 8) {
             require(balance >= politicalLobbyistsCost, "Insufficient balance");
             bool existingWonder = idToWonders3[countryId].politicalLobbyists;
             require(existingWonder == false, "Already owned");
             idToWonders3[countryId].politicalLobbyists = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 politicalLobbyistsCost
-            );
+            ));
         } else {
             require(
                 balance >= scientificDevelopmentCenterCost,
@@ -1570,10 +1584,10 @@ contract WondersContract3 is Ownable {
             );
             idToWonders3[countryId].scientificDevelopmentCenter = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 scientificDevelopmentCenterCost
-            );
+            ));
         }
         emit Wonder3Purchased(countryId, wonderId);
     }
@@ -1593,7 +1607,7 @@ contract WondersContract3 is Ownable {
      * 8. political lobbyists
      * 9. scientific development center
     */
-    function deleteWonder3(uint256 countryId, uint256 wonderId) public {
+    function deleteWonder3(uint256 countryId, uint256 wonderId) public nonReentrant {
         bool isOwner = mint.checkOwnership(countryId, msg.sender);
         require(isOwner, "!nation owner");
         require(wonderId <= 9, "Invalid wonder ID");
@@ -1780,7 +1794,7 @@ contract WondersContract3 is Ownable {
 ///@author OxSnosh
 ///@dev this contract inherits from openzeppelin's ownable contract
 ///@notice this contract will strore information about a nations wonders
-contract WondersContract4 is Ownable {
+contract WondersContract4 is Ownable, ReentrancyGuard {
     address public treasuryAddress;
     address public infrastructureAddress;
     address public improvementsContract2Address;
@@ -1800,6 +1814,7 @@ contract WondersContract4 is Ownable {
     CountryMinter mint;
 
     struct Wonders4 {
+        bool initialized;
         //Social Security System -
         //$40,000,000-
         //The social security system provides benefits to aging members of your nation.
@@ -1885,7 +1900,12 @@ contract WondersContract4 is Ownable {
     ///@dev this function is only callable from the country minter contract
     ///@notice this function will be called when a nation is minted and allow a nation to buy the wonders in this contract
     function generateWonders4(uint256 id) public onlyCountryMinter {
+        require(
+            idToWonders4[id].initialized == false,
+            "Nation already initialized"
+        );
         Wonders4 memory newWonders4 = Wonders4(
+            true,
             false,
             false,
             false,
@@ -1950,7 +1970,7 @@ contract WondersContract4 is Ownable {
      * 6. universal healthcare
      * 7. weapons research center
     */
-    function buyWonder4(uint256 countryId, uint256 wonderId) public {
+    function buyWonder4(uint256 countryId, uint256 wonderId) public nonReentrant {
         bool isOwner = mint.checkOwnership(countryId, msg.sender);
         require(isOwner, "!nation owner");
         require(wonderId <= 7, "Invalid wonder ID");
@@ -1966,30 +1986,30 @@ contract WondersContract4 is Ownable {
             require(existingWonder == false, "Already owned");
             idToWonders4[countryId].socialSecuritySystem = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 socialSecuritySystemCost
-            );
+            ));
         } else if (wonderId == 2) {
             require(balance >= spaceProgramCost, "Insufficient balance");
             bool existingWonder = idToWonders4[countryId].spaceProgram;
             require(existingWonder == false, "Already owned");
             idToWonders4[countryId].spaceProgram = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 spaceProgramCost
-            );
+            ));
         } else if (wonderId == 3) {
             require(balance >= stockMarketCost, "Insufficient balance");
             bool existingWonder = idToWonders4[countryId].stockMarket;
             require(existingWonder == false, "Already owned");
             idToWonders4[countryId].stockMarket = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 stockMarketCost
-            );
+            ));
         } else if (wonderId == 4) {
             require(
                 balance >= strategicDefenseInitiativeCost,
@@ -2014,10 +2034,10 @@ contract WondersContract4 is Ownable {
             );
             idToWonders4[countryId].strategicDefenseInitiative = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 strategicDefenseInitiativeCost
-            );
+            ));
         } else if (wonderId == 5) {
             require(
                 balance >= superiorLogisticalSupportCost,
@@ -2034,10 +2054,10 @@ contract WondersContract4 is Ownable {
             );
             idToWonders4[countryId].superiorLogisticalSupport = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 superiorLogisticalSupportCost
-            );
+            ));
         } else if (wonderId == 6) {
             require(balance >= universalHealthcareCost, "Insufficient balance");
             bool existingWonder = idToWonders4[countryId].universalHealthcare;
@@ -2064,10 +2084,10 @@ contract WondersContract4 is Ownable {
             );
             idToWonders4[countryId].universalHealthcare = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 universalHealthcareCost
-            );
+            ));
         } else {
             require(
                 balance >= weaponsResearchCenterCost,
@@ -2102,15 +2122,15 @@ contract WondersContract4 is Ownable {
             );
             idToWonders4[countryId].weaponsResearchCenter = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
-            TreasuryContract(treasuryAddress).spendBalance(
+            require(TreasuryContract(treasuryAddress).spendBalance(
                 countryId,
                 weaponsResearchCenterCost
-            );
+            ));
         }
         emit Wonder4Purchased(countryId, wonderId);
     }
 
-    function deleteWonder4(uint256 countryId, uint256 wonderId) public {
+    function deleteWonder4(uint256 countryId, uint256 wonderId) public nonReentrant {
         bool isOwner = mint.checkOwnership(countryId, msg.sender);
         require(isOwner, "!nation owner");
         require(wonderId <= 7, "Invalid wonder ID");

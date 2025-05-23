@@ -302,8 +302,8 @@ contract AidContract is Ownable, ReentrancyGuard {
         uint256 idSender,
         uint256 idRecipient
     ) public view returns (bool) {
-        bool senderEligable = won1.getFederalAidComission(idSender);
-        bool recipientEligable = won1.getFederalAidComission(idRecipient);
+        bool senderEligable = won1.getFederalAidCommission(idSender);
+        bool recipientEligable = won1.getFederalAidCommission(idRecipient);
         if (senderEligable && recipientEligable) {
             return true;
         } else {

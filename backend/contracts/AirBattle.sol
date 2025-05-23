@@ -605,7 +605,7 @@ contract AdditionalAirBattle is Ownable, ReentrancyGuard {
         uint256 tankDamage,
         uint256 cruiseMissileDamage
     ) internal {
-        bool antiAir = won1.getAntiAirDefenseNewtwork(defenderId);
+        bool antiAir = won1.getAntiAirDefenseNetwork(defenderId);
         if (antiAir) {
             infrastructureDamage = ((infrastructureDamage * 60) / 100);
             tankDamage = ((tankDamage * 60) / 100);
