@@ -41,6 +41,7 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     uint32 private constant NUM_WORDS = 2;
 
     struct Resources1 {
+        bool initialized;
         bool aluminium;
         //Aluminum
         //Increases soldier efficiency +20%,
@@ -223,7 +224,12 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     ///@dev this function will call the chainlink vrf contract to assign the minted nation two resources randomly
     ///@param id is the nation id of the nation being minted
     function generateResources(uint256 id) public onlyCountryMinter {
+        require(
+            idToResources1[id].initialized == false,
+            "this nation already has resources"
+        );
         Resources1 memory newResources1 = Resources1(
+            true,
             false,
             false,
             false,
@@ -1026,7 +1032,6 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
 ///@title BonusResourcesContract
 ///@author OxSnosh
 ///@notice this contract will keep track of a nations bonus resources
-///@dev this contract inherits from chainlink VRF
 ///@dev this contract inherits from oepnzeppelin ownable
 contract BonusResourcesContract is Ownable {
     address public infrastructure;
@@ -1040,6 +1045,7 @@ contract BonusResourcesContract is Ownable {
     CrimeContract crim;
 
     struct BonusResources {
+        bool initialized;
         bool beer;
         //beer
         //requires Water, Wheat, Lumber, Aluminium
@@ -1132,7 +1138,12 @@ contract BonusResourcesContract is Ownable {
     ///@notice this function will allow a nation to store the bonus resources they have access to
     ///@param id is the nation id of the nation being minted
     function generateBonusResources(uint256 id) public onlyCountryMinter {
+        require(
+            idToBonusResources[id].initialized == false,
+            "bonus resources already initialized"
+        );
         BonusResources memory newBonusResources = BonusResources(
+            true,
             false,
             false,
             false,
