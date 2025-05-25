@@ -111,7 +111,7 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
 
     ///@dev this is a public view functon that will return the infrastructure cost per level
     ///@notice this function will return the cost of an infrastructure purchase per level
-    ///@notice cartain modifiers in the following functions will reduce the cost of infrastructure
+    ///@notice certain modifiers in the following functions will reduce the cost of infrastructure
     ///@param id this is the nation id making the purchase
     ///@return uint256 this is the cost per level of an infrastructure purchase
     function getInfrastructureCostPerLevel(
@@ -170,13 +170,16 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
         uint256 adjustments = (costAdjustments1 +
             costAdjustments2 +
             costAdjustments3);
+        if (adjustments > 100) {
+            adjustments = 100;
+        }
         uint256 multiplier = (100 - adjustments);
         uint256 adjustedCostPerLevel = ((grossCost * multiplier) / 100);
         return adjustedCostPerLevel * (10 ** 18);
     }
 
     ///@dev this function is one of three functions that will adjust the cost of infrastructure lower
-    ///@dev this function is a public view function that will get called when infrasturcture is quoted or purchased
+    ///@dev this function is a public view function that will get called when infrastructure is quoted or purchased
     ///@notice this function is one of three functions that will adjust the cost of infrastructure lower based on a nations resources, improvements and wonders
     ///@notice lumber will reduce the cost of infrastructure by 6%
     ///@notice iron will reduce the cost of infrastructure by 5%
@@ -207,12 +210,12 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
     }
 
     ///@dev this function is the second of three functions that will adjust the cost of infrastructure lower
-    ///@dev this function is a public view function that will get called when infrasturcture is quoted or purchased
+    ///@dev this function is a public view function that will get called when infrastructure is quoted or purchased
     ///@notice this function is the second of three functions that will adjust the cost of infrastructure lower based on a nations resources, improvements and wonders
     ///@notice rubber will reduce the cost of infrastructure by 3%
     ///@notice construction will reduce the cost of infrastructure by 5%
     ///@notice an interstate system will reduce the cost of infrastructure by 8%
-    ///@notice certain accomodative governements will reduce the cost of infrastructure by 5%
+    ///@notice certain accommodative governements will reduce the cost of infrastructure by 5%
     ///@notice factories without a scientific development center will reduce the cost of infrastructure by 8% and 10% with a scientific development center
     ///@return uint256 this will be the multiplier reductions from this formula
     function getInfrastructureCostMultiplier2(
@@ -220,13 +223,13 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
     ) public view returns (uint256) {
         uint256 rubberMultiplier = 0;
         uint256 constructionMultiplier = 0;
-        uint256 insterstateSystemMultiplier = 0;
-        uint256 accomodativeGovernmentMultiplier = 0;
+        uint256 interstateSystemMultiplier = 0;
+        uint256 accommodativeGovernmentMultiplier = 0;
         uint256 factoryMultiplier = 0;
         bool isRubber = res.viewRubber(id);
         bool isConstruction = bonus.viewConstruction(id);
         bool isInterstateSystem = won2.getInterstateSystem(id);
-        bool isAccomodativeGovernment = checkAccomodativeGovernment(id);
+        bool isAccommodativeGovernment = checkAccommodativeGovernment(id);
         uint256 factoryCount = imp1.getFactoryCount(id);
         bool scientificDevelopmentCenter = won3.getScientificDevelopmentCenter(
             id
@@ -238,10 +241,10 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
             constructionMultiplier = 5;
         }
         if (isInterstateSystem) {
-            insterstateSystemMultiplier = 8;
+            interstateSystemMultiplier = 8;
         }
-        if (isAccomodativeGovernment) {
-            accomodativeGovernmentMultiplier = 5;
+        if (isAccommodativeGovernment) {
+            accommodativeGovernmentMultiplier = 5;
         }
         if (factoryCount > 0) {
             if (!scientificDevelopmentCenter) {
@@ -252,14 +255,14 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
         }
         uint256 sumOfAdjustments = rubberMultiplier +
             constructionMultiplier +
-            insterstateSystemMultiplier +
-            accomodativeGovernmentMultiplier +
+            interstateSystemMultiplier +
+            accommodativeGovernmentMultiplier +
             factoryMultiplier;
         return sumOfAdjustments;
     }
 
     ///@dev this function is the third of three functions that will adjust the cost of infrastructure lower
-    ///@dev this function is a public view function that will get called when infrasturcture is quoted or purchased
+    ///@dev this function is a public view function that will get called when infrastructure is quoted or purchased
     ///@notice this function is the third of three functions that will adjust the cost of infrastructure lower based on a nations resources, improvements and wonders
     ///@notice aluminium will reduce the cost of infrastructure by 7%
     ///@notice coal will reduce the cost of infrastructure by 4%
@@ -289,11 +292,11 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
         return multiplier;
     }
 
-    ///@dev this is a public view function that will return a boolean value if a nations government type accomodates a reduced infrastructure cost
-    ///@notice this function will check if the given nation has a governemnt type that accomodate a lower cost of infrastructure
+    ///@dev this is a public view function that will return a boolean value if a nations government type accommodates a reduced infrastructure cost
+    ///@notice this function will check if the given nation has a government type that accommodate a lower cost of infrastructure
     ///@param countryId is the nation ID of the country being queried
-    ///@return bool will be true if the nation's government type accomodates a lower infrastructure cost
-    function checkAccomodativeGovernment(
+    ///@return bool will be true if the nation's government type accommodates a lower infrastructure cost
+    function checkAccommodativeGovernment(
         uint256 countryId
     ) public view returns (bool) {
         uint256 governmentType = param.getGovernmentType(countryId);
