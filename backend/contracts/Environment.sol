@@ -115,7 +115,9 @@ contract EnvironmentContract is Ownable {
         }
         uint256 radiationContainmentChambers = imp3
             .getRadiationContainmentChamberCount(id);
-        if (radiationContainmentChambers >= 0) {
+        if (radiationContainmentChambers >= globalRadiation) {
+            globalRadiation = 0;
+        } else {
             globalRadiation -= radiationContainmentChambers;
         }
         bool radiationCleanup = bonus.viewRadiationCleanup(id);
@@ -304,12 +306,12 @@ contract EnvironmentContract is Ownable {
         view
         returns (int256)
     {
-        int256 pointsFromMilitaryRatiio;
+        int256 pointsFromMilitaryRatio;
         ( , bool environmentPenalty, ) = addTax.soldierToPopulationRatio(id);
         if (environmentPenalty) {
-            pointsFromMilitaryRatiio += 10;
+            pointsFromMilitaryRatio += 10;
         }
-        return pointsFromMilitaryRatiio;
+        return pointsFromMilitaryRatio;
     }
 
     ///@dev this is a public view function that will generate gross environment score from a nations infrastructure to land ratio
