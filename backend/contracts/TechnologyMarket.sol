@@ -9,12 +9,13 @@ import "./Wonders.sol";
 import "./Treasury.sol";
 import "./Crime.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title TechnologyMarketContract
 ///@author OxSnosh
 ///@dev this contract inherits from openzeppelin's ownable contract
 ///@notice this contract allows a nation owner to purchase technology
-contract TechnologyMarketContract is Ownable {
+contract TechnologyMarketContract is Ownable, ReentrancyGuard {
     address public countryMinter;
     address public infrastructure;
     address public resources;
@@ -85,13 +86,14 @@ contract TechnologyMarketContract is Ownable {
     ///@notice this function will allow a nation owner to purchase technology
     ///@param id this is the nation id of the nation buying technology
     ///@param amount this is the amount of technology being purchased
-    function buyTech(uint256 id, uint256 amount) public {
+    function buyTech(uint256 id, uint256 amount) public nonReentrant {
         uint256 initialLiteracy = crim.getLiteracy(id);
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
+        require(amount > 0, "cannot be zero");
         uint256 cost = getTechCost(id, amount);
         require(inf.increaseTechnologyFromMarket(id, amount), "error adding tech");
-        tsy.spendBalance(id, cost);
+        require(tsy.spendBalance(id, cost), "error spending funds on tech");
         uint256 finalLiteracy = crim.getLiteracy(id);
         if(initialLiteracy < 90 && finalLiteracy >= 90){
             res.triggerForResources(id);
@@ -220,9 +222,10 @@ contract TechnologyMarketContract is Ownable {
     }
 
     ///@dev this function allows a nation to destroy technology
-    function destroyTech(uint256 id, uint256 amount) public {
+    function destroyTech(uint256 id, uint256 amount) public nonReentrant {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
+        require(amount > 0, "cannot be zero");
         uint256 currentTech = inf.getTechnologyCount(id);
         require((currentTech - amount) >= 0, "not enough tech");
         require(inf.decreaseTechnologyFromMarket(id, amount), "error removing tech");

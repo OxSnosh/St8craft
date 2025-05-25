@@ -6,12 +6,13 @@ import "./Resources.sol";
 import "./Treasury.sol";
 import "./Infrastructure.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title LandMarketContract
 ///@author OxSnosh
 ///@notice this contract will allow a nation owner to purchase land
 ///@dev this contract inherits from openzeppelin's ownable contract
-contract LandMarketContract is Ownable {
+contract LandMarketContract is Ownable, ReentrancyGuard {
     address public countryMinter;
     address public resources;
     address public infrastructure;
@@ -44,17 +45,18 @@ contract LandMarketContract is Ownable {
         tsy = TreasuryContract(_treasury);
     }
 
-    ///@dev this is a public view function that will allow a nation owner to buy land
+    ///@dev this is a public function that will allow a nation owner to buy land
     ///@dev this function is only callable by the nation owner
     ///@notice this function will allow a nation owner to purchase land
     ///@param id is the nation id of the nation purchasing land
     ///@param amount is the amount of land being purchased
-    function buyLand(uint256 id, uint256 amount) public {
+    function buyLand(uint256 id, uint256 amount) public nonReentrant {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
+        require(amount > 0, "cannot be zero");
         uint256 cost = getLandCost(id, amount);
         require(inf.increaseLandCountFromMarket(id, amount), "error adding land");
-        tsy.spendBalance(id, cost);
+        require(tsy.spendBalance(id, cost), "error spending funds on land");
         emit LandPurchased(id, amount, cost);
     }
 
@@ -141,9 +143,10 @@ contract LandMarketContract is Ownable {
     ///@notice this function will allow a nation owner to destroy land
     ///@param id this is the nation id of the nation destroying land
     ///@param amount this is the amount of land being destroyed
-    function destroyLand(uint256 id, uint256 amount) public {
+    function destroyLand(uint256 id, uint256 amount) public nonReentrant {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
+        require(amount > 0, "cannot be zero");
         uint256 currentLandAmount = inf.getLandCount(id);
         require((currentLandAmount - amount) >= 0, "not enough land");
         require(inf.decreaseLandCountFromMarket(id, amount), "error removing land");

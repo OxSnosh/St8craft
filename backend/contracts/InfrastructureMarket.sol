@@ -9,12 +9,12 @@ import "./Wonders.sol";
 import "./Treasury.sol";
 import "./CountryParameters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title InfrastructureMarketContract
 ///@author OxSnosh
 ///@notice this contract will allow a nation owner to buy Infrastructure
-contract InfrastructureMarketContract is Ownable {
+contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
     address public countryMinter;
     address public resources;
     address public infrastructure;
@@ -84,12 +84,13 @@ contract InfrastructureMarketContract is Ownable {
     ///@notice this function will allow a nation owner to purchase infrastructure
     ///@param id is the nation id of the nation purchasing infrastructure
     ///@param buyAmount is the amount of infrastructure being purchased
-    function buyInfrastructure(uint256 id, uint256 buyAmount) public {
+    function buyInfrastructure(uint256 id, uint256 buyAmount) public nonReentrant {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
+        require(buyAmount > 0, "cannot be zero");
         uint256 cost = getInfrastructureCost(id, buyAmount);
         require(inf.increaseInfrastructureFromMarket(id, buyAmount), "error buying Infrastructure");
-        tsy.spendBalance(id, cost);
+        require(tsy.spendBalance(id, cost), "error spending funds on infrastructure");
         emit InfrastructurePurchased(id, buyAmount, cost);
     }
 
@@ -314,9 +315,10 @@ contract InfrastructureMarketContract is Ownable {
     ///@notice this function will allow a nation owner to destroy infrastructure
     ///@param id this is the nation id of the nation destroying infrastructure
     ///@param amount this is the amount of infrastructure being destroyed
-    function destroyInfrastructure(uint256 id, uint256 amount) public {
+    function destroyInfrastructure(uint256 id, uint256 amount) public nonReentrant {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
+        require(amount > 0, "cannot be zero");
         uint256 currentInfrastructureAmount = inf.getInfrastructureCount(id);
         require(
             (currentInfrastructureAmount - amount) >= 0,
