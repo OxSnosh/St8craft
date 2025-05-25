@@ -329,7 +329,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     wonderscontract4 = await deploy("WondersContract4", { from: deployer, args: [], log: true });
     let deployedWondersContract4 = await ethers.getContractAt("WondersContract4", wonderscontract4.address);
 
-    messenger = await deploy("Messenger", { from: deployer, args: [countryminter.address], log: true });
+    messenger = await deploy("Messenger", { from: deployer, args: [], log: true });
     let deployedMessenger = await ethers.getContractAt("Messenger", messenger.address);
 
     console.log("✅ All contracts deployed successfully!");
@@ -1009,6 +1009,10 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         wonderscontract1.address,
         wonderscontract3.address,
         countryminter.address
+    )
+
+    await deployedMessenger.settings(
+        countryminter.address,
     )
 
     console.log("settings initiated");

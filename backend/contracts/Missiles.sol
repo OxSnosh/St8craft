@@ -13,13 +13,13 @@ import "./GroundBattle.sol";
 import "./KeeperFile.sol";
 import "./CountryParameters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title MissilesContract
 ///@author OxSnosh
 ///@dev this contract will allow a nation to purchase cruise missiles and nukes
 ///@dev this contract inherits from the openzeppelin ownable contract
-contract MissilesContract is Ownable {
+contract MissilesContract is Ownable, ReentrancyGuard {
     uint256 public cruiseMissileCost = 20000 * (10 ** 18);
     uint256 public defaultNukeCost = 500000 * (10 ** 18);
     uint256 public nukeCost;
@@ -148,7 +148,7 @@ contract MissilesContract is Ownable {
     ///@notice this function allows a nation owner to purchase cruise missiles
     ///@param amount is the amount of cruise missiles being purchased
     ///@param id is the nation id of the nation buying cruise missiles
-    function buyCruiseMissiles(uint256 amount, uint256 id) public {
+    function buyCruiseMissiles(uint256 amount, uint256 id) public nonReentrant{
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         uint256 techAmount = inf.getTechnologyCount(id);
@@ -219,8 +219,6 @@ contract MissilesContract is Ownable {
     function decreaseCruiseMissileCountFromNukeContract(
         uint256 id
     ) public onlyNukeContract {
-        console.log("decreasing cruise missiles");
-        console.log("id", id);
         uint256 cruiseMissiles = idToMissiles[id].cruiseMissiles;
         uint256 percentage = 35;
         bool falloutShelter = won1.getFalloutShelterSystem(id);
@@ -229,7 +227,11 @@ contract MissilesContract is Ownable {
         }
         uint256 cruiseMissilesToDecrease = ((cruiseMissiles * percentage) /
             100);
-        idToMissiles[id].cruiseMissiles -= cruiseMissilesToDecrease;
+        if (cruiseMissilesToDecrease >= cruiseMissiles) {
+            idToMissiles[id].cruiseMissiles = 0;
+        } else {
+            idToMissiles[id].cruiseMissiles -= cruiseMissilesToDecrease;
+        }
     }
 
     ///@dev this is a public function only callable from the air battle contact
@@ -257,7 +259,7 @@ contract MissilesContract is Ownable {
     ///@notice a nation must also have a nation strength of 150,000 or a manhattan project to purchase nukes
     ///@notice a nation owner can only purchase one nuke per day (2 with a weapons research center)
     ///@param id is the nation id of the nation purchasing nukes
-    function buyNukes(uint256 id) public {
+    function buyNukes(uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         uint256 techAmount = inf.getTechnologyCount(id);
@@ -270,7 +272,7 @@ contract MissilesContract is Ownable {
         bool manhattanProject = won2.getManhattanProject(id);
         require(
             nationStrength > 150000 || manhattanProject,
-            "nation strength too low"
+            "need 150,000 strength or manhattan project"
         );
         uint256 day = keep.getGameDay();
         uint256 nukesPurchasedToday = idToNukesPurchasedToday[id][day];
@@ -283,10 +285,10 @@ contract MissilesContract is Ownable {
             nukesPurchasedToday < maxNukesPerDay,
             "already purchased nuke today"
         );
+        uint256 cost = getNukeCost(id);
+        require(tsy.spendBalance(id, cost), "failed to spend balance on nuke");
         idToNukesPurchasedToday[id][day] += 1;
         idToMissiles[id].nuclearWeapons += 1;
-        uint256 cost = getNukeCost(id);
-        tsy.spendBalance(id, cost);
         emit NukePurchased(id);
     }
 
@@ -336,6 +338,10 @@ contract MissilesContract is Ownable {
     function decreaseNukeCountFromNukeContract(
         uint256 id
     ) public onlyNukeContract {
+        require(
+            idToMissiles[id].nuclearWeapons > 0,
+            "no nukes to launch"
+        );
         idToMissiles[id].nuclearWeapons -= 1;
     }
 
