@@ -23,7 +23,11 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
     InfrastructureContract inf;
     TreasuryContract tsy;
 
-    event LandPurchased(uint256 indexed id, uint256 indexed amount, uint256 indexed cost);
+    event LandPurchased(
+        uint256 indexed id,
+        uint256 indexed amount,
+        uint256 indexed cost
+    );
 
     event LandDestroyed(uint256 indexed id, uint256 indexed amount);
 
@@ -55,7 +59,10 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
         require(owner, "!nation owner");
         require(amount > 0, "cannot be zero");
         uint256 cost = getLandCost(id, amount);
-        require(inf.increaseLandCountFromMarket(id, amount), "error adding land");
+        require(
+            inf.increaseLandCountFromMarket(id, amount),
+            "error adding land"
+        );
         require(tsy.spendBalance(id, cost), "error spending funds on land");
         emit LandPurchased(id, amount, cost);
     }
@@ -66,7 +73,10 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
     ///@param id is the nation id of the nation buying land
     ///@param amount this is the amount of land being purchased
     ///@return uint256 this is the cost of the purchase
-    function getLandCost(uint256 id, uint256 amount) public view returns (uint256) {
+    function getLandCost(
+        uint256 id,
+        uint256 amount
+    ) public view returns (uint256) {
         uint256 costPerMile = getLandCostPerMile(id);
         uint256 cost = (costPerMile * amount);
         return cost;
@@ -108,9 +118,9 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
             costPerLevel = (400 + (currentLand * 75));
         }
         uint256 purchasePriceMultiplier = getLandPriceMultiplier(id);
-        uint256 adjustedCostPerMile = ((costPerLevel * purchasePriceMultiplier) /
-            100);
-        return adjustedCostPerMile * (10**18);
+        uint256 adjustedCostPerMile = ((costPerLevel *
+            purchasePriceMultiplier) / 100);
+        return adjustedCostPerMile * (10 ** 18);
     }
 
     ///@dev this function  will adjust the cost of land lower
@@ -137,8 +147,7 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
         return multiplier;
     }
 
-    
-    ///@dev this is a public function callable by the nation owner 
+    ///@dev this is a public function callable by the nation owner
     ///@dev this function will allow a nation owner to destroy land
     ///@notice this function will allow a nation owner to destroy land
     ///@param id this is the nation id of the nation destroying land
@@ -148,8 +157,11 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
         require(owner, "!nation owner");
         require(amount > 0, "cannot be zero");
         uint256 currentLandAmount = inf.getLandCount(id);
-        require((currentLandAmount - amount) >= 0, "not enough land");
-        require(inf.decreaseLandCountFromMarket(id, amount), "error removing land");
+        require(currentLandAmount >= amount, "not enough land");
+        require(
+            inf.decreaseLandCountFromMarket(id, amount),
+            "error removing land"
+        );
         emit LandDestroyed(id, amount);
     }
 }

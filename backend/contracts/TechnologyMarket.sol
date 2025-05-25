@@ -88,18 +88,21 @@ contract TechnologyMarketContract is Ownable, ReentrancyGuard {
     ///@param amount this is the amount of technology being purchased
     function buyTech(uint256 id, uint256 amount) public nonReentrant {
         uint256 initialLiteracy = crim.getLiteracy(id);
+        uint256 currentTechAmount = inf.getTechnologyCount(id);
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
         require(amount > 0, "cannot be zero");
         uint256 cost = getTechCost(id, amount);
-        require(inf.increaseTechnologyFromMarket(id, amount), "error adding tech");
+        require(
+            inf.increaseTechnologyFromMarket(id, amount),
+            "error adding tech"
+        );
         require(tsy.spendBalance(id, cost), "error spending funds on tech");
         uint256 finalLiteracy = crim.getLiteracy(id);
-        if(initialLiteracy < 90 && finalLiteracy >= 90){
+        if (initialLiteracy < 90 && finalLiteracy >= 90) {
             res.triggerForResources(id);
         }
-        uint256 currentTechAmount = inf.getTechnologyCount(id);
-        if((currentTechAmount) < 10 && (currentTechAmount + amount) >= 10){
+        if ((currentTechAmount) < 10 && (currentTechAmount + amount) >= 10) {
             res.triggerForResources(id);
         }
         emit TechPurchased(id, amount, cost);
@@ -120,9 +123,9 @@ contract TechnologyMarketContract is Ownable, ReentrancyGuard {
     }
 
     ///@dev this is a public view function that will return the cost a nation has to pay for technology per level
-    ///@notice this function willreturn the cost a nation has to pay for technology per level
+    ///@notice this function will return the cost a nation has to pay for technology per level
     ///@param id is the nation id of the nation being queried
-    ///@return uint256 is the cost a nation has to pey for technology per level
+    ///@return uint256 is the cost a nation has to pay for technology per level
     function getTechCostPerLevel(uint256 id) public view returns (uint256) {
         uint256 currentTechAmount = inf.getTechnologyCount(id);
         uint256 baseCostPerLevel;
@@ -227,8 +230,11 @@ contract TechnologyMarketContract is Ownable, ReentrancyGuard {
         require(owner, "!nation owner");
         require(amount > 0, "cannot be zero");
         uint256 currentTech = inf.getTechnologyCount(id);
-        require((currentTech - amount) >= 0, "not enough tech");
-        require(inf.decreaseTechnologyFromMarket(id, amount), "error removing tech");
+        require(currentTech >= amount, "not enough tech");
+        require(
+            inf.decreaseTechnologyFromMarket(id, amount),
+            "error removing tech"
+        );
         emit TechDestroyed(id, amount);
     }
 }

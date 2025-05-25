@@ -84,13 +84,22 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
     ///@notice this function will allow a nation owner to purchase infrastructure
     ///@param id is the nation id of the nation purchasing infrastructure
     ///@param buyAmount is the amount of infrastructure being purchased
-    function buyInfrastructure(uint256 id, uint256 buyAmount) public nonReentrant {
+    function buyInfrastructure(
+        uint256 id,
+        uint256 buyAmount
+    ) public nonReentrant {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
         require(buyAmount > 0, "cannot be zero");
         uint256 cost = getInfrastructureCost(id, buyAmount);
-        require(inf.increaseInfrastructureFromMarket(id, buyAmount), "error buying Infrastructure");
-        require(tsy.spendBalance(id, cost), "error spending funds on infrastructure");
+        require(
+            inf.increaseInfrastructureFromMarket(id, buyAmount),
+            "error buying Infrastructure"
+        );
+        require(
+            tsy.spendBalance(id, cost),
+            "error spending funds on infrastructure"
+        );
         emit InfrastructurePurchased(id, buyAmount, cost);
     }
 
@@ -318,16 +327,23 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
     ///@notice this function will allow a nation owner to destroy infrastructure
     ///@param id this is the nation id of the nation destroying infrastructure
     ///@param amount this is the amount of infrastructure being destroyed
-    function destroyInfrastructure(uint256 id, uint256 amount) public nonReentrant {
+    function destroyInfrastructure(
+        uint256 id,
+        uint256 amount
+    ) public nonReentrant {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
         require(amount > 0, "cannot be zero");
         uint256 currentInfrastructureAmount = inf.getInfrastructureCount(id);
+
         require(
-            (currentInfrastructureAmount - amount) >= 0,
+            currentInfrastructureAmount >= amount,
             "not enough infrastructure"
         );
-        require(inf.decreaseInfrastructureFromMarket(id, amount), "error destroying Infrastructure");
+        require(
+            inf.decreaseInfrastructureFromMarket(id, amount),
+            "error destroying Infrastructure"
+        );
         emit InfrastructureDestroyed(id, amount);
     }
 }
