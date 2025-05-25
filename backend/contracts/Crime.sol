@@ -57,7 +57,7 @@ contract CrimeContract is Ownable {
 
     ///@dev this is a public view function that will calculate the number of criminals in a nations population
     ///@notice this will calulate the number of criminals in a nations population
-    ///@notice criminals will rduce the amount of your tax paying citizens
+    ///@notice criminals will reduce the amount of your tax paying citizens
     ///@notice you will also lose population happiness as your criminal population increases
     ///@notice jails, labor camps, border walls and prisons will reduce the number of criminals in your nation
     ///@param id this is the nation ID for the nation being queried
@@ -160,7 +160,7 @@ contract CrimeContract is Ownable {
 
     ///@dev this is a public view function that returns the literace rate of the nation
     ///@notice this function will return a nations literacy rate
-    ///@param id is the nation ID of the countey being queried
+    ///@param id is the nation ID of the country being queried
     ///@return uint256 is the literacy rate of the nation
     ///@notice literacy is increased by the amount of technology of a nation as well as the amount of schools and universities
     ///@notice increased literacy will increase crime prevention score
@@ -190,7 +190,7 @@ contract CrimeContract is Ownable {
     }
 
     ///@dev this function is a public view function that will calculate the amount of points that a nations literace rate will add to the crime prevention score
-    ///@notice literaacy will increse the crime prevention score of a nation
+    ///@notice literacy will increse the crime prevention score of a nation
     ///@notice crime prevention score points added will be 80% of literacy (max of 80 points added)
     ///@param id is the nation ID of the nation being queried
     ///@return uint256 is the amount of points being added to the crime prevention score
@@ -226,7 +226,7 @@ contract CrimeContract is Ownable {
         return improvementPoints;
     }
 
-    ///@dev this a public vuew function that will return the multiplier used to adjust the affect that a nations tax rate will have on crime prevention score
+    ///@dev this a public view function that will return the multiplier used to adjust the affect that a nations tax rate will have on crime prevention score
     ///@notice the higher a nations tax rate the lower the multiplier will be and the lower the crime prevention score will be
     ///@param id is the nation ID of the nation being queried
     ///@return uint256 is the munliplier used to adjust the points added to crime prevention score from taxes and improvements
@@ -273,7 +273,7 @@ contract CrimeContract is Ownable {
     }
 
     ///@dev this is a public view function that will add points to crime prevention score based on government type
-    ///@notice different govermnet types will affect a nations crime prevenetion score differently
+    ///@notice different governmet types will affect a nations crime prevenetion score differently
     ///@param id is the nation ID of the nation being queried
     ///@return uint256 is the points added to crime prevention score from governemtn type
     function getPointsFromGovernmentType(
@@ -331,7 +331,7 @@ contract CrimeContract is Ownable {
     }
 
     ///@dev this is a public view function that will add points to crime prevention score based on population
-    ///@notice increased population will reduce croime prevention score
+    ///@notice increased population will reduce crime prevention score
     ///@param id is the nation id of the nation being queries
     ///@return uint256 is the amount of points being added to crime prevention score
     function getPointsFromPopulation(uint256 id) public view returns (uint256) {
