@@ -20,6 +20,7 @@ contract MilitaryContract is Ownable {
     KeeperContract keep;
 
     struct Military {
+        bool initialized;
         uint256 defconLevel;
         uint256 threatLevel;
         bool warPeacePreference;
@@ -61,7 +62,8 @@ contract MilitaryContract is Ownable {
     ///@dev this function is a public function only callable from the country minter contract
     ///@notice this function will allow allow a nation owner to reset their defcon and threat level and toggle their war peace preference
     function generateMilitary(uint256 id) public onlyCountryMinter {
-        Military memory newMilitary = Military(5, 1, false, 0);
+        require(idToMilitary[id].initialized == false, "Military already initialized");
+        Military memory newMilitary = Military(true, 5, 1, false, 0);
         idToMilitary[id] = newMilitary;
     }
 
@@ -87,11 +89,20 @@ contract MilitaryContract is Ownable {
 
     ///@dev this function will only be callable from the Spy contract
     ///@dev this function will allow a successful spy operation to update the defcon level
-    ///@notice this function will allow a succesful spy attack to update the defcon level
+    ///@notice this function will allow a successful spy attack to update the defcon level
     ///@param id is the nation id that was attacked and getting their defcon reset
     ///@param newLevel is the new defcon level being set during the attack
     function setDefconLevelFromSpyContract(uint256 id, uint256 newLevel) public onlySpyContract {
+        require(
+            newLevel == 1 ||
+                newLevel == 2 ||
+                newLevel == 3 ||
+                newLevel == 4 ||
+                newLevel == 5,
+            "New DEFCON level is not an integer between 1 and 5"
+        );
         idToMilitary[id].defconLevel = newLevel;
+        emit DefconLevelUpdated(id, newLevel);
     }
 
     ///@dev this is a public function only callable by the nation owner
@@ -116,19 +127,28 @@ contract MilitaryContract is Ownable {
 
     ///@dev this function will only be callable from the Spy contract
     ///@dev this function will allow a successful spy operation to update the threat level
-    ///@notice this function will allow a succesful spy attack to update the threat level
+    ///@notice this function will allow a successful spy attack to update the threat level
     ///@param id is the nation id that was attacked and getting their threat level reset
     ///@param newLevel is the new threat level being set during the attack
     function setThreatLevelFromSpyContract(uint256 id, uint256 newLevel)
         public
         onlySpyContract
     {
+        require(
+            newLevel == 1 ||
+                newLevel == 2 ||
+                newLevel == 3 ||
+                newLevel == 4 ||
+                newLevel == 5,
+            "New threat level is not an integer between 1 and 5"
+        );
         idToMilitary[id].threatLevel = newLevel;
+        emit ThreatLevelUpdated(id, newLevel);
     }
 
     ///@dev this function is a public function only callable from the nation owner
-    ///@dev this function will allow a nation to toggle their prefernece for peace or war
-    ///@notice this function will allow a nation to toggle their prefernece for peace or war
+    ///@dev this function will allow a nation to toggle their preference for peace or war
+    ///@notice this function will allow a nation to toggle their preference for peace or war
     ///@param id is the nation id of the nation toggling their preference
     function toggleWarPeacePreference(uint256 id) public {
         bool isOwner = mint.checkOwnership(id, msg.sender);
@@ -171,13 +191,13 @@ contract MilitaryContract is Ownable {
         bool war = idToMilitary[id].warPeacePreference;
         uint256 daysPeaceToggled = idToMilitary[id].dayPeaceToggled;
         uint256 gameDay = keep.getGameDay();
-        uint256 daysReamaining;
+        uint256 daysRemaining;
         if (war == true) {
-            daysReamaining = 7 - (gameDay - daysPeaceToggled);
+            daysRemaining = 7 - (gameDay - daysPeaceToggled);
         } else {
-            daysReamaining = 0;
+            daysRemaining = 0;
         }
-        return (war, daysReamaining);
+        return (war, daysRemaining);
     }
 
     function getDaysInPeaceMode(uint256 id) public view returns (uint256) {
