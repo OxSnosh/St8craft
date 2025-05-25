@@ -14,9 +14,9 @@ import "./GroundBattle.sol";
 import "./KeeperFile.sol";
 import "./CountryParameters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract SpyContract is Ownable {
+contract SpyContract is Ownable, ReentrancyGuard {
     uint256 public spyCost = 100000 * (10**18);
     address public treasury;
     address public spyOperations;
@@ -66,7 +66,7 @@ contract SpyContract is Ownable {
     ///@notice you cannot buy more spies than the maximum amount for your nation
     ///@param amount is the amount of spies being purchased
     ///@param id is the nation id of the nation buying spies
-    function buySpies(uint256 amount, uint256 id) public {
+    function buySpies(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         uint256 maxSpyCount = getMaxSpyCount(id);
@@ -81,8 +81,10 @@ contract SpyContract is Ownable {
             balance >= purchasePrice,
             "insufficient balance to purchase spies"
         );
+        require(TreasuryContract(treasury).spendBalance(id, purchasePrice), 
+            "failed to spend balance"
+        );
         idToSpies[id] += amount;
-        TreasuryContract(treasury).spendBalance(id, purchasePrice);
         emit SpiesPurchased(id, amount);
     }
 
@@ -119,7 +121,7 @@ contract SpyContract is Ownable {
         require(isOwner, "!nation owner");
         uint256 spyCount = idToSpies[id];
         require(
-            (spyCount - amount) >= 0,
+            spyCount >= amount,
             "not enough spies to decommission that many"
         );
         idToSpies[id] -= amount;
@@ -130,6 +132,8 @@ contract SpyContract is Ownable {
     ///@notice this function will allow the spy contract to decrease the number of spies of an nation that is lost by the attacker during a spy attack
     ///@param id is the nation id of the nation losing their spy when the attack fails
     function decreaseAttackerSpyCount(uint256 id) public onlySpyOperations {
+        uint256 spyCount = idToSpies[id];
+        require(spyCount > 0, "no spies to lose");
         idToSpies[id] -= 1;
     }
 
@@ -141,6 +145,8 @@ contract SpyContract is Ownable {
         uint256 amount,
         uint256 id
     ) public onlySpyOperations {
+        uint256 spyCount = idToSpies[id];
+        require(spyCount >= amount, "not enough spies to lose");
         idToSpies[id] -= amount;
     }
 
@@ -151,7 +157,6 @@ contract SpyContract is Ownable {
     function getSpyCount(
         uint256 countryId
     ) public view returns (uint256 count) {
-        uint256 spyAmount = idToSpies[countryId];
-        return spyAmount;
+        return idToSpies[countryId];
     }
 }

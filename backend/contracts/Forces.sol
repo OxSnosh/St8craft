@@ -10,12 +10,13 @@ import "./War.sol";
 import "./GroundBattle.sol";
 import "./CountryParameters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title ForcesContract
 ///@author OxSnosh
 ///@dev this contract inherits from the openzeppelin Ownable contract
 ///@notice this contract allows a nation owner to purchase soldiers, tanks and spies
-contract ForcesContract is Ownable {
+contract ForcesContract is Ownable, ReentrancyGuard {
     // uint256 public spyCost = 100000;
     address public countryMinter;
     address public treasuryAddress;
@@ -213,7 +214,7 @@ contract ForcesContract is Ownable {
     ///@notice this function will allow a nation owner to purchase soldiers
     ///@param amount is the amount of soldiers being purchased
     ///@param id is the nation id of the nation being queried
-    function buySoldiers(uint256 amount, uint256 id) public {
+    function buySoldiers(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         uint256 populationCount = inf.getTotalPopulationCount(id);
@@ -230,9 +231,11 @@ contract ForcesContract is Ownable {
             balance >= purchasePrice,
             "insufficient funds for soldier purchase"
         );
+        require(TreasuryContract(treasuryAddress).spendBalance(id, purchasePrice), 
+            "failed to spend balance"
+        );
         idToForces[id].numberOfSoldiers += amount;
         idToForces[id].defendingSoldiers += amount;
-        TreasuryContract(treasuryAddress).spendBalance(id, purchasePrice);
         emit SoldiersPurchased(id, amount);
     }
 
@@ -323,7 +326,7 @@ contract ForcesContract is Ownable {
         uint256 tanksToDeploy,
         uint256 id,
         uint256 warId
-    ) public {
+    ) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         uint256 totalSoldiers = getSoldierCount(id);
@@ -542,7 +545,7 @@ contract ForcesContract is Ownable {
     ///@notice factories reduce the cost of tanks 5% per factory
     ///@param amount is the number of tanks being purchased
     ///@param id is the nation ID of the nation purchasing tanks
-    function buyTanks(uint256 amount, uint256 id) public {
+    function buyTanks(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         uint256 maxTanks = getMaxTankCount(id);
@@ -554,10 +557,12 @@ contract ForcesContract is Ownable {
         uint256 costPerTank = getTankCost(id);
         uint256 cost = (costPerTank * amount);
         uint256 balance = TreasuryContract(treasuryAddress).checkBalance(id);
-        require(balance >= cost);
+        require(balance >= cost, "insufficient funds for tank purchase");
+        require(TreasuryContract(treasuryAddress).spendBalance(id, cost), 
+            "failed to spend balance"
+        );
         idToForces[id].numberOfTanks += amount;
         idToForces[id].defendingTanks += amount;
-        TreasuryContract(treasuryAddress).spendBalance(id, cost);
         emit TanksPurchased(id, amount);
     }
 
