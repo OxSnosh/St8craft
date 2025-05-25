@@ -18,11 +18,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 ///@dev this contract inherits from chainlink VRF
 ///@dev this contract inherits from oepnzeppelin ownable
 contract ResourcesContract is VRFConsumerBaseV2, Ownable {
-    uint256 public resourcesLength = 21;
     uint256[] private s_randomWords;
-    uint256[] public tradingPartners;
-    uint256[] public proposedTrades;
-    uint256[] public trades;
     address public infrastructure;
     address public improvements2;
     address public countryMinter;
@@ -47,113 +43,107 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     struct Resources1 {
         bool aluminium;
         //Aluminum
-        //DONE //Increases soldier efficiency +20%,
-        //DONE //lowers infrastructure purchase cost -7%, and
-        //DONE //lowers aircraft purchase costs -8%.
+        //Increases soldier efficiency +20%,
+        //lowers infrastructure purchase cost -7%, and
+        //lowers aircraft purchase costs -8%.
         bool cattle;
         //Cattle
-        //DONE //Increases number of citizens +5%
-        //DONE //and lowers land purchase cost -10%.
+        //Increases number of citizens +5%
+        //and lowers land purchase cost -10%.
         bool coal;
         //Coal
-        //DONE //Increases the purchased land area of a nation by 15%,
-        //DONE //increases soldier efficiency +8%,
-        //DONE //and lowers infrastructure purchase cost -4%.
+        //Increases the purchased land area of a nation by 15%,
+        //increases soldier efficiency +8%,
+        //and lowers infrastructure purchase cost -4%.
         bool fish;
         //Fish
-        //DONE //Increases number of citizens +8%
-        //DOME //and lowers land purchase cost -5%.
+        //Increases number of citizens +8%
+        //and lowers land purchase cost -5%.
         bool furs;
         //Furs
-        //DONE //Increases citizen's daily income +$3.50
-        //and triples the natural growth of a nation.
+        //Increases citizen's daily income +$3.50
         bool gems;
         //Gems
-        //DONE //Increases citizen's daily income +$1.50
-        //DONE //and increases population happiness +3.
+        //Increases citizen's daily income +$1.50
+        //and increases population happiness +3.
         bool gold;
         //Gold
-        //DONE //Increases citizen's daily income +$3.00
-        //DONE //and lowers technology cost by 5%.
+        //Increases citizen's daily income +$3.00
+        //and lowers technology cost by 5%.
         bool iron;
         //Iron
-        //DONE //Lowers soldier purchase cost -$3.00,
-        //DONE //lowers infrastructure upkeep costs -10%,
-        //DONE //lowers infrastructure purchase costs -5%,
-        //DONE //and lowers tank upkeep costs -5%.
+        //Lowers soldier purchase cost -$3.00,
+        //lowers infrastructure upkeep costs -10%,
+        //lowers infrastructure purchase costs -5%,
+        //and lowers tank upkeep costs -5%.
         bool lead;
         //Lead
-        //DONE //Lowers cruise missile and nuclear weapon purchase cost and upkeep cost -20%,
-        //DONE //lowers aircraft upkeep cost -25%,
+        //Lowers cruise missile and nuclear weapon purchase cost and upkeep cost -20%,
+        //lowers aircraft upkeep cost -25%,
         //lowers tank purchase and upkeep costs -8%,
-        //DONE //lowers soldier upkeep cost -15%,
-        //DONE //reduces environment penalties for owning nuclear weapons by 50%,
-        //DONE //and lowers all navy vessel upkeep cost -20%.
+        //lowers soldier upkeep cost -15%,
+        //reduces environment penalties for owning nuclear weapons by 50%,
+        //and lowers all navy vessel upkeep cost -20%.
         bool lumber;
         //Lumber
-        //DONE //Lowers infrastructure purchase cost -6%
-        //DONE //and lowers infrastructure upkeep costs -8%.
+        //Lowers infrastructure purchase cost -6%
+        //and lowers infrastructure upkeep costs -8%.
         bool marble;
         //Marble
-        //DONE //Lowers infrastructure purchase cost -10%.
+        //Lowers infrastructure purchase cost -10%.
     }
 
     struct Resources2 {
         bool oil;
         //Oil
-        //DONE //Lowers soldier purchase cost -$3.00,
-        //DONE //increases population happiness +2,
-        //DONE //increases soldier efficiency +10%,
-        //DONE //lowers tank upkeep cost -5%,
-        //DONE //lowers aircraft purchase cost -4%,
-        //DONE //and lowers all navy vessel upkeep cost -10%.
-        //
+        //Lowers soldier purchase cost -$3.00,
+        //increases population happiness +2,
+        //increases soldier efficiency +10%,
+        //lowers tank upkeep cost -5%,
+        //lowers aircraft purchase cost -4%,
+        //and lowers all navy vessel upkeep cost -10%.
         bool pigs;
         //Pigs
-        //DONE //Lowers soldier upkeep cost -$0.50,
-        //DONE //increases soldier efficiency +15%,
-        //DONE //and increases number of citizens +4%.
+        //Lowers soldier upkeep cost -$0.50,
+        //increases soldier efficiency +15%,
+        //and increases number of citizens +4%.
         bool rubber;
         //Rubber
-        //DONE //Increases purchased land area of a nation by 20%,
-        //DONE //lowers land purchase cost -10%,
-        //DONE //triples the value of land when selling (from $100 to $300),
-        //DONE //lowers infrastructure purchase cost -3%,
-        //DONE //and lowers aircraft purchase cost -4%.
+        //Increases purchased land area of a nation by 20%,
+        //lowers land purchase cost -10%,
+        //triples the value of land when selling (from $100 to $300),
+        //lowers infrastructure purchase cost -3%,
+        //and lowers aircraft purchase cost -4%.
         bool silver;
         //Silver
-        //DONE //Increases citizen's daily income +$2.00
-        //DONE //and increases population happiness +2.
+        //Increases citizen's daily income +$2.00
+        //and increases population happiness +2.
         bool spices;
         //Spices
-        //DONE //Increases the purchased land area of a nation by 8%
-        //DONE //and increases population happiness +2.
+        //Increases the purchased land area of a nation by 8%
+        //and increases population happiness +2.
         bool sugar;
         //Sugar
-        //DONE //Increases number of citizens +3%,
-        //DONE //and increases population happiness +1.
+        //Increases number of citizens +3%,
+        //and increases population happiness +1.
         bool uranium;
         //Uranium
-        //DONE //Reduces infrastructure upkeep cost -3%.
-        //DONE //Allow nations to develop nuclear weapons
-        //If a nations government preference favors nuclear technology for the use of nuclear
-        //power plants but does not support nuclear weapons then the nation will receive +$3.00
-        //per citizen and +$0.15 for every level of tech purchased up to level 30 but loses -1
-        //population happiness.
-        //DONE //If a nation owns nuclear weapons but does not have uranium the cost to maintain nukes
+        //Reduces infrastructure upkeep cost -3%.
+        //Allow nations to develop nuclear weapons
+        //If a nation owns nuclear weapons but does not have uranium the cost to maintain nukes
         //is doubled.
-        //DONE //Lowers Submarine and Aircraft Carrier navy vessel purchase and upkeep cost -5%.
+        //Lowers Submarine and Aircraft Carrier navy vessel purchase and upkeep cost -5%.
         bool water;
         //Water
-        //DONE //Increases number of citizens per mile before population unhappiness by 50,
-        //DONE //increases population happiness +3,
-        //DONE //and improves a nation's environment by 1.
+        //Increases number of citizens per mile before population unhappiness by 50,
+        //increases population happiness +3,
+        //and improves a nation's environment by 1.
         bool wheat;
         //Wheat
-        //DONE //Increases number of citizens +8%.
+        //Increases number of citizens +8%.
         bool wine;
         //Wine
-        //DONE //Increases population happiness +3.
+        //Increases population happiness +3.
     }
 
     mapping(uint256 => Resources1) public idToResources1;
@@ -260,7 +250,7 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
         );
         idToResources1[id] = newResources1;
         idToResources2[id] = newResources2;
-        fulfillRequest(id);  
+        fulfillRequest(id);
     }
 
     ///@dev this is the function that will call the chainlink vrf contract to return random numbers
@@ -530,13 +520,13 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
         uint256[] storage partnerProposedTrades = idToProposedTradingPartners[
             partnerId
         ];
-        for (uint i = 0; i <= nationProposedTrades.length; i++) {
+        for (uint i = 0; i < nationProposedTrades.length; i++) {
             if (nationProposedTrades[i] == partnerId) {
                 nationProposedTrades[i] = nationProposedTrades[
                     nationProposedTrades.length - 1
                 ];
                 nationProposedTrades.pop();
-                for (uint j = 0; j <= partnerProposedTrades.length; j++) {
+                for (uint j = 0; j < partnerProposedTrades.length; j++) {
                     if (partnerProposedTrades[j] == nationId) {
                         partnerProposedTrades[j] = partnerProposedTrades[
                             partnerProposedTrades.length - 1
@@ -1053,52 +1043,52 @@ contract BonusResourcesContract is Ownable {
         bool beer;
         //beer
         //requires Water, Wheat, Lumber, Aluminium
-        // //DONE //Increases population happiness + 2.
+        //Increases population happiness + 2.
         bool steel;
         //steel
-        // //DONE //reduces infrastructure cost -2%.
-        // //DONE //Lowers all vessel purchase costs -15%
+        //reduces infrastructure cost -2%.
+        //Lowers all vessel purchase costs -15%
         //requires Coal and Iron
         bool construction;
         //construction
-        // //DONE //Reduces infrastructure cost -5% and
-        // //DONE //raises the aircraft limit +10.
+        //Reduces infrastructure cost -5% and
+        //raises the aircraft limit +10.
         //requires Lumber, Iron, Marble, Aluminium, tech > 5
         bool fastFood;
         //fast food
-        // //DONE //Increases population happiness + 2.
+        //Increases population happiness + 2.
         //requires Cattle, Sugar, Spices, Pigs
         bool fineJewelry;
         //fine jewelry
-        // //DONE //Increases population happiness + 3.
+        //Increases population happiness + 3.
         //requires Gold, Silver, Gems, Coal
         bool scholars;
         //scholars
-        // //DONE //increases population income +$3.00
+        //increases population income +$3.00
         //requires literacy rate > 90%, lumber, lead
         bool asphalt;
         //asphalt
-        // //DONE //Lowers infrastructure upkeep cost -5%.
+        //Lowers infrastructure upkeep cost -5%.
         //requires Construction, Oil, Rubber
         bool automobiles;
         //automobiles
-        // //DONE //Increases population happiness +3.
+        //Increases population happiness +3.
         //requires Asphalt, Steel
         bool affluentPopulation;
         //affluent population
-        //DONE //Increases number of citizens +5%.
+        //Increases number of citizens +5%.
         //requires fineJewelry, Fish, Furs, Wine
         bool microchips;
         //microchips
-        // //DONE //reduces tech cost -8%
-        // //DONE //increases population happiness +2
-        // //DONE //lowers frigate, destroyer, submarine, aircraft carrier upkeep cost -10%
+        //reduces tech cost -8%
+        //increases population happiness +2
+        //lowers frigate, destroyer, submarine, aircraft carrier upkeep cost -10%
         //requires Gold, Lead, Oil, tech > 10
         bool radiationCleanup;
         //radiation cleanup
         //reduces nuclear anarchy effects by 1 day
-        // //DONE //Improves a nation's environment by 1
-        // //DONE //Reduces global radiation for your nation by 50%
+        //Improves a nation's environment by 1
+        //Reduces global radiation for your nation by 50%
         //requires Construction, Microchips, Steel and Technology > 15
     }
 
