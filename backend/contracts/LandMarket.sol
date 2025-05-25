@@ -53,7 +53,7 @@ contract LandMarketContract is Ownable {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
         uint256 cost = getLandCost(id, amount);
-        inf.increaseLandCountFromMarket(id, amount);
+        require(inf.increaseLandCountFromMarket(id, amount), "error adding land");
         tsy.spendBalance(id, cost);
         emit LandPurchased(id, amount, cost);
     }
@@ -146,7 +146,7 @@ contract LandMarketContract is Ownable {
         require(owner, "!nation owner");
         uint256 currentLandAmount = inf.getLandCount(id);
         require((currentLandAmount - amount) >= 0, "not enough land");
-        inf.decreaseLandCountFromMarket(id, amount);
+        require(inf.decreaseLandCountFromMarket(id, amount), "error removing land");
         emit LandDestroyed(id, amount);
     }
 }

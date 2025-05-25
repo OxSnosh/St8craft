@@ -88,7 +88,7 @@ contract InfrastructureMarketContract is Ownable {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
         uint256 cost = getInfrastructureCost(id, buyAmount);
-        inf.increaseInfrastructureFromMarket(id, buyAmount);
+        require(inf.increaseInfrastructureFromMarket(id, buyAmount), "error buying Infrastructure");
         tsy.spendBalance(id, cost);
         emit InfrastructurePurchased(id, buyAmount, cost);
     }
@@ -322,7 +322,7 @@ contract InfrastructureMarketContract is Ownable {
             (currentInfrastructureAmount - amount) >= 0,
             "not enough infrastructure"
         );
-        inf.decreaseInfrastructureFromMarket(id, amount);
+        require(inf.decreaseInfrastructureFromMarket(id, amount), "error destroying Infrastructure");
         emit InfrastructureDestroyed(id, amount);
     }
 }

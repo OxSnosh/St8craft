@@ -90,7 +90,7 @@ contract TechnologyMarketContract is Ownable {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
         uint256 cost = getTechCost(id, amount);
-        inf.increaseTechnologyFromMarket(id, amount);
+        require(inf.increaseTechnologyFromMarket(id, amount), "error adding tech");
         tsy.spendBalance(id, cost);
         uint256 finalLiteracy = crim.getLiteracy(id);
         if(initialLiteracy < 90 && finalLiteracy >= 90){
@@ -225,7 +225,7 @@ contract TechnologyMarketContract is Ownable {
         require(owner, "!nation owner");
         uint256 currentTech = inf.getTechnologyCount(id);
         require((currentTech - amount) >= 0, "not enough tech");
-        inf.decreaseTechnologyFromMarket(id, amount);
+        require(inf.decreaseTechnologyFromMarket(id, amount), "error removing tech");
         emit TechDestroyed(id, amount);
     }
 }
