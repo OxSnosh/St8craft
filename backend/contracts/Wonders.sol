@@ -6,6 +6,7 @@ import "./Infrastructure.sol";
 import "./Improvements.sol";
 import "./Forces.sol";
 import "./CountryMinter.sol";
+import "./Resources.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
@@ -470,7 +471,7 @@ contract WondersContract1 is Ownable, ReentrancyGuard {
     ///@dev this function will allow a nation owner to delete a wonder
     ///@dev this function is only callable by a nation owner
     ///@notice this funtion will allow a nation owner to delete a wonder
-    ///@param countryId is the nation deleting the woner
+    ///@param countryId is the nation deleting the wonder
     /**@param wonderId is the id of the wonder
      * 1. agricultrual development program
      * 2. air defense network
@@ -686,6 +687,7 @@ contract WondersContract2 is Ownable, ReentrancyGuard {
     address public wonderContract3Address;
     address public wonderContract4Address;
     address public countryMinter;
+    address public resources;
     uint256 public greatMonumentCost = 35000000 * (10**18);
     uint256 public greatTempleCost = 35000000 * (10**18);
     uint256 public greatUniversityCost = 35000000 * (10**18);
@@ -697,6 +699,7 @@ contract WondersContract2 is Ownable, ReentrancyGuard {
     uint256 public miningIndustryConsortiumCost = 25000000 * (10**18);
 
     CountryMinter mint;
+    ResourcesContract res;
 
     struct Wonders2 {
         bool initialized;
@@ -763,7 +766,8 @@ contract WondersContract2 is Ownable, ReentrancyGuard {
         address _wonders1,
         address _wonders3,
         address _wonders4,
-        address _countryMinter
+        address _countryMinter,
+        address _resources
     ) public onlyOwner {
         treasuryAddress = _treasury;
         infrastructureAddress = _infrastructure;
@@ -772,6 +776,8 @@ contract WondersContract2 is Ownable, ReentrancyGuard {
         wonderContract4Address = _wonders4;
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
+        resources = _resources;
+        res = ResourcesContract(_resources);
     }
 
     modifier onlyCountryMinter() {
@@ -859,15 +865,15 @@ contract WondersContract2 is Ownable, ReentrancyGuard {
     ///@notice this function allows a nation owner to purchase the wonders in this contract
     ///@param countryId is the nationId of the country purchasing a wonder
     /**@param wonderId is the id of the wonder
-     * 1. great monumnet
+     * 1. great monument
      * 2. great temple
      * 3. great university
      * 4. hidden nuclear missile silo
      * 5. interceptor missile system
-     * 6. internat
+     * 6. internet
      * 7. interstate system
      * 8. manhattan project
-     * 9. minimg industry consortium
+     * 9. mining industry consortium
     */
     function buyWonder2(uint256 countryId, uint256 wonderId) public nonReentrant {
         bool isOwner = mint.checkOwnership(countryId, msg.sender);
@@ -933,7 +939,7 @@ contract WondersContract2 is Ownable, ReentrancyGuard {
             ).getStrategicDefenseInitiative(countryId);
             require(
                 strategicDefenseInitiative == true,
-                "Strategic Defense Inititive required to purchase"
+                "Strategic Defense Initiative required to purchase"
             );
             uint256 techAmount = InfrastructureContract(infrastructureAddress)
                 .getTechnologyCount(countryId);
@@ -982,6 +988,8 @@ contract WondersContract2 is Ownable, ReentrancyGuard {
             uint256 techAmount = InfrastructureContract(infrastructureAddress)
                 .getTechnologyCount(countryId);
             require(techAmount >= 300, "Must have 300 Technology to purchase");
+            bool uranium = res.viewUranium(countryId);
+            require(uranium == true, "Requires uranium to purchase");
             idToWonders2[countryId].manhattanProject = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
             require(TreasuryContract(treasuryAddress).spendBalance(
@@ -1025,17 +1033,17 @@ contract WondersContract2 is Ownable, ReentrancyGuard {
     ///@dev this function will allow a nation owner to delete a wonder
     ///@dev this function is only callable by a nation owner
     ///@notice this funtion will allow a nation owner to delete a wonder
-    ///@param countryId is the nation deleting the woner
+    ///@param countryId is the nation deleting the wonder
     /**@param wonderId is the id of the wonder
-     * 1. great monumnet
+     * 1. great monument
      * 2. great temple
      * 3. great university
      * 4. hidden nuclear missile silo
      * 5. interceptor missile system
-     * 6. internat
+     * 6. internet
      * 7. interstate system
      * 8. manhattan project
-     * 9. minimg industry consortium
+     * 9. mining industry consortium
     */
     function deleteWonder2(uint256 countryId, uint256 wonderId) public nonReentrant {
         bool isOwner = mint.checkOwnership(countryId, msg.sender);
@@ -1227,6 +1235,7 @@ contract WondersContract3 is Ownable, ReentrancyGuard {
     address public wonderContract4Address;
     address public forces;
     address public countryMinter;
+    address public resources;
     uint256 public movieIndustryCost = 26000000 * (10**18);
     uint256 public nationalCemetaryCost = 150000000 * (10**18);
     uint256 public nationalEnvironmentOfficeCost = 100000000 * (10**18);
@@ -1239,6 +1248,7 @@ contract WondersContract3 is Ownable, ReentrancyGuard {
 
     ForcesContract frc;
     CountryMinter mint;
+    ResourcesContract res;
 
     struct Wonders3 {
         bool initialized;
@@ -1281,7 +1291,6 @@ contract WondersContract3 is Ownable, ReentrancyGuard {
         //national wonder upkeep -5%,
         //and improvement upkeep -5%.
         //Requires 12,000 infrastructure, 1,000 technology, and a Uranium resource to build.
-        //Nations that develop the Nuclear Power Plant must keep their government position on nuclear weapons set to option 2 or 3.
         bool nuclearPowerPlant;
         //Pentagon -
         //$30,000,000 -
@@ -1319,7 +1328,8 @@ contract WondersContract3 is Ownable, ReentrancyGuard {
         address _wonders1,
         address _wonders2,
         address _wonders4,
-        address _countryMinter
+        address _countryMinter,
+        address _resources
     ) public onlyOwner {
         treasuryAddress = _treasuryAddress;
         infrastructureAddress = _infrastructureAddress;
@@ -1330,6 +1340,8 @@ contract WondersContract3 is Ownable, ReentrancyGuard {
         wonderContract4Address = _wonders4;
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
+        resources = _resources;
+        res = ResourcesContract(_resources);
     }
 
     modifier onlyCountryMinter() {
@@ -1522,7 +1534,8 @@ contract WondersContract3 is Ownable, ReentrancyGuard {
                 infrastructureAmount >= 12000,
                 "Must have 12000 Infrastructure to purchase"
             );
-            //require Uranium
+            bool uranium = res.viewUranium(countryId);
+            require(uranium == true, "Requires uranium to purchase");
             idToWonders3[countryId].nuclearPowerPlant = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
             require(TreasuryContract(treasuryAddress).spendBalance(
@@ -1595,7 +1608,7 @@ contract WondersContract3 is Ownable, ReentrancyGuard {
     ///@dev this function will allow a nation owner to delete a wonder
     ///@dev this function is only callable by a nation owner
     ///@notice this funtion will allow a nation owner to delete a wonder
-    ///@param countryId is the nation deleting the woner
+    ///@param countryId is the nation deleting the wonder
     /**@param wonderId is the id of the wonder
      * 1. movie industry
      * 2. national cemetary

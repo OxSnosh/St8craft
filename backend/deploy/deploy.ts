@@ -985,7 +985,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         wonderscontract1.address,
         wonderscontract3.address,
         wonderscontract4.address,
-        countryminter.address
+        countryminter.address,
+        resourcescontract.address
     )
 
     await deployedWondersContract3.settings(
@@ -995,7 +996,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         wonderscontract1.address,
         wonderscontract2.address,
         wonderscontract4.address,
-        countryminter.address
+        countryminter.address,
+        resourcescontract.address
     )
 
     await deployedWondersContract4.settings(
