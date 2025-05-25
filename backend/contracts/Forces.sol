@@ -10,7 +10,6 @@ import "./War.sol";
 import "./GroundBattle.sol";
 import "./CountryParameters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 
 ///@title ForcesContract
 ///@author OxSnosh
@@ -46,6 +45,7 @@ contract ForcesContract is Ownable {
     CountryParametersContract params;
 
     struct Forces {
+        bool initialized;
         uint256 numberOfSoldiers;
         uint256 defendingSoldiers;
         uint256 deployedSoldiers;
@@ -145,11 +145,23 @@ contract ForcesContract is Ownable {
     mapping(uint256 => Forces) public idToForces;
     mapping(uint256 => GroundBattleCasualties) public idToCasualties;
 
+    modifier onlyCountryMinter() {
+        require(
+            msg.sender == countryMinter,
+            "only callable from country minter contract"
+        );
+        _;
+    }
+
     ///@dev this function is a public function but only callable from the country minter contact when a country is minted
     ///@notice this function allows a nation to purchase forces once a country is minted
     ///@param id this is the nation ID of the nation being minted
-    function generateForces(uint256 id) public {
-        Forces memory newForces = Forces(20, 20, 0, 0, 0, 0, true);
+    function generateForces(uint256 id) public onlyCountryMinter {
+        require(
+            idToForces[id].initialized == false,
+            "Forces already initialized"
+        );
+        Forces memory newForces = Forces(true, 20, 20, 0, 0, 0, 0, true);
         idToForces[id] = newForces;
     }
 
@@ -258,7 +270,7 @@ contract ForcesContract is Ownable {
             "You do not have enough defending soldiers to send"
         );
         require(
-            idToForces[idReciever].nationExists = true,
+            idToForces[idReciever].nationExists == true,
             "Destination nation does not exist"
         );
         idToForces[idSender].defendingSoldiers -= amount;
@@ -322,7 +334,7 @@ contract ForcesContract is Ownable {
             defendingSoldierCount >= soldiersToDeploy,
             "cannot deploy that many soldiers"
         );
-        if (soldiersToDeploy > 0) {
+        if (soldiersToDeploy > 0 && totalSoldiers > 0) {
             require(
                 (((deployedSoldiers + soldiersToDeploy) * 100) /
                     totalSoldiers) <= maxDeployablePercentage,
@@ -351,10 +363,8 @@ contract ForcesContract is Ownable {
     ) public view returns (uint256) {
         uint256 maxDeployablePercentage = 80;
         uint256 borderFortificationCount = imp1.getBorderFortificationCount(id);
-        console.log("border fortification count", borderFortificationCount);
         if (borderFortificationCount > 0) {
             maxDeployablePercentage -= (2 * borderFortificationCount);
-            console.log("max deployable percentage", maxDeployablePercentage);
         }
         return maxDeployablePercentage;
     }
@@ -367,9 +377,6 @@ contract ForcesContract is Ownable {
         uint256 amountToWithdraw,
         uint256 id
     ) public onlyWar {
-        console.log("withdraw soldiers function");
-        console.log("amount to withdraw", amountToWithdraw);
-        console.log("id", id);
         uint256 deployedSoldierCount = idToForces[id].deployedSoldiers;
         require(
             deployedSoldierCount >= amountToWithdraw,
@@ -590,7 +597,7 @@ contract ForcesContract is Ownable {
     }
 
     ///@dev this is a public view function that will return the cost a nation has to pay for tanks
-    ///@notice the default cost of a tnak is soldier cost * 40
+    ///@notice the default cost of a tank is soldier cost * 40
     ///@notice tank cost will be reduced by 5% for every factory owned
     ///@param id is the nation id of the nation buying tanks
     ///@return cost is the cost per tank for a given nation
@@ -615,7 +622,10 @@ contract ForcesContract is Ownable {
         uint256 id
     ) public onlyWar {
         uint256 deployedTankCount = idToForces[id].deployedTanks;
-        require(deployedTankCount >= amountToWithdraw, "not enough tanks to withdraw that many");
+        require(
+            deployedTankCount >= amountToWithdraw,
+            "not enough tanks to withdraw that many"
+        );
         idToForces[id].defendingTanks += amountToWithdraw;
         idToForces[id].deployedTanks -= amountToWithdraw;
     }
@@ -628,6 +638,10 @@ contract ForcesContract is Ownable {
         uint256 amount,
         uint256 id
     ) public onlySpyContract {
+        require(
+            idToForces[id].defendingTanks >= amount,
+            "not enough tanks to remove"
+        );
         idToForces[id].defendingTanks -= amount;
         idToForces[id].numberOfTanks -= amount;
     }
@@ -640,6 +654,10 @@ contract ForcesContract is Ownable {
         uint256 amount,
         uint256 id
     ) public onlyCruiseMissileContract {
+        require(
+            idToForces[id].defendingTanks >= amount,
+            "not enough tanks to remove"
+        );
         idToForces[id].defendingTanks -= amount;
         idToForces[id].numberOfTanks -= amount;
         emit TankDamageFromCruiseMissile(id, amount);
@@ -733,6 +751,22 @@ contract ForcesContract is Ownable {
         uint256 defenderTankLosses,
         uint256 defenderId
     ) public onlyGroundBattle {
+        require(
+            idToForces[attackerId].numberOfSoldiers >= attackerSoldierLosses,
+            "not enough soldiers to remove"
+        );
+        require(
+            idToForces[attackerId].numberOfTanks >= attackerTankLosses,
+            "not enough tanks to remove"
+        );
+        require(
+            idToForces[defenderId].numberOfSoldiers >= defenderSoldierLosses,
+            "not enough soldiers to remove"
+        );
+        require(
+            idToForces[defenderId].numberOfTanks >= defenderTankLosses,
+            "not enough tanks to remove"
+        );
         idToForces[attackerId].numberOfSoldiers -= attackerSoldierLosses;
         idToForces[attackerId].deployedSoldiers -= attackerSoldierLosses;
         idToForces[attackerId].numberOfTanks -= attackerTankLosses;
@@ -766,7 +800,3 @@ contract ForcesContract is Ownable {
         return (soldierCasualties, tankCasualties);
     }
 }
-
-
-
-
