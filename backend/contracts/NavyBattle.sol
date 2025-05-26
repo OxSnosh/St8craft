@@ -894,6 +894,8 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2 {
     address public improvements4;
     address public navalActions;
     address public navy2;
+    address public additionalNavy;
+    address public countryMinter;
 
     uint256 corvetteStrength = 1;
     uint256 landingShipStrength = 3;
@@ -927,6 +929,8 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2 {
     ImprovementsContract4 imp4;
     NavalActionsContract navAct;
     NavyContract2 nav2;
+    AdditionalNavyContract addNav;
+    CountryMinter mint;
 
     struct NavyForces {
         uint256 corvetteCount;
@@ -972,7 +976,9 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2 {
         address _war,
         address _improvements4,
         address _navalActions,
-        address _navy2
+        address _navy2,
+        address _additionalNavy,
+        address _countryMinter
     ) public onlyOwner {
         navy = _navy;
         nav = NavyContract(_navy);
@@ -984,6 +990,10 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2 {
         navAct = NavalActionsContract(_navalActions);
         navy2 = _navy2;
         nav2 = NavyContract2(_navy2);
+        additionalNavy = _navy2;
+        addNav = AdditionalNavyContract(_additionalNavy);
+        countryMinter = _countryMinter;
+        mint = CountryMinter(_countryMinter);
     }
 
     ///@dev this is a public function callable only from the nation owner
@@ -997,6 +1007,8 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2 {
         uint256 attackerId,
         uint256 defenderId
     ) public {
+        bool isOwner = mint.checkOwnership(attackerId, msg.sender);
+        require(isOwner, "caller not nation owner");
         bool isActiveWar = war.isWarActive(warId);
         require(isActiveWar, "!active war");
         uint256 slotsUsed = navAct.getActionSlotsUsed(attackerId);
@@ -1312,6 +1324,37 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2 {
         return strength;
     }
 
+    mapping(uint256 => bool) public pendingRequests;
+    mapping(uint256 => uint256) public pendingRequestTimestamp;
+    uint256 public constant RETRY_TIMEOUT = 5 minutes;
+
+    function retryFulfillRequest(uint256 battleId) public {
+        require(pendingRequests[battleId], "No pending request");
+        require(
+            block.timestamp > pendingRequestTimestamp[battleId] + RETRY_TIMEOUT,
+            "Retry not allowed yet"
+        );
+
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+            i_gasLane,
+            i_subscriptionId,
+            REQUEST_CONFIRMATIONS,
+            i_callbackGasLimit,
+            NUM_WORDS
+        );
+
+        s_requestIdToRequestIndex[requestId] = battleId;
+        pendingRequests[battleId] = true;
+        pendingRequestTimestamp[battleId] = block.timestamp;
+        emit RandomnessRequested(requestId, battleId, block.timestamp);
+    }
+
+    event RandomnessRequested(
+        uint256 requestId,
+        uint256 id,
+        uint256 timestamp
+    );
+
     function fulfillRequest(uint256 battleId) internal {
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
@@ -1321,76 +1364,63 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2 {
             NUM_WORDS
         );
         s_requestIdToRequestIndex[requestId] = battleId;
+        pendingRequests[battleId] = true;
+        pendingRequestTimestamp[battleId] = block.timestamp;
+        emit RandomnessRequested(
+            requestId,
+            battleId,
+            block.timestamp
+        );
     }
 
-    // bytes32 navyAttackJobId;
-    // address oracleAddress;
-    // uint256 fee;
-
-    // // address linkAddress;
-
-    // function updateJobId(bytes32 _jobId) public onlyOwner {
-    //     navyAttackJobId = _jobId;
-    // }
-
-    // function updateOracleAddress(address _oracleAddress) public onlyOwner {
-    //     setChainlinkOracle(_oracleAddress);
-    //     oracleAddress = _oracleAddress;
-    // }
-
-    // function updateFee(uint256 _fee) public onlyOwner {
-    //     fee = _fee;
-    // }
-
-    // function updateLinkAddress(address _linkAddress) public onlyOwner {
-    //     setChainlinkToken(_linkAddress);
-    //     // linkAddress = _linkAddress;
-    // }
+    event NavalAttackRequested(
+        uint256 requestId,
+        uint256 battleId,
+        uint256[] randomWords,
+        uint256[] attackerChances,
+        uint256[] attackerTypes,
+        uint256[] defenderChances,
+        uint256[] defenderTypes,
+        uint256 losses
+    );
 
     function fulfillRandomWords(
         uint256 requestId,
         uint256[] memory randomWords
     ) internal override {
-        // Chainlink.Request memory req = buildOperatorRequest(
-        //     navyAttackJobId,
-        //     this.completeNavalAttack.selector
-        // );
-        uint256 requestNumber = s_requestIdToRequestIndex[requestId];
-        // req.addUint("battleId", requestNumber);
-        s_requestIndexToRandomWords[requestNumber] = randomWords;
+        require(
+            pendingRequests[s_requestIdToRequestIndex[requestId]],
+            "Request not pending"
+        );
+        uint256 battleId = s_requestIdToRequestIndex[requestId];
+        delete pendingRequests[battleId];
+        delete pendingRequestTimestamp[battleId];
+        s_requestIndexToRandomWords[battleId] = randomWords;
         s_randomWords = randomWords;
-        // req.addBytes("randomWords", abi.encode(randomWords));
-        // uint256 numberBetweenZeroAndTwo = (s_randomWords[0] % 2);
-        // uint256 losses = getLosses(requestNumber, numberBetweenZeroAndTwo);
-        // console.log("losses", losses);
-        // req.addUint("losses", losses);
+        uint256 numberBetweenZeroAndTwo = (s_randomWords[0] % 2);
+        uint256 losses = getLosses(battleId, numberBetweenZeroAndTwo);
         uint256[] memory attackerChances = battleIdToAttackerChanceArray[
-            requestNumber
+            battleId
         ];
         uint256[] memory attackerTypes = battleIdToAttackerTypeArray[
-            requestNumber
+            battleId
         ];
         uint256[] memory defenderChances = battleIdToDefenderChanceArray[
-            requestNumber
+            battleId
         ];
         uint256[] memory defenderTypes = battleIdToDefenderTypeArray[
-            requestNumber
+            battleId
         ];
-        // req.addBytes("attackerChances", abi.encode(attackerChances));
-        // req.addBytes("attackerTypes", abi.encode(attackerTypes));
-        // req.addBytes("defenderChances", abi.encode(defenderChances));
-        // req.addBytes("defenderTypes", abi.encode(defenderTypes));
-        // sendOperatorRequest(req, fee);
-        // uint256 attackerStartingStrength = idToAttackerNavy[requestNumber]
-        //     .startingStrength;
-        // console.log("attack strength", attackerStartingStrength);
-        // uint256 defenderStartingStrength = idToDefenderNavy[requestNumber]
-        //     .startingStrength;
-        // console.log("def strength", defenderStartingStrength);
-        // uint256 totalStrength = (attackerStartingStrength +
-        //     defenderStartingStrength);
-        // console.log("total strength", totalStrength);
-        // console.log("arrived to for loop");
+        emit NavalAttackRequested(
+            requestId,
+            battleId,
+            randomWords,
+            attackerChances,
+            attackerTypes,
+            defenderChances,
+            defenderTypes,
+            losses
+        );
     }
 
     event NavalAttackComplete(
@@ -1400,53 +1430,23 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2 {
     );
 
     function completeNavalAttack(
-        // bytes32 requestId,
         uint256[] memory _attackerLosses,
         uint256[] memory _defenderLosses,
         uint256 battleId
     ) public {
-
         emit NavalAttackComplete(_attackerLosses, _defenderLosses, battleId);
-
-        // for (uint256 i = 0; i <= losses + 1; i++) {
-        //     console.log("loop", i);
-        //     uint256 randomNumberForTeamSelection = (s_randomWords[i] %
-        //         totalStrength);
-        //     uint256 randomNumnerForShipSelection = s_randomWords[i + 8];
-        //     if (randomNumberForTeamSelection <= attackerStartingStrength) {
-        //         console.log("defender loss");
-        //         generateLossForDefender(
-        //             requestNumber,
-        //             randomNumnerForShipSelection
-        //         );
-        //     } else {
-        //         console.log("attacker loss");
-        //         generateLossForAttacker(
-        //             requestNumber,
-        //             randomNumnerForShipSelection
-        //         );
-        //     }
-        // }
-        // uint256[] memory defenderLosses = battleIdToDefenderLosses[
-        //     requestNumber
-        // ];
-        // uint256[] memory attackerLosses = battleIdToAttackerLosses[
-        //     requestNumber
-        // ];
-        // uint256 defenderId = idToDefenderNavy[requestNumber].countryId;
-        // uint256 attackerId = idToAttackerNavy[requestNumber].countryId;
-        // nav.decrementLosses(
-        //     defenderLosses,
-        //     defenderId,
-        //     attackerLosses,
-        //     attackerId
-        // );
-        // console.log("losses decremented");
-        // uint256 warId = idToAttackerNavy[requestNumber].warId;
-        // war.addNavyCasualties(warId, defenderId, defenderLosses.length);
-        // war.addNavyCasualties(warId, attackerId, attackerLosses.length);
-        // navBlock.checkIfBlockadeCapable(defenderId);
-        // console.log("naval attack complete");
+        uint256 defenderId = idToDefenderNavy[battleId].countryId;
+        uint256 attackerId = idToAttackerNavy[battleId].countryId;
+        uint256 warId = idToAttackerNavy[battleId].warId;
+        addNav.decrementLosses(
+            _defenderLosses,
+            defenderId,
+            _attackerLosses,
+            attackerId
+        );
+        war.addNavyCasualties(warId, defenderId, _defenderLosses.length);
+        war.addNavyCasualties(warId, attackerId, _attackerLosses.length);
+        navBlock.checkIfBlockadeCapable(defenderId);
     }
 
     function getLosses(
@@ -1496,88 +1496,4 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2 {
             aircraftCarrierCount);
         return count;
     }
-
-    // function generateLossForDefender(
-    //     uint256 battleId,
-    //     uint256 randomNumberForShipLoss
-    // ) public {
-    //     uint256[] storage chanceArray = battleIdToDefenderChanceArray[battleId];
-    //     uint256[] storage typeArray = battleIdToDefenderTypeArray[battleId];
-    //     uint256 cumulativeValue = battleIdToDefenderCumulativeSumOdds[battleId];
-    //     uint256 randomNumber = (randomNumberForShipLoss % cumulativeValue);
-    //     uint256 shipType;
-    //     uint256 amountToDecrease;
-    //     uint256 j;
-    //     for (uint256 i; i < chanceArray.length; i++) {
-    //         if (randomNumber <= chanceArray[i]) {
-    //             shipType = typeArray[i];
-    //             amountToDecrease = getAmountToDecrease(shipType);
-    //             j = i;
-    //             break;
-    //         }
-    //     }
-    //     for (j; j < chanceArray.length; j++) {
-    //         if (chanceArray[j] >= randomNumber) {
-    //             chanceArray[j] -= amountToDecrease;
-    //         }
-    //     }
-    //     battleIdToDefenderCumulativeSumOdds[battleId] -= amountToDecrease;
-    //     uint256[] storage defenderLosses = battleIdToDefenderLosses[battleId];
-    //     defenderLosses.push(shipType);
-    // }
-
-    // function generateLossForAttacker(
-    //     uint256 battleId,
-    //     uint256 randomNumberForShipLoss
-    // ) public {
-    //     uint256[] storage chanceArray = battleIdToAttackerChanceArray[battleId];
-    //     uint256[] storage typeArray = battleIdToAttackerTypeArray[battleId];
-    //     uint256 cumulativeValue = battleIdToAttackerCumulativeSumOdds[battleId];
-    //     uint256 randomNumber = (randomNumberForShipLoss % cumulativeValue);
-    //     uint256 shipType;
-    //     uint256 amountToDecrease;
-    //     bool ranAlready = false;
-    //     if (ranAlready == false) {
-    //         for (uint256 i; i < chanceArray.length; i++) {
-    //             if (randomNumber <= chanceArray[i]) {
-    //                 shipType = typeArray[i];
-    //                 amountToDecrease = getAmountToDecrease(shipType);
-    //             }
-    //             uint256 j = i;
-    //             for (j; j < chanceArray.length; j++) {
-    //                 if (chanceArray[j] >= randomNumber) {
-    //                     chanceArray[j] -= amountToDecrease;
-    //                 }
-    //                 ranAlready = true;
-    //             }
-    //         }
-    //     }
-    //     battleIdToAttackerCumulativeSumOdds[battleId] -= amountToDecrease;
-    //     uint256[] storage defenderLosses = battleIdToAttackerLosses[battleId];
-    //     defenderLosses.push(shipType);
-    // }
-
-    // function getAmountToDecrease(
-    //     uint256 shipType
-    // ) internal pure returns (uint256) {
-    //     uint256 amountToDecrease;
-    //     if (shipType == 1) {
-    //         amountToDecrease = 15;
-    //     } else if (shipType == 2) {
-    //         amountToDecrease = 13;
-    //     } else if (shipType == 3) {
-    //         amountToDecrease = 11;
-    //     } else if (shipType == 4) {
-    //         amountToDecrease = 10;
-    //     } else if (shipType == 5) {
-    //         amountToDecrease = 8;
-    //     } else if (shipType == 6) {
-    //         amountToDecrease = 5;
-    //     } else if (shipType == 7) {
-    //         amountToDecrease = 4;
-    //     } else if (shipType == 8) {
-    //         amountToDecrease = 1;
-    //     }
-    //     return amountToDecrease;
-    // }
 }

@@ -74,7 +74,7 @@ contract WarContract is Ownable {
         uint256 tanksLost;
         uint256 cruiseMissilesLost;
         uint256 aircraftLost;
-        uint256 navyStrengthLost;
+        uint256 navyShipsLost;
         uint256 infrastructureLost;
         uint256 technologyLost;
         uint256 landLost;
@@ -87,7 +87,7 @@ contract WarContract is Ownable {
         uint256 tanksLost;
         uint256 cruiseMissilesLost;
         uint256 aircraftLost;
-        uint256 navyStrengthLost;
+        uint256 navyShipsLost;
         uint256 infrastructureLost;
         uint256 technologyLost;
         uint256 landLost;
@@ -471,10 +471,10 @@ contract WarContract is Ownable {
     ) public onlyNavyBattle {
         (uint256 offenseId, uint256 defenseId) = getInvolvedParties(_warId);
         if (offenseId == nationId) {
-            warIdToOffenseLosses[_warId].navyStrengthLost = navyCasualties;
+            warIdToOffenseLosses[_warId].navyShipsLost = navyCasualties;
         }
         if (defenseId == nationId) {
-            warIdToDefenseLosses[_warId].navyStrengthLost = navyCasualties;
+            warIdToDefenseLosses[_warId].navyShipsLost = navyCasualties;
         }
     }
 

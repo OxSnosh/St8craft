@@ -787,7 +787,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         warcontract.address,
         improvementscontract4.address,
         navalactionscontract.address,
-        navycontract2.address
+        navycontract2.address,
+        additionalnavycontract.address
     )
 
     await deployedNukeContract.settings(
