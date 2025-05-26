@@ -5,19 +5,17 @@ import "./CountryMinter.sol";
 import "./Navy.sol";
 import "./War.sol";
 import "./Improvements.sol";
-import "./War.sol";
 import "./KeeperFile.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title NavalBlocadeContract
 ///@author OxSnosh
 ///@dev this contract inherits from the openzeppelin ownable contract
 ///@dev this contract inherits from the chainlink VRF contract
-contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
+contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
     uint256 public blockadeId;
     address public navy;
     address public additionalNavy;
@@ -26,6 +24,7 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
     address public countryMinter;
     address public keeper;
     address public breakBlockadeAddress;
+    address public billsContract;
 
     //Chainlik Variables
     uint256[] private s_randomWords;
@@ -55,8 +54,6 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
     event BlockadeCompleted(uint256[] attackerLosses, uint256[] defenderLosses, uint256 battleId);
 
     mapping(uint256 => Blockade) public blockadeIdToBlockade;
-    // mapping(uint256 => uint256[]) public idDefenderToIdAttackerToActiveBlockadesAgainst;
-    // mapping(uint256 => uint256[]) public idAttackerToIdDefenderToActiveBlockadesFor;
     mapping(uint256 => uint256[]) public idToActiveBlockadesFor;
     mapping(uint256 => uint256[]) public idToActiveBlockadesAgainst;
     mapping(uint256 => uint256) s_requestIdToRequestIndex;
@@ -81,7 +78,8 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
         address _war,
         address _countryMinter,
         address _keeper,
-        address _breakBlockadeAddress
+        address _breakBlockadeAddress,
+        address _billsContract
     ) public onlyOwner {
         navy = _navy;
         nav = NavyContract(_navy);
@@ -96,6 +94,8 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
         keeper = _keeper;
         keep = KeeperContract(_keeper);
         breakBlockadeAddress = _breakBlockadeAddress;
+        billsContract = _billsContract;
+
     }
 
     ///@dev this is a public function callable only from the nation owner
@@ -108,7 +108,7 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
         uint256 attackerId,
         uint256 defenderId,
         uint256 warId
-    ) public {
+    ) public nonReentrant {
         bool requirementsMet = checkRequirements(attackerId, defenderId, warId);
         require(requirementsMet, "requrements not met");
         uint256 slotsUsed = navAct.getActionSlotsUsed(attackerId);
@@ -152,13 +152,10 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
                 defenderId
             ];
         newActiveBlockadesAgainst.push(blockadeId);
-        console.log(newActiveBlockadesAgainst[0], "blockades against index 0");
-        // idToActiveBlockadesAgainst[defenderId] = newActiveBlockadesAgainst;
         uint256[] storage newActiveBlockadesFor = idToActiveBlockadesFor[
             attackerId
         ];
         newActiveBlockadesFor.push(blockadeId);
-        // idToActiveBlockadesFor[attackerId] = newActiveBlockadesFor;
         war.cancelPeaceOffersUponAttack(warId);
         fulfillRequest(blockadeId);
         blockadeId++;
@@ -175,6 +172,13 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
         require(blockadedAlready == false, "nation already blockaded today");
         bool warActive = war.isWarActive(warId);
         require(warActive, "war !active");
+        uint256[] memory activeBlockadesAgainst = idToActiveBlockadesAgainst[
+            defenderId
+        ];
+        require(
+            activeBlockadesAgainst.length < 12,
+            "nation already has max blockades"
+        );
         bool requirementsMet = false;
         if (isOwner && !blockadedAlready && warActive) {
             requirementsMet = true;
@@ -201,7 +205,9 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
         return false;
     }
 
-    function fulfillRequest(uint256 id) public {
+    event RandomnessRequested(uint256 requestId, uint256 id);
+
+    function fulfillRequest(uint256 id) internal {
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
@@ -210,6 +216,10 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
             NUM_WORDS
         );
         s_requestIdToRequestIndex[requestId] = id;
+        emit RandomnessRequested(
+            requestId,
+            id
+        );
     }
 
     function fulfillRandomWords(
@@ -222,7 +232,6 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
         uint256 blockadePercentage = ((s_randomWords[0] % 5) + 1);
         blockadeIdToBlockade[requestNumber]
             .blockadePercentageReduction = blockadePercentage;
-        console.log("blockade percentage: ", blockadePercentage);
     }
 
     function getActiveBlockadesAgainst(
@@ -247,7 +256,6 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
                 .blockadePercentageReduction;
             percentageReduction += blockadePercentage;
         }
-        console.log("percentage reduction: ", percentageReduction);
         return percentageReduction;
     }
 
@@ -259,32 +267,38 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
         _;
     }
 
+    event BlockadeBroken(
+        uint256 blockadedCountry,
+        uint256 blockadeId
+    );
+
     function checkIfBlockadeCapable(
         uint256 countryId
     ) external onlyBreakBlockade {
-        uint256 blockadeCapableShips = addNav.getBlockadeCapableShips(
-            countryId
-        );
-        console.log(blockadeCapableShips, "blockade capable ships");
+        uint256 blockadeCapableShips = addNav.getBlockadeCapableShips(countryId);
+
         if (blockadeCapableShips == 0) {
             uint256[] storage blockadesFor = idToActiveBlockadesFor[countryId];
-            for (uint256 i = 0; i < blockadesFor.length; i++) {
-                blockadeId = blockadesFor[i];
-                blockadeIdToBlockade[blockadeId].blockadeActive = false;
-                uint256 blockadedCountry = blockadeIdToBlockade[blockadeId]
-                    .blockadedId;
-                uint256[] storage blockadesAgainst = idToActiveBlockadesAgainst[
-                    blockadedCountry
-                ];
+
+            while (blockadesFor.length > 0) {
+                uint256 lastIndex = blockadesFor.length - 1;
+                uint256 _blockadeId = blockadesFor[lastIndex];
+                Blockade storage _blockade = blockadeIdToBlockade[_blockadeId];
+                _blockade.blockadeActive = false;
+
+                uint256 blockadedCountry = _blockade.blockadedId;
+                uint256[] storage blockadesAgainst = idToActiveBlockadesAgainst[blockadedCountry];
+
                 for (uint256 j = 0; j < blockadesAgainst.length; j++) {
-                    if (blockadesAgainst[j] == blockadeId) {
-                        blockadesAgainst[j] = blockadesAgainst[j] - 1;
+                    if (blockadesAgainst[j] == _blockadeId) {
+                        blockadesAgainst[j] = blockadesAgainst[blockadesAgainst.length - 1];
                         blockadesAgainst.pop();
-                        console.log("blockade against deleted");
+                        emit BlockadeBroken(blockadedCountry, _blockadeId);
+                        break;
                     }
                 }
-                delete blockadesFor[i];
-                console.log("blockade for deleted");
+
+                blockadesFor.pop();
             }
         }
     }
@@ -293,38 +307,57 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
         uint256 blockaderId,
         uint256 breakerId
     ) external onlyBreakBlockade {
-        console.log(blockaderId, "blockader id");
-        console.log(breakerId, "breaker id");
-        console.log("break blockade function");
-        uint256[] storage blockadesAgainst = idToActiveBlockadesAgainst[
-            breakerId
-        ];
-        console.log("length", blockadesAgainst.length);
-        console.log("literally every line");
+
+        uint256[] storage blockadesAgainst = idToActiveBlockadesAgainst[breakerId];
         for (uint256 i = 0; i < blockadesAgainst.length; i++) {
-            console.log("beginning og loop");
             uint256 _blockadeId = blockadesAgainst[i];
-            console.log(_blockadeId, "blockade id");
             if (blockadeIdToBlockade[_blockadeId].blockaderId == blockaderId) {
-                console.log("blockade id to blockade");
-                blockadesAgainst[i] = blockadesAgainst[i] - 1;
+                blockadesAgainst[i] = blockadesAgainst[blockadesAgainst.length - 1];
                 blockadesAgainst.pop();
-                console.log("blockade against deleted");
+                emit BlockadeBroken(breakerId, _blockadeId);
+                break;
             }
-            console.log("end of loop");
         }
+
         uint256[] storage blockadesFor = idToActiveBlockadesFor[blockaderId];
-        console.log("length", blockadesFor.length);
         for (uint256 j = 0; j < blockadesFor.length; j++) {
             uint256 _blockadeId = blockadesFor[j];
-            console.log(_blockadeId, "blockade id");
             if (blockadeIdToBlockade[_blockadeId].blockadedId == breakerId) {
-                blockadesFor[j] = blockadesFor[j] - 1;
+                blockadesFor[j] = blockadesFor[blockadesFor.length - 1];
                 blockadesFor.pop();
-                console.log("blockade for deleted");
+                break;
             }
         }
-        console.log("end of function");
+    }
+
+    modifier onlyBills() {
+        require(msg.sender == billsContract, "Only callable from the Bills contract");
+        _;
+    }
+
+    function removeAllBlockadesAgainst(uint256 countryId) external onlyBills {
+        uint256[] storage blockadesAgainst = idToActiveBlockadesAgainst[countryId];
+
+        while (blockadesAgainst.length > 0) {
+            uint256 lastIndex = blockadesAgainst.length - 1;
+            uint256 _blockadeId = blockadesAgainst[lastIndex];
+            Blockade storage _blockade = blockadeIdToBlockade[_blockadeId];
+            _blockade.blockadeActive = false;
+
+            uint256 blockaderId = _blockade.blockaderId;
+            uint256[] storage blockadesFor = idToActiveBlockadesFor[blockaderId];
+
+            for (uint256 j = 0; j < blockadesFor.length; j++) {
+                if (blockadesFor[j] == _blockadeId) {
+                    blockadesFor[j] = blockadesFor[blockadesFor.length - 1];
+                    blockadesFor.pop();
+                    break;
+                }
+            }
+
+            emit BlockadeBroken(countryId, _blockadeId);
+            blockadesAgainst.pop();
+        }
     }
 }
 
@@ -332,8 +365,7 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2 {
 ///@author OxSnosh
 ///@dev this contract inherits from the openzeppelin ownable contract
 ///@dev this contract inherits from the chainlink VRF contract
-contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
-    using Chainlink for Chainlink.Request;
+contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 
     uint256 public breakBlockadeId;
     address public countryMinter;
@@ -343,6 +375,8 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
     address public improvements4;
     address public navalActions;
     address public navy2;
+    address public additionalNavy;
+
     uint256 battleshipStrength = 5;
     uint256 cruiserStrength = 6;
     uint256 frigateStrength = 8;
@@ -370,6 +404,7 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
     ImprovementsContract4 imp4;
     NavalActionsContract navAct;
     NavyContract2 nav2;
+    AdditionalNavyContract addNav;
 
     struct BreakBlockade {
         uint256 battleshipCount;
@@ -423,7 +458,8 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         address _warAddress,
         address _improvements4,
         address _navalActions,
-        address _navy2
+        address _navy2,
+        address _additionalNavy
     ) public onlyOwner {
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
@@ -439,6 +475,8 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         navAct = NavalActionsContract(_navalActions);
         navy2 = _navy2;
         nav2 = NavyContract2(_navy2);
+        additionalNavy = _additionalNavy;
+        addNav = AdditionalNavyContract(_additionalNavy);
     }
 
     ///@dev this is a public function callable only from the nation owner
@@ -451,7 +489,7 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         uint256 warId,
         uint256 attackerId,
         uint256 blockaderId
-    ) public {
+    ) public nonReentrant{
         bool isOwner = mint.checkOwnership(attackerId, msg.sender);
         require(isOwner, "caller not nation owner");
         bool warActive = war.isWarActive(warId);
@@ -462,14 +500,10 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             attackerId
         );
         bool isBlockader = false;
-        console.log(blockaderId, "blockaderId");
-        console.log(attackerBlockades.length, "attacker blockades length");
         for (uint256 i; i < attackerBlockades.length; i++) {
             if (attackerBlockades[i] == blockaderId) {
-                console.log(attackerBlockades[i], "attacker blocades i");
                 isBlockader = true;
-            } else {
-                isBlockader = false;
+                break;
             }
         }
         require(isBlockader, "!blockaded by this nation");
@@ -544,7 +578,6 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             uint256 battleshipOddsToPush = (battleshipOdds + cumulativeSum);
             chances.push(battleshipOddsToPush);
             types.push(3);
-            console.log("pushed a battleship");
             cumulativeSum = battleshipOddsToPush;
         }
         //cruiser
@@ -554,7 +587,6 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             uint256 cruiserOddsToPush = (cruiserOdds + cumulativeSum);
             chances.push(cruiserOddsToPush);
             types.push(4);
-            console.log("pushed a cruiser");
             cumulativeSum = cruiserOddsToPush;
         }
         //frigate
@@ -564,7 +596,6 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             uint256 frigateOddsToPush = (frigateOdds + cumulativeSum);
             chances.push(frigateOddsToPush);
             types.push(5);
-            console.log("pushed a frigate");
             cumulativeSum = frigateOddsToPush;
         }
         //destroyer
@@ -575,7 +606,6 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             uint256 destroyerOddsToPush = (destroyerOdds + cumulativeSum);
             chances.push(destroyerOddsToPush);
             types.push(6);
-            console.log("pushed a destroyer");
             cumulativeSum = destroyerOddsToPush;
         }
         battleIdToBreakBlockadeChanceArray[breakBlockId] = chances;
@@ -599,7 +629,6 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             uint256 battleshipOddsToPush = (battleshipOdds + cumulativeSum);
             chances.push(battleshipOddsToPush);
             types.push(3);
-            console.log("pushed a battleship DEFEND");
             cumulativeSum = battleshipOddsToPush;
         }
         //cruiser
@@ -609,7 +638,6 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             uint256 cruiserOddsToPush = (cruiserOdds + cumulativeSum);
             chances.push(cruiserOddsToPush);
             types.push(4);
-            console.log("pushed a cruiser DEFEND");
             cumulativeSum = cruiserOddsToPush;
         }
         //frigate
@@ -619,7 +647,6 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             uint256 frigateOddsToPush = (frigateOdds + cumulativeSum);
             chances.push(frigateOddsToPush);
             types.push(5);
-            console.log("pushed a frigate DEFEND");
             cumulativeSum = frigateOddsToPush;
         }
         //submarine
@@ -630,7 +657,6 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             uint256 submarineOddsToPush = (submarineOdds + cumulativeSum);
             chances.push(submarineOddsToPush);
             types.push(7);
-            console.log("pushed a submarine DEFEND");
             cumulativeSum = submarineOddsToPush;
         }
         battleIdToDefendBlockadeChanceArray[breakBlockId] = chances;
@@ -687,7 +713,38 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         return strength;
     }
 
-    function fulfillRequest(uint256 battleId) public {
+    mapping(uint256 => bool) public pendingRequests;
+    mapping(uint256 => uint256) public pendingRequestTimestamp;
+    uint256 public constant RETRY_TIMEOUT = 5 minutes;
+
+    function retryFulfillRequest(uint256 battleId) public {
+        require(pendingRequests[battleId], "No pending request");
+        require(
+            block.timestamp > pendingRequestTimestamp[battleId] + RETRY_TIMEOUT,
+            "Retry not allowed yet"
+        );
+
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+            i_gasLane,
+            i_subscriptionId,
+            REQUEST_CONFIRMATIONS,
+            i_callbackGasLimit,
+            NUM_WORDS
+        );
+
+        s_requestIdToRequestIndex[requestId] = battleId;
+        pendingRequests[battleId] = true;
+        pendingRequestTimestamp[battleId] = block.timestamp;
+        emit RandomnessRequested(requestId, battleId, block.timestamp);
+    }
+
+    event RandomnessRequested(
+        uint256 requestId,
+        uint256 id,
+        uint256 timestamp
+    );
+
+    function fulfillRequest(uint256 battleId) internal {
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
@@ -696,180 +753,104 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             NUM_WORDS
         );
         s_requestIdToRequestIndex[requestId] = battleId;
+        pendingRequests[battleId] = true;
+        pendingRequestTimestamp[battleId] = block.timestamp;
+        emit RandomnessRequested(
+            requestId,
+            battleId,
+            block.timestamp
+        );
     }
 
-    bytes32 navyAttackJobId;
-    address oracleAddress;
-    uint256 fee;
-
-    // address linkAddress;
-
-    function updateJobId(bytes32 _jobId) public onlyOwner {
-        navyAttackJobId = _jobId;
-    }
-
-    function updateOracleAddress(address _oracleAddress) public onlyOwner {
-        setChainlinkOracle(_oracleAddress);
-        oracleAddress = _oracleAddress;
-    }
-
-    function updateFee(uint256 _fee) public onlyOwner {
-        fee = _fee;
-    }
-
-    function updateLinkAddress(address _linkAddress) public onlyOwner {
-        setChainlinkToken(_linkAddress);
-        // linkAddress = _linkAddress;
-    }
+    event BreakBlockadeRequested(
+        uint256 requestId,
+        uint256 requestNumber,
+        uint256[] randomWords,
+        uint256[] attackerChances,
+        uint256[] attackerTypes,
+        uint256[] defenderChances,
+        uint256[] defenderTypes
+    );
 
     function fulfillRandomWords(
         uint256 requestId,
         uint256[] memory randomWords
     ) internal override {
-        console.log("fulfill random words");
-        Chainlink.Request memory req = buildOperatorRequest(
-            navyAttackJobId,
-            this.completeBattleSequence.selector
+        require(
+            pendingRequests[s_requestIdToRequestIndex[requestId]],
+            "Request not pending"
         );
-        uint256 requestNumber = s_requestIdToRequestIndex[requestId];
-        console.log(requestNumber, "requestNumber");
-        req.addUint("battleId", requestNumber);
-        req.addBytes("randomWords", abi.encode(randomWords));
-        s_requestIndexToRandomWords[requestNumber] = randomWords;
+        uint256 battleId = s_requestIdToRequestIndex[requestId];
+        delete pendingRequests[battleId];
+        delete pendingRequestTimestamp[battleId];
+        s_requestIndexToRandomWords[battleId] = randomWords;
         uint256[] memory attackerChances = battleIdToBreakBlockadeChanceArray[
-            requestNumber
+            battleId
         ];
         uint256[] memory attackerTypes = battleIdToBreakBlockadeTypeArray[
-            requestNumber
+            battleId
         ];
         uint256[] memory defenderChances = battleIdToDefendBlockadeChanceArray[
-            requestNumber
+            battleId
         ];
         uint256[] memory defenderTypes = battleIdToDefendBlockadeTypeArray[
-            requestNumber
+            battleId
         ];
-        console.log(attackerChances[0], attackerChances[1], attackerChances[2]);
-        console.log(attackerTypes[0], attackerTypes[1], attackerTypes[2]);
-        console.log(defenderChances[0], defenderChances[1], defenderChances[2]);
-        console.log(defenderTypes[0], defenderTypes[1], defenderTypes[2]);
-        req.addBytes("attackerChances", abi.encode(attackerChances));
-        req.addBytes("attackerTypes", abi.encode(attackerTypes));
-        req.addBytes("defenderChances", abi.encode(defenderChances));
-        req.addBytes("defenderTypes", abi.encode(defenderTypes));
-        sendOperatorRequest(req, fee);
-        console.log("request sent");
-        // uint256 breakerStartingStrength = getBreakerStrength(requestNumber);
-        // console.log(breakerStartingStrength, "breaker starting strength");
-        // uint256 defenderStartingStrength = getDefenderStrength(requestNumber);
-        // console.log(defenderStartingStrength, "defender starting strength");
-        // uint256 totalStrength = (breakerStartingStrength +
-        //     defenderStartingStrength);
-        // console.log(totalStrength, "total strength");
-        // console.log(randomNumberForBattle, "random number for battle");
-        // uint256 outcomeNumber = (randomNumberForBattle % totalStrength);
-        // console.log(outcomeNumber, "outcome number");
-        // completeBattleSequesnce(
-        //     requestNumber,
-        //     outcomeNumber,
-        //     breakerStartingStrength,
-        //     randomWords
-        // );
+        emit BreakBlockadeRequested(
+            requestId,
+            battleId,
+            randomWords,
+            attackerChances,
+            attackerTypes,
+            defenderChances,
+            defenderTypes
+        );
     }
 
     event BreakBlockadeComlpete(
         uint256[] attackerLosses,
+        uint256 breakerId,
         uint256[] defenderLosses,
+        uint256 defenderId,
         uint256 battleId
     );
 
+    address public oracle = 0xdB3892b0FD38D73B65a9AD2fC3920B74B2B71dfb;
+
+    modifier onlyOracle() {
+        require(msg.sender == oracle, "!ORACLE");
+        _;
+    }
+
+    function setOracle(address _oracleAddress) public onlyOwner {
+        oracle = _oracleAddress;
+    }
+
     function completeBattleSequence(
-        bytes32 requestId,
         uint256[] memory _attackerLosses,
         uint256[] memory _defenderLosses,
         uint256 battleId
-    ) public recordChainlinkFulfillment(requestId) {
-
-        emit BreakBlockadeComlpete(_attackerLosses, _defenderLosses, battleId);
-
-        // console.log(_defenderLosses[0]);
-        // console.log(_defenderLosses[1]);
-        // console.log(_defenderLosses[2]);
-        // console.log(battleId);
-        // uint256[] storage defenderLosses = battleIdToDefendBlockadeLosses[
-        //     requestNumber
-        // ];
-        // uint256[] storage breakerLosses = battleIdToBreakBlockadeLosses[
-        //     requestNumber
-        // ];
-        // uint256 _defenderId = breakBlockadeIdToDefendBlockade[requestNumber]
-        //     .defenderId;
-        // uint256 _breakerId = breakBlockadeIdToBreakBlockade[requestNumber]
-        //     .breakerId;
-        // if (outcomeNumber <= breakerStartingStrength) {
-        //     console.log("blokckader loss");
-        //     uint256[] memory typeArray = battleIdToDefendBlockadeTypeArray[
-        //         requestNumber
-        //     ];
-        //     uint256 randomArray = (randomWords[1] % typeArray.length);
-        //     uint256 shipType = typeArray[randomArray];
-        //     console.log(shipType, "ship type");
-        //     defenderLosses.push(shipType);
-        //     console.log("umm");
-        //     navBlock.breakBlockade(_defenderId, _breakerId);
-        // } else {
-        //     console.log("breaker loss");
-        //     uint256[] memory typeArray = battleIdToBreakBlockadeTypeArray[
-        //         requestNumber
-        //     ];
-        //     uint256 randomArray = (randomWords[1] % typeArray.length);
-        //     uint256 shipType = typeArray[randomArray];
-        //     console.log(shipType, "ship type");
-        //     breakerLosses.push(shipType);
-        // }
-        // console.log(breakerLosses.length, "breaker losses");
-        // console.log(defenderLosses.length, "defender losses");
-        // nav.decrementLosses(
-        //     defenderLosses,
-        //     _defenderId,
-        //     breakerLosses,
-        //     _breakerId
-        // );
-        // uint256 warId = breakBlockadeIdToBreakBlockade[requestNumber].warId;
-        // war.addNavyCasualties(warId, _breakerId, breakerLosses.length);
-        // war.addNavyCasualties(warId, _defenderId, defenderLosses.length);
-        // console.log("maybe");
+    ) public onlyOracle {
+        uint256 _defenderId = breakBlockadeIdToDefendBlockade[battleId]
+            .defenderId;
+        uint256 _breakerId = breakBlockadeIdToBreakBlockade[battleId]
+            .breakerId;
+        addNav.decrementLosses(
+            _defenderLosses,
+            _defenderId,
+            _attackerLosses,
+            _breakerId
+        );
+        uint256 blockaderShips = getDefenderShipCount(_defenderId);
+        if (blockaderShips == 0) {
+            navBlock.breakBlockade(
+                _defenderId,
+                _breakerId
+            );
+            navBlock.checkIfBlockadeCapable(_defenderId);
+        }
+        emit BreakBlockadeComlpete(_attackerLosses, _breakerId, _defenderLosses, _defenderId, battleId);
     }
-
-    // function getLosses(uint256 battleId, uint256 numberBetweenZeroAndTwo)
-    //     public
-    //     view
-    //     returns (uint256)
-    // {
-    //     uint256 breakerId = breakBlockadeIdToBreakBlockade[battleId].breakerId;
-    //     uint256 breakerCount = getBreakerShipCount(breakerId);
-    //     uint256 defenderId = breakBlockadeIdToDefendBlockade[battleId]
-    //         .defenderId;
-    //     uint256 defenderCount = getDefenderShipCount(defenderId);
-    //     uint256 totalShips = (breakerCount + defenderCount);
-    //     uint256 losses;
-    //     if (totalShips < 4) {
-    //         losses = 1;
-    //     } else if (totalShips <= 10) {
-    //         losses = (1 + numberBetweenZeroAndTwo);
-    //     } else if (totalShips <= 30) {
-    //         losses = (2 + numberBetweenZeroAndTwo);
-    //     } else if (totalShips <= 50) {
-    //         losses = (3 + numberBetweenZeroAndTwo);
-    //     } else if (totalShips <= 70) {
-    //         losses = (4 + numberBetweenZeroAndTwo);
-    //     } else if (totalShips <= 100) {
-    //         losses = (5 + numberBetweenZeroAndTwo);
-    //     } else {
-    //         losses = (6 + numberBetweenZeroAndTwo);
-    //     }
-    //     console.log(losses, "losses");
-    //     return losses;
-    // }
 
     function getBreakerShipCount(
         uint256 countryId
@@ -898,124 +879,13 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             submarineCount);
         return count;
     }
-
-    function generateLossForDefender(
-        uint256 battleId,
-        uint256 randomNumberForShipLoss
-    ) public {
-        // uint256[] storage chanceArray = battleIdToDefendBlockadeChanceArray[
-        //     battleId
-        // ];
-        // uint256[] storage typeArray = battleIdToDefendBlockadeTypeArray[
-        //     battleId
-        // ];
-        // uint256 randomArray = (randomNumberForShipLoss % typeArray.length);
-        // uint256 shipType = typeArray[randomArray];
-        // uint256[] storage defenderLosses = battleIdToDefendBlockadeLosses[
-        //     battleId
-        // ];
-        // defenderLosses.push(shipType);
-        // battleship
-        // cruiser
-        // frigate
-        // destroyer / submarine
-        // if (shipType == 3) {
-        // }
-        // uint256 cumulativeValue = battleIdToDefendBlockadeCumulativeSumOdds[
-        //     battleId
-        // ];
-        // uint256 randomNumber = (randomNumberForShipLoss % cumulativeValue);
-        // uint256 shipType;
-        // uint256 amountToDecrease;
-        // uint256 j;
-        // for (uint256 i; i < chanceArray.length; i++) {
-        //     if (randomNumber <= chanceArray[i]) {
-        //         shipType = typeArray[i];
-        //         amountToDecrease = getAmountToDecrease(shipType);
-        //         j = i;
-        //         break;
-        //     }
-        // }
-        // for (j; j < chanceArray.length; j++) {
-        //     if (chanceArray[j] >= randomNumber) {
-        //         chanceArray[j] -= amountToDecrease;
-        //     }
-        // }
-        // battleIdToDefendBlockadeCumulativeSumOdds[battleId] -= amountToDecrease;
-    }
-
-    // function generateLossForBreaker(
-    //     uint256 battleId,
-    //     uint256 randomNumberForShipLoss
-    // ) public {
-    //     uint256[] storage chanceArray = battleIdToBreakBlockadeChanceArray[
-    //         battleId
-    //     ];
-    //     uint256[] storage typeArray = battleIdToBreakBlockadeTypeArray[
-    //         battleId
-    //     ];
-    //     uint256 cumulativeValue = battleIdToBreakBlockadeCumulativeSumOdds[
-    //         battleId
-    //     ];
-    //     uint256 randomNumber = (randomNumberForShipLoss % cumulativeValue);
-    //     uint256 shipType;
-    //     uint256 amountToDecrease;
-    //     bool ranAlready = false;
-    //     if (ranAlready == false) {
-    //         for (uint256 i; i < chanceArray.length; i++) {
-    //             if (randomNumber <= chanceArray[i]) {
-    //                 shipType = typeArray[i];
-    //                 amountToDecrease = getAmountToDecrease(shipType);
-    //             }
-    //             uint256 j = i;
-    //             for (j; j < chanceArray.length; j++) {
-    //                 if (chanceArray[j] >= randomNumber) {
-    //                     chanceArray[j] -= amountToDecrease;
-    //                 }
-    //                 ranAlready = true;
-    //             }
-    //         }
-    //     }
-    //     battleIdToBreakBlockadeCumulativeSumOdds[battleId] -= amountToDecrease;
-    //     uint256[] storage defenderLosses = battleIdToBreakBlockadeLosses[
-    //         battleId
-    //     ];
-    //     defenderLosses.push(shipType);
-    // }
-
-    // function getAmountToDecrease(uint256 shipType)
-    //     internal
-    //     pure
-    //     returns (uint256)
-    // {
-    //     uint256 amountToDecrease;
-    //     if (shipType == 1) {
-    //         amountToDecrease = 15;
-    //     } else if (shipType == 2) {
-    //         amountToDecrease = 13;
-    //     } else if (shipType == 3) {
-    //         amountToDecrease = 11;
-    //     } else if (shipType == 4) {
-    //         amountToDecrease = 10;
-    //     } else if (shipType == 5) {
-    //         amountToDecrease = 8;
-    //     } else if (shipType == 6) {
-    //         amountToDecrease = 5;
-    //     } else if (shipType == 7) {
-    //         amountToDecrease = 4;
-    //     } else if (shipType == 8) {
-    //         amountToDecrease = 1;
-    //     }
-    //     return amountToDecrease;
-    // }
 }
 
 ///@title NavalAttackContract
 ///@author OxSnosh
 ///@dev this contract inherits from the openzeppelin ownable contract
 ///@dev this contract inherits from the chainlink VRF contract
-contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
-    using Chainlink for Chainlink.Request;
+contract NavalAttackContract is Ownable, VRFConsumerBaseV2 {
 
     address public navy;
     uint256 public navyBattleId;
@@ -1165,22 +1035,10 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         uint256 destroyerCount = nav2.getDestroyerCount(countryId);
         uint256 submarineCount = nav2.getSubmarineCount(countryId);
         uint256 aircraftCarrierCount = nav2.getAircraftCarrierCount(countryId);
-        console.log("creating struct");
-        console.log(
-            battleshipCount,
-            cruiserCount,
-            frigateCount,
-            submarineCount
-        );
         NavyForces storage newNavyForces = idToAttackerNavy[battleId];
         newNavyForces.corvetteCount = corvetteCount;
         newNavyForces.landingShipCount = landingShipCount;
         newNavyForces.battleshipCount = battleshipCount;
-        console.log(
-            "battleship count from mapping",
-            idToAttackerNavy[battleId].battleshipCount,
-            battleId
-        );
         newNavyForces.cruiserCount = cruiserCount;
         newNavyForces.frigateCount = frigateCount;
         newNavyForces.destroyerCount = destroyerCount;
@@ -1205,12 +1063,6 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         uint256 destroyerCount = nav2.getDestroyerCount(countryId);
         uint256 submarineCount = nav2.getSubmarineCount(countryId);
         uint256 aircraftCarrierCount = nav2.getAircraftCarrierCount(countryId);
-        console.log(
-            battleshipCount,
-            cruiserCount,
-            frigateCount,
-            submarineCount
-        );
         NavyForces storage newNavyForces = idToDefenderNavy[attackId];
         newNavyForces.corvetteCount = corvetteCount;
         newNavyForces.landingShipCount = landingShipCount;
@@ -1248,19 +1100,12 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             cumulativeSum = landingShipOddsToPush;
         }
         //battleship
-        console.log(
-            idToAttackerNavy[battleId].battleshipCount,
-            "triggering array generation"
-        );
         if (idToAttackerNavy[battleId].battleshipCount > 0) {
-            console.log("creating chance and type array");
             uint256 battleshipOdds = (idToAttackerNavy[battleId]
                 .battleshipCount * battleshipTargetSize);
             uint256 battleshipOddsToPush = (battleshipOdds + cumulativeSum);
             chances.push(battleshipOddsToPush);
-            console.log(chances[chances.length - 1]);
             types.push(3);
-            console.log(types[types.length - 1]);
             cumulativeSum = battleshipOddsToPush;
         }
         //cruiser
@@ -1404,16 +1249,8 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             .landingShipCount * landingShipStrength;
         uint256 _battleshipStrength = idToAttackerNavy[battleId]
             .battleshipCount * battleshipStrength;
-        console.log(
-            "count from getStrenf()",
-            idToAttackerNavy[battleId].battleshipCount
-        );
         uint256 _cruiserStrength = idToAttackerNavy[battleId].cruiserCount *
             cruiserStrength;
-        console.log(
-            "count from getStrenf()",
-            idToAttackerNavy[battleId].cruiserCount
-        );
         uint256 _frigateStrength = idToAttackerNavy[battleId].frigateCount *
             frigateStrength;
         uint256 _destroyerStrength = idToAttackerNavy[battleId].destroyerCount *
@@ -1422,9 +1259,6 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             submarineStrength;
         uint256 _aircraftCarrierStrength = idToAttackerNavy[battleId]
             .aircraftCarrierCount * aircraftCarrierStrength;
-        console.log("cruisers", idToAttackerNavy[battleId].cruiserCount);
-        console.log("cruiser strength", _cruiserStrength);
-        console.log("cruiser strength", cruiserStrength);
         uint256 strength = (_corvetteStrength +
             _landingShipStrength +
             _battleshipStrength +
@@ -1439,7 +1273,6 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             uint256 shipCount = getShipCount(attackerId);
             strength += (shipCount * navalAcademyCount);
         }
-        console.log("strength att", strength);
         return strength;
     }
 
@@ -1452,16 +1285,8 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             .landingShipCount * landingShipStrength;
         uint256 _battleshipStrength = idToDefenderNavy[battleId]
             .battleshipCount * battleshipStrength;
-        console.log(
-            "count from getStrenf()",
-            idToDefenderNavy[battleId].battleshipCount
-        );
         uint256 _cruiserStrength = idToDefenderNavy[battleId].cruiserCount *
             cruiserStrength;
-        console.log(
-            "count from getStrenf()",
-            idToDefenderNavy[battleId].cruiserCount
-        );
         uint256 _frigateStrength = idToDefenderNavy[battleId].frigateCount *
             frigateStrength;
         uint256 _destroyerStrength = idToDefenderNavy[battleId].destroyerCount *
@@ -1484,12 +1309,10 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             uint256 shipCount = getShipCount(defenderId);
             strength += (shipCount * navalAcademyCount);
         }
-        console.log("strength def", strength);
         return strength;
     }
 
-    function fulfillRequest(uint256 battleId) public {
-        console.log("arrived at fulfillRequest()");
+    function fulfillRequest(uint256 battleId) internal {
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
@@ -1497,48 +1320,46 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             i_callbackGasLimit,
             NUM_WORDS
         );
-        console.log("random words requested");
         s_requestIdToRequestIndex[requestId] = battleId;
     }
 
-    bytes32 navyAttackJobId;
-    address oracleAddress;
-    uint256 fee;
+    // bytes32 navyAttackJobId;
+    // address oracleAddress;
+    // uint256 fee;
 
-    // address linkAddress;
+    // // address linkAddress;
 
-    function updateJobId(bytes32 _jobId) public onlyOwner {
-        navyAttackJobId = _jobId;
-    }
+    // function updateJobId(bytes32 _jobId) public onlyOwner {
+    //     navyAttackJobId = _jobId;
+    // }
 
-    function updateOracleAddress(address _oracleAddress) public onlyOwner {
-        setChainlinkOracle(_oracleAddress);
-        oracleAddress = _oracleAddress;
-    }
+    // function updateOracleAddress(address _oracleAddress) public onlyOwner {
+    //     setChainlinkOracle(_oracleAddress);
+    //     oracleAddress = _oracleAddress;
+    // }
 
-    function updateFee(uint256 _fee) public onlyOwner {
-        fee = _fee;
-    }
+    // function updateFee(uint256 _fee) public onlyOwner {
+    //     fee = _fee;
+    // }
 
-    function updateLinkAddress(address _linkAddress) public onlyOwner {
-        setChainlinkToken(_linkAddress);
-        // linkAddress = _linkAddress;
-    }
+    // function updateLinkAddress(address _linkAddress) public onlyOwner {
+    //     setChainlinkToken(_linkAddress);
+    //     // linkAddress = _linkAddress;
+    // }
 
     function fulfillRandomWords(
         uint256 requestId,
         uint256[] memory randomWords
     ) internal override {
-        Chainlink.Request memory req = buildOperatorRequest(
-            navyAttackJobId,
-            this.completeNavalAttack.selector
-        );
+        // Chainlink.Request memory req = buildOperatorRequest(
+        //     navyAttackJobId,
+        //     this.completeNavalAttack.selector
+        // );
         uint256 requestNumber = s_requestIdToRequestIndex[requestId];
-        console.log(requestNumber, "requestNumber");
-        req.addUint("battleId", requestNumber);
+        // req.addUint("battleId", requestNumber);
         s_requestIndexToRandomWords[requestNumber] = randomWords;
         s_randomWords = randomWords;
-        req.addBytes("randomWords", abi.encode(randomWords));
+        // req.addBytes("randomWords", abi.encode(randomWords));
         // uint256 numberBetweenZeroAndTwo = (s_randomWords[0] % 2);
         // uint256 losses = getLosses(requestNumber, numberBetweenZeroAndTwo);
         // console.log("losses", losses);
@@ -1555,12 +1376,11 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         uint256[] memory defenderTypes = battleIdToDefenderTypeArray[
             requestNumber
         ];
-        req.addBytes("attackerChances", abi.encode(attackerChances));
-        req.addBytes("attackerTypes", abi.encode(attackerTypes));
-        req.addBytes("defenderChances", abi.encode(defenderChances));
-        req.addBytes("defenderTypes", abi.encode(defenderTypes));
-        sendOperatorRequest(req, fee);
-        console.log("request sent");
+        // req.addBytes("attackerChances", abi.encode(attackerChances));
+        // req.addBytes("attackerTypes", abi.encode(attackerTypes));
+        // req.addBytes("defenderChances", abi.encode(defenderChances));
+        // req.addBytes("defenderTypes", abi.encode(defenderTypes));
+        // sendOperatorRequest(req, fee);
         // uint256 attackerStartingStrength = idToAttackerNavy[requestNumber]
         //     .startingStrength;
         // console.log("attack strength", attackerStartingStrength);
@@ -1585,10 +1405,6 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         uint256[] memory _defenderLosses,
         uint256 battleId
     ) public {
-        console.log(_defenderLosses[0]);
-        console.log(_defenderLosses[1]);
-        console.log(_defenderLosses[2]);
-        console.log(battleId);
 
         emit NavalAttackComplete(_attackerLosses, _defenderLosses, battleId);
 

@@ -12,7 +12,7 @@ import "./Resources.sol";
 import "./CountryMinter.sol";
 import "./CountryParameters.sol";
 import "./Missiles.sol";
-import "hardhat/console.sol";
+import "./NavyBattle.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
@@ -38,6 +38,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
     address public bonusResources;
     address public navy2;
     address public parameters;
+    address public blockade;
 
     TreasuryContract tsy;
     WondersContract1 won1;
@@ -56,6 +57,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
     BonusResourcesContract bonus;
     NavyContract2 nav2;
     CountryParametersContract param;
+    NavalBlockadeContract bloc;
 
     mapping(uint256 => address) public idToOwnerBills;
 
@@ -107,7 +109,8 @@ contract BillsContract is Ownable, ReentrancyGuard {
         address _infrastructure,
         address _bonusResources,
         address _navy2,
-        address _parameters
+        address _parameters,
+        address _blockade
     ) public onlyOwner {
         improvements1 = _improvements1;
         imp1 = ImprovementsContract1(_improvements1);
@@ -125,6 +128,8 @@ contract BillsContract is Ownable, ReentrancyGuard {
         nav2 = NavyContract2(_navy2);
         parameters = _parameters;
         param = CountryParametersContract(_parameters);
+        blockade = _blockade;
+        bloc = NavalBlockadeContract(_blockade);
     }
 
     ///@dev this is public function but will only work for the nation owner who owes the bill payment
@@ -143,6 +148,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
         require(
             tsy.decreaseBalanceOnBillsPaid(id, billsPayable), "Payment failed"
         );
+        bloc.removeAllBlockadesAgainst(id);
         emit BillsPaid(id, billsPayable);
     }
 

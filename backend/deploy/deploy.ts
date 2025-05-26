@@ -768,7 +768,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         warcontract.address,
         countryminter.address,
         keepercontract.address,
-        breakblockadecontract.address
+        breakblockadecontract.address,
+        billscontract.address,
     )
 
     await deployedBreakBlocadeContract.settings(
