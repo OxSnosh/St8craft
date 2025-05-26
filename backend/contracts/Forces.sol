@@ -266,12 +266,7 @@ contract ForcesContract is Ownable, ReentrancyGuard {
         uint256 idSender,
         uint256 idReciever,
         uint256 amount
-    ) public onlyAidContract {
-        uint256 defendingSoldierCount = idToForces[idSender].defendingSoldiers;
-        require(
-            defendingSoldierCount >= amount,
-            "You do not have enough defending soldiers to send"
-        );
+    ) public onlyAidContract returns (bool) {
         require(
             idToForces[idReciever].nationExists == true,
             "Destination nation does not exist"
@@ -280,6 +275,7 @@ contract ForcesContract is Ownable, ReentrancyGuard {
         idToForces[idSender].numberOfSoldiers -= amount;
         idToForces[idReciever].defendingSoldiers += amount;
         idToForces[idReciever].numberOfSoldiers += amount;
+        return true;
     }
 
     ///@dev this is a public view function that will return the amount of defending soldiers of a nation

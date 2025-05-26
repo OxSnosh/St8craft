@@ -80,7 +80,7 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
     }
 
     uint256 public constant MAX_INFRASTRUCTURE = 20000;
-    uint256 public constant MAX_INFRASTRUCTURE_PER_PURCHASE = 100;
+    uint256 public constant MAX_INFRASTRUCTURE_PER_PURCHASE = 200;
 
     ///@dev this is a public view function that will allow a nation owner to buy infrastructure
     ///@dev this function is only callable by the nation owner
@@ -101,7 +101,7 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
         );
         require(
             buyAmount <= MAX_INFRASTRUCTURE_PER_PURCHASE,
-            "limit 100 infrastructure per purchase"
+            "limit 200 infrastructure per purchase"
         );
         uint256 cost = getInfrastructureCost(id, buyAmount);
         require(

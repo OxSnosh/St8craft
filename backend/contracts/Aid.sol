@@ -363,17 +363,17 @@ contract AidContract is Ownable, ReentrancyGuard {
         bool available = checkAvailability(idSender, tech, balance, soldiers);
         require(available, "balances not available");
         idToProposal[proposalId].accepted = true;
-        InfrastructureContract(infrastructure).sendTech(
+        require(InfrastructureContract(infrastructure).sendTech(
             idSender,
             idRecipient,
             tech
-        );
-        TreasuryContract(treasury).sendAidBalance(
+        ));
+        require(TreasuryContract(treasury).sendAidBalance(
             idSender,
             idRecipient,
             balance
-        );
-        ForcesContract(forces).sendSoldiers(idSender, idRecipient, soldiers);
+        ));
+        require(ForcesContract(forces).sendSoldiers(idSender, idRecipient, soldiers));
         finishAcceptProposal(
             proposalId,
             idSender,

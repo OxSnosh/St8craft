@@ -49,7 +49,7 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
         tsy = TreasuryContract(_treasury);
     }
 
-    uint256 public constant MAX_LAND_PER_PURCHASE = 100;
+    uint256 public constant MAX_LAND_PER_PURCHASE = 200;
 
     ///@dev this is a public function that will allow a nation owner to buy land
     ///@dev this function is only callable by the nation owner
@@ -60,7 +60,7 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
         require(amount > 0, "cannot be zero");
-        require(amount <= MAX_LAND_PER_PURCHASE, "limit 100 land per purchase");
+        require(amount <= MAX_LAND_PER_PURCHASE, "limit 200 land per purchase");
         uint256 cost = getLandCost(id, amount);
         require(
             inf.increaseLandCountFromMarket(id, amount),

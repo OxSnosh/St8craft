@@ -497,10 +497,11 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
         uint256 idSender,
         uint256 idRecipient,
         uint256 amount
-    ) public onlyAidContract {
+    ) public onlyAidContract returns (bool) {
         uint256 balance = idToTreasury[idSender].balance;
         require(balance >= amount, "not enough balance");
         idToTreasury[idSender].balance -= amount;
         idToTreasury[idRecipient].balance += amount;
+        return true;
     }
 }

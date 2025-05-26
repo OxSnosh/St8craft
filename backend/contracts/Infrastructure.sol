@@ -487,12 +487,10 @@ contract InfrastructureContract is Ownable, ReentrancyGuard {
         uint256 idSender,
         uint256 idReciever,
         uint256 amount
-    ) public onlyAidContract nonReentrant {
-        uint256 senderTech = idToInfrastructure[idSender].technologyCount;
-        require(senderTech >= amount, "Insufficient tech to send");
-
-        idToInfrastructure[idSender].technologyCount = senderTech - amount;
+    ) public onlyAidContract nonReentrant returns (bool) {
+        idToInfrastructure[idSender].technologyCount -= amount;
         idToInfrastructure[idReciever].technologyCount += amount;
+        return true;
     }
 
     ///@dev this is a public function only callable from the spy contract
