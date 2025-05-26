@@ -11,7 +11,7 @@ import "./Wonders.sol";
 import "./CountryMinter.sol";
 import "./KeeperFile.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title NavalActionsContract
 ///@author OxSnosh
@@ -30,6 +30,7 @@ contract NavalActionsContract is Ownable {
     KeeperContract keep;
 
     struct NavalActions {
+        bool initialized;
         mapping(uint256 => bool) blockadedToday;
         mapping(uint256 => uint256) purchasesToday;
         mapping(uint256 => uint256) actionSlotsUsedToday;
@@ -86,6 +87,11 @@ contract NavalActionsContract is Ownable {
     function generateNavalActions(uint256 id) public onlyCountryMinter {
         uint256 gameDay = keep.getGameDay();
         NavalActions storage newNavalActions = idToNavalActions[id];
+        require(
+            !newNavalActions.initialized,
+            "naval actions already initialized"
+        );
+        newNavalActions.initialized = true;
         newNavalActions.blockadedToday[gameDay] = false;
         newNavalActions.purchasesToday[gameDay] = 0;
         newNavalActions.actionSlotsUsedToday[gameDay] = 0;
@@ -172,7 +178,7 @@ contract NavalActionsContract is Ownable {
 ///@author OxSnosh
 ///@dev this contract inherits from openzeppelin's ownable contract
 ///@notice this contract will allow a user to purchase navy vessels
-contract NavyContract is Ownable {
+contract NavyContract is Ownable, ReentrancyGuard {
     address public treasuryAddress;
     address public improvementsContract1Address;
     address public improvementsContract3Address;
@@ -384,15 +390,27 @@ contract NavyContract is Ownable {
         _;
     }
 
-    function decreaseShipCount(uint256 nationId, uint256 shipType) public onlyAdditionalNavy {
+    function decreaseShipCount(
+        uint256 nationId,
+        uint256 shipType
+    ) public onlyAdditionalNavy {
         if (shipType == 1) {
-            require(idToNavy[nationId].corvetteCount > 0, "underflow: corvette");
+            require(
+                idToNavy[nationId].corvetteCount > 0,
+                "underflow: corvette"
+            );
             idToNavy[nationId].corvetteCount -= 1;
         } else if (shipType == 2) {
-            require(idToNavy[nationId].landingShipCount > 0, "underflow: landing ship");
+            require(
+                idToNavy[nationId].landingShipCount > 0,
+                "underflow: landing ship"
+            );
             idToNavy[nationId].landingShipCount -= 1;
         } else if (shipType == 3) {
-            require(idToNavy[nationId].battleshipCount > 0, "underflow: battleship");
+            require(
+                idToNavy[nationId].battleshipCount > 0,
+                "underflow: battleship"
+            );
             idToNavy[nationId].battleshipCount -= 1;
         } else if (shipType == 4) {
             require(idToNavy[nationId].cruiserCount > 0, "underflow: cruiser");
@@ -425,7 +443,7 @@ contract NavyContract is Ownable {
     ///@notice this function will allow a nation owner to purchase a corvette vessel
     ///@param amount this is the number of corvettes being purchased
     ///@param id this is the naton id of the nation purchasing vessels
-    function buyCorvette(uint256 amount, uint256 id) public {
+    function buyCorvette(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         (uint256 availablePurchases, ) = addNav.getAvailablePurchases(id);
@@ -484,7 +502,7 @@ contract NavyContract is Ownable {
     ///@notice this function will allow a nation owner to purchase a landing ships vessel
     ///@param amount this is the number of landing ships being purchased
     ///@param id this is the naton id of the nation purchasing vessels
-    function buyLandingShip(uint256 amount, uint256 id) public {
+    function buyLandingShip(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         (uint256 availablePurchases, ) = addNav.getAvailablePurchases(id);
@@ -546,7 +564,7 @@ contract NavyContract is Ownable {
     ///@notice this function will allow a nation owner to purchase a battleship vessel
     ///@param amount this is the number of battleship being purchased
     ///@param id this is the naton id of the nation purchasing vessels
-    function buyBattleship(uint256 amount, uint256 id) public {
+    function buyBattleship(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         (uint256 availablePurchases, ) = addNav.getAvailablePurchases(id);
@@ -608,7 +626,7 @@ contract NavyContract is Ownable {
     ///@notice this function will allow a nation owner to purchase a cruiser vessel
     ///@param amount this is the number of cruisers being purchased
     ///@param id this is the naton id of the nation purchasing vessels
-    function buyCruiser(uint256 amount, uint256 id) public {
+    function buyCruiser(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         (uint256 availablePurchases, ) = addNav.getAvailablePurchases(id);
@@ -673,7 +691,9 @@ contract NavyContract is Ownable {
     ///@notice vessels available to nuke strikes are corvettes, landing ships, cruisers and frigates
     ///@notice a nuke strike will reduce the number of these ships by 25% (12% with a fallout shelter system)
     ///@param defenderId this is the nation id of the nation being attacked
-    function decreaseNavyFromNukeContract(uint256 defenderId) public onlyNukeContract {
+    function decreaseNavyFromNukeContract(
+        uint256 defenderId
+    ) public onlyNukeContract {
         uint256 percentage = 40;
         if (won1.getFalloutShelterSystem(defenderId)) {
             percentage = 20;
@@ -682,10 +702,28 @@ contract NavyContract is Ownable {
         Navy storage navy = idToNavy[defenderId];
 
         uint256 corvetteCountToReduce = (navy.corvetteCount * percentage) / 100;
-        uint256 landingShipCountToReduce = (navy.landingShipCount * percentage) / 100;
+        uint256 landingShipCountToReduce = (navy.landingShipCount *
+            percentage) / 100;
         uint256 cruiserCountToReduce = (navy.cruiserCount * percentage) / 100;
         uint256 currentFrigates = navy2.getFrigateCount(defenderId);
         uint256 frigateCountToReduce = (currentFrigates * percentage) / 100;
+
+        require(
+            corvetteCountToReduce <= navy.corvetteCount,
+            "not enough corvettes"
+        );
+        require(
+            landingShipCountToReduce <= navy.landingShipCount,
+            "not enough landing ships"
+        );
+        require(
+            cruiserCountToReduce <= navy.cruiserCount,
+            "not enough cruisers"
+        );
+        require(
+            frigateCountToReduce <= navy2.getFrigateCount(defenderId),
+            "not enough frigates"
+        );
 
         navy.corvetteCount -= corvetteCountToReduce;
         navy.landingShipCount -= landingShipCountToReduce;
@@ -706,7 +744,7 @@ contract NavyContract is Ownable {
 ///@author OxSnosh
 ///@dev this contract inherits from openzeppelin's ownable contract
 ///@notice this contract will allow a user to purchase navy vessels
-contract NavyContract2 is Ownable {
+contract NavyContract2 is Ownable, ReentrancyGuard {
     address public treasuryAddress;
     address public improvementsContract1Address;
     address public improvementsContract3Address;
@@ -908,7 +946,7 @@ contract NavyContract2 is Ownable {
     ///@notice this function will allow a nation owner to purchase a frigates vessel
     ///@param amount this is the number of frigates being purchased
     ///@param id this is the naton id of the nation purchasing vessels
-    function buyFrigate(uint256 amount, uint256 id) public {
+    function buyFrigate(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         (uint256 availablePurchases, ) = addNav.getAvailablePurchases(id);
@@ -966,15 +1004,19 @@ contract NavyContract2 is Ownable {
         return frigateAmount;
     }
 
-    modifier onlyNavy1Contract () {
-        require(msg.sender == navy1Address, "function only callable from the navy1 contract");
+    modifier onlyAdditionalNavyContract() {
+        require(
+            msg.sender == additionalNavy,
+            "function only callable from additional navy contract"
+        );
         _;
     }
 
     function decreaseFrigateCount(
         uint256 id,
         uint256 amount
-    ) public onlyNavy1Contract {
+    ) public onlyAdditionalNavyContract {
+        require(amount <= idToNavy[id].frigateCount, "not enough frigates");
         idToNavy[id].frigateCount -= amount;
     }
 
@@ -983,7 +1025,7 @@ contract NavyContract2 is Ownable {
     ///@notice this function will allow a nation owner to purchase a destroyer vessel
     ///@param amount this is the number of destroyers being purchased
     ///@param id this is the naton id of the nation purchasing vessels
-    function buyDestroyer(uint256 amount, uint256 id) public {
+    function buyDestroyer(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         (uint256 availablePurchases, ) = addNav.getAvailablePurchases(id);
@@ -1044,7 +1086,8 @@ contract NavyContract2 is Ownable {
     function decreaseDestroyerCount(
         uint256 id,
         uint256 amount
-    ) public onlyNavy1Contract {
+    ) public onlyAdditionalNavyContract {
+        require(amount <= idToNavy[id].destroyerCount, "not enough destroyers");
         idToNavy[id].destroyerCount -= amount;
     }
 
@@ -1053,7 +1096,7 @@ contract NavyContract2 is Ownable {
     ///@notice this function will allow a nation owner to purchase a submarine vessel
     ///@param amount this is the number of submarines being purchased
     ///@param id this is the naton id of the nation purchasing vessels
-    function buySubmarine(uint256 amount, uint256 id) public {
+    function buySubmarine(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         (uint256 availablePurchases, ) = addNav.getAvailablePurchases(id);
@@ -1114,7 +1157,8 @@ contract NavyContract2 is Ownable {
     function decreaseSubmarineCount(
         uint256 id,
         uint256 amount
-    ) public onlyNavy1Contract {
+    ) public onlyAdditionalNavyContract {
+        require(amount <= idToNavy[id].submarineCount, "not enough submarines");
         idToNavy[id].submarineCount -= amount;
     }
 
@@ -1123,7 +1167,7 @@ contract NavyContract2 is Ownable {
     ///@notice this function will allow a nation owner to purchase a aircraft carrier vessel
     ///@param amount this is the number of aircraft carriers being purchased
     ///@param id this is the naton id of the nation purchasing vessels
-    function buyAircraftCarrier(uint256 amount, uint256 id) public {
+    function buyAircraftCarrier(uint256 amount, uint256 id) public nonReentrant {
         bool isOwner = mint.checkOwnership(id, msg.sender);
         require(isOwner, "!nation owner");
         (uint256 availablePurchases, ) = addNav.getAvailablePurchases(id);
@@ -1187,7 +1231,11 @@ contract NavyContract2 is Ownable {
     function decreaseAircraftCarrierCount(
         uint256 id,
         uint256 amount
-    ) public onlyNavy1Contract {
+    ) public onlyAdditionalNavyContract {
+        require(
+            amount <= idToNavy[id].aircraftCarrierCount,
+            "not enough aircraft carriers"
+        );
         idToNavy[id].aircraftCarrierCount -= amount;
     }
 }
@@ -1205,7 +1253,7 @@ contract AdditionalNavyContract is Ownable {
     address public navy2;
     address public blockade;
     address public breakBlockade;
-    address public navyalAttack;
+    address public navalAttack;
 
     NavyContract nav;
     NavalActionsContract navAct;
@@ -1225,7 +1273,7 @@ contract AdditionalNavyContract is Ownable {
         address _navy2,
         address _blockade,
         address _breakBlockade,
-        address _navyalAttack
+        address _navalAttack
     ) public onlyOwner {
         navy = _navy;
         nav = NavyContract(_navy);
@@ -1233,7 +1281,7 @@ contract AdditionalNavyContract is Ownable {
         navAct = NavalActionsContract(_navalActions);
         military = _military;
         mil = MilitaryContract(_military);
-        wonders1 = wonders1;
+        wonders1 = _wonders1;
         won1 = WondersContract1(_wonders1);
         improvements4 = _improvements4;
         imp4 = ImprovementsContract4(_improvements4);
@@ -1241,7 +1289,7 @@ contract AdditionalNavyContract is Ownable {
         nav2 = NavyContract2(_navy2);
         blockade = _blockade;
         breakBlockade = _breakBlockade;
-        navyalAttack = _navyalAttack;
+        navalAttack = _navalAttack;
     }
 
     ///@dev this is a public view function
@@ -1254,20 +1302,12 @@ contract AdditionalNavyContract is Ownable {
     ) public view returns (uint256, uint256) {
         uint256 purchasesToday = navAct.getPurchasesToday(id);
         uint256 maxDailyPurchases;
-        (bool isWar,) = mil.getWarPeacePreference(id);
+        (bool isWar, ) = mil.getWarPeacePreference(id);
         bool foreignNavalBase = won1.getForeignNavalBase(id);
         if (isWar) {
-            if (foreignNavalBase) {
-                maxDailyPurchases = 7;
-            } else if (!foreignNavalBase) {
-                maxDailyPurchases = 5;
-            }
-        } else if (!isWar) {
-            if (foreignNavalBase) {
-                maxDailyPurchases = 4;
-            } else if (!foreignNavalBase) {
-                maxDailyPurchases = 2;
-            }
+            maxDailyPurchases = foreignNavalBase ? 7 : 5;
+        } else {
+            maxDailyPurchases = foreignNavalBase ? 4 : 2;
         }
         uint256 navalConstructionYards = imp4.getNavalConstructionYardCount(id);
         if (navalConstructionYards > 0) {
@@ -1355,7 +1395,8 @@ contract AdditionalNavyContract is Ownable {
 
     modifier onlyBattle() {
         require(
-            msg.sender == navyalAttack || msg.sender == blockade ||
+            msg.sender == navalAttack ||
+                msg.sender == blockade ||
                 msg.sender == breakBlockade,
             "function only callable from battle contract"
         );
@@ -1370,56 +1411,104 @@ contract AdditionalNavyContract is Ownable {
     ) public onlyBattle {
         for (uint256 i; i < defenderLosses.length; i++) {
             if (defenderLosses[i] == 1) {
-                require(nav.getCorvetteCount(defenderId) > 0, "underflow: corvette");
+                require(
+                    nav.getCorvetteCount(defenderId) > 0,
+                    "underflow: corvette"
+                );
                 nav.decreaseShipCount(defenderId, 1);
             } else if (defenderLosses[i] == 2) {
-                require(nav.getLandingShipCount(defenderId) > 0, "underflow: landing ship");
+                require(
+                    nav.getLandingShipCount(defenderId) > 0,
+                    "underflow: landing ship"
+                );
                 nav.decreaseShipCount(defenderId, 2);
             } else if (defenderLosses[i] == 3) {
-                require(nav.getBattleshipCount(defenderId) > 0, "underflow: battleship");
+                require(
+                    nav.getBattleshipCount(defenderId) > 0,
+                    "underflow: battleship"
+                );
                 nav.decreaseShipCount(defenderId, 3);
             } else if (defenderLosses[i] == 4) {
-                require(nav.getCruiserCount(defenderId) > 0, "underflow: cruiser");
+                require(
+                    nav.getCruiserCount(defenderId) > 0,
+                    "underflow: cruiser"
+                );
                 nav.decreaseShipCount(defenderId, 4);
             } else if (defenderLosses[i] == 5) {
-                require(nav2.getFrigateCount(defenderId) > 0, "underflow: frigate");
+                require(
+                    nav2.getFrigateCount(defenderId) > 0,
+                    "underflow: frigate"
+                );
                 nav2.decreaseFrigateCount(defenderId, 1);
             } else if (defenderLosses[i] == 6) {
-                require(nav2.getDestroyerCount(defenderId) > 0, "underflow: destroyer");
+                require(
+                    nav2.getDestroyerCount(defenderId) > 0,
+                    "underflow: destroyer"
+                );
                 nav2.decreaseDestroyerCount(defenderId, 1);
             } else if (defenderLosses[i] == 7) {
-                require(nav2.getSubmarineCount(defenderId) > 0, "underflow: submarine");
+                require(
+                    nav2.getSubmarineCount(defenderId) > 0,
+                    "underflow: submarine"
+                );
                 nav2.decreaseSubmarineCount(defenderId, 1);
             } else if (defenderLosses[i] == 8) {
-                require(nav2.getAircraftCarrierCount(defenderId) > 0, "underflow: aircraft carrier");
+                require(
+                    nav2.getAircraftCarrierCount(defenderId) > 0,
+                    "underflow: aircraft carrier"
+                );
                 nav2.decreaseAircraftCarrierCount(defenderId, 1);
             }
         }
 
         for (uint256 i; i < attackerLosses.length; i++) {
             if (attackerLosses[i] == 1) {
-                require(nav.getCorvetteCount(attackerId) > 0, "underflow: corvette");
+                require(
+                    nav.getCorvetteCount(attackerId) > 0,
+                    "underflow: corvette"
+                );
                 nav.decreaseShipCount(attackerId, 1);
             } else if (attackerLosses[i] == 2) {
-                require(nav.getLandingShipCount(attackerId) > 0, "underflow: landing ship");
+                require(
+                    nav.getLandingShipCount(attackerId) > 0,
+                    "underflow: landing ship"
+                );
                 nav.decreaseShipCount(attackerId, 2);
             } else if (attackerLosses[i] == 3) {
-                require(nav.getBattleshipCount(attackerId) > 0, "underflow: battleship");
+                require(
+                    nav.getBattleshipCount(attackerId) > 0,
+                    "underflow: battleship"
+                );
                 nav.decreaseShipCount(attackerId, 3);
             } else if (attackerLosses[i] == 4) {
-                require(nav.getCruiserCount(attackerId) > 0, "underflow: cruiser");
+                require(
+                    nav.getCruiserCount(attackerId) > 0,
+                    "underflow: cruiser"
+                );
                 nav.decreaseShipCount(attackerId, 4);
             } else if (attackerLosses[i] == 5) {
-                require(nav2.getFrigateCount(attackerId) > 0, "underflow: frigate");
+                require(
+                    nav2.getFrigateCount(attackerId) > 0,
+                    "underflow: frigate"
+                );
                 nav2.decreaseFrigateCount(attackerId, 1);
             } else if (attackerLosses[i] == 6) {
-                require(nav2.getDestroyerCount(attackerId) > 0, "underflow: destroyer");
+                require(
+                    nav2.getDestroyerCount(attackerId) > 0,
+                    "underflow: destroyer"
+                );
                 nav2.decreaseDestroyerCount(attackerId, 1);
             } else if (attackerLosses[i] == 7) {
-                require(nav2.getSubmarineCount(attackerId) > 0, "underflow: submarine");
+                require(
+                    nav2.getSubmarineCount(attackerId) > 0,
+                    "underflow: submarine"
+                );
                 nav2.decreaseSubmarineCount(attackerId, 1);
             } else if (attackerLosses[i] == 8) {
-                require(nav2.getAircraftCarrierCount(attackerId) > 0, "underflow: aircraft carrier");
+                require(
+                    nav2.getAircraftCarrierCount(attackerId) > 0,
+                    "underflow: aircraft carrier"
+                );
                 nav2.decreaseAircraftCarrierCount(attackerId, 1);
             }
         }
