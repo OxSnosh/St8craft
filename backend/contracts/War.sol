@@ -16,6 +16,7 @@ import "hardhat/console.sol";
 ///@title WarContract
 ///@author OxSnosh
 ///@notice this contact will allow a naion owner to declare war on another nation
+///@notice this contract will also handle peace negotiations
 ///@dev this contract inherits from openzeppelin's ownable contract
 contract WarContract is Ownable {
     uint256 public warId;
@@ -55,7 +56,6 @@ contract WarContract is Ownable {
         mapping(uint256 => uint256) offenseIdToCruiseMissileLaunchesToday;
         mapping(uint256 => uint256) defenseIdToCruiseMissileLaunchesToday;
     }
-
 
     struct OffenseDeployed1 {
         mapping(uint256 => bool) offenseDeployedToday;
@@ -110,10 +110,7 @@ contract WarContract is Ownable {
         uint256 indexed defenseId
     );
 
-    event PeaceOffered(
-        uint256 indexed warId,
-        uint256 indexed offeredBy
-    );
+    event PeaceOffered(uint256 indexed warId, uint256 indexed offeredBy);
 
     event PeaceDeclared(
         uint256 indexed warId,
@@ -154,7 +151,12 @@ contract WarContract is Ownable {
         keep = KeeperContract(_keeper);
     }
 
-    function settings2(address _treasury, address _forces, address _blockade, address _nuke) public onlyOwner {
+    function settings2(
+        address _treasury,
+        address _forces,
+        address _blockade,
+        address _nuke
+    ) public onlyOwner {
         treasury = _treasury;
         tres = TreasuryContract(_treasury);
         forces = _forces;
@@ -180,17 +182,19 @@ contract WarContract is Ownable {
     function declareWar(uint256 offenseId, uint256 defenseId) public {
         bool isOwner = mint.checkOwnership(offenseId, msg.sender);
         require(isOwner, "!nation owner");
+        bool isOwner2 = mint.checkOwnership(defenseId, msg.sender);
+        require (!isOwner2, "cannot declare war on yourself");
         bool check = warCheck(offenseId, defenseId);
         require(check, "war not possible");
         uint day = keep.getGameDay();
         War storage war = warIdToWar[warId];
-            war.offenseId = offenseId;
-            war.defenseId = defenseId;
-            war.active = true;
-            war.dayStarted = day;
-            war.peaceDeclared = false;
-            war.offensePeaceOffered = false;
-            war.defensePeaceOffered = false;
+        war.offenseId = offenseId;
+        war.defenseId = defenseId;
+        war.active = true;
+        war.dayStarted = day;
+        war.peaceDeclared = false;
+        war.offensePeaceOffered = false;
+        war.defensePeaceOffered = false;
         OffenseLosses memory newOffenseLosses = OffenseLosses(
             warId,
             0,
@@ -241,10 +245,9 @@ contract WarContract is Ownable {
         uint256 offenseId,
         uint256 defenseId
     ) internal view returns (bool) {
-        bool warCheckReturn = false;
-        (bool isWarOkOffense,) = mil.getWarPeacePreference(offenseId);
+        (bool isWarOkOffense, ) = mil.getWarPeacePreference(offenseId);
         require(isWarOkOffense == true, "you are in peace mode");
-        (bool isWarOkDefense,) = mil.getWarPeacePreference(defenseId);
+        (bool isWarOkDefense, ) = mil.getWarPeacePreference(defenseId);
         require(isWarOkDefense == true, "nation in peace mode");
         bool isStrengthWithinRange = checkStrength(offenseId, defenseId);
         require(
@@ -255,7 +258,17 @@ contract WarContract is Ownable {
         require(!defenderInactive, "defender inactive");
         bool offenseInactive = tres.checkInactive(offenseId);
         require(!offenseInactive, "nation inactive");
+        uint256[] memory defenseActiveWars = idToActiveWars[defenseId];
+        //if you get caught spoofing wars to occupy slots your nations will be demonitized
+        require(
+            defenseActiveWars.length < 50,
+            "defender already has 50 active wars, you cannot declare another"
+        );
         uint256[] memory activeWars = idToActiveWars[offenseId];
+        require(
+            activeWars.length < 50,
+            "offense already has 50 active wars, you cannot declare another"
+        );
         for (uint256 i = 0; i < activeWars.length; i++) {
             uint256 war = activeWars[i];
             (uint256 offense, uint256 defense) = getInvolvedParties(war);
@@ -264,8 +277,7 @@ contract WarContract is Ownable {
                 "already at war with this nation"
             );
         }
-        warCheckReturn = true;
-        return warCheckReturn;
+        return true;
     }
 
     function offensiveWarLength(
@@ -291,12 +303,16 @@ contract WarContract is Ownable {
 
     ///@dev this is an internal function that will be balled by the declare war function and set up several structs that will keep track of each war
     function initializeDeployments(uint256 _warId) internal {
-        OffenseDeployed1 storage newOffenseDeployed1 = warIdToOffenseDeployed1[_warId];
-            newOffenseDeployed1.soldiersDeployed = 0;
-            newOffenseDeployed1.tanksDeployed = 0;
-        DefenseDeployed1 storage newDefenseDeployed1 = warIdToDefenseDeployed1[_warId];
-            newDefenseDeployed1.soldiersDeployed = 0;
-            newDefenseDeployed1.tanksDeployed = 0;
+        OffenseDeployed1 storage newOffenseDeployed1 = warIdToOffenseDeployed1[
+            _warId
+        ];
+        newOffenseDeployed1.soldiersDeployed = 0;
+        newOffenseDeployed1.tanksDeployed = 0;
+        DefenseDeployed1 storage newDefenseDeployed1 = warIdToDefenseDeployed1[
+            _warId
+        ];
+        newDefenseDeployed1.soldiersDeployed = 0;
+        newDefenseDeployed1.tanksDeployed = 0;
     }
 
     ///@dev this is a public view function that will return a boolean value if the nations are able to fight eachother
@@ -375,7 +391,23 @@ contract WarContract is Ownable {
         );
     }
 
-    function returnWarDetails(uint256 _warId) public view returns (uint256, uint256, bool, uint256, bool, bool, bool, uint256, uint256) {
+    function returnWarDetails(
+        uint256 _warId
+    )
+        public
+        view
+        returns (
+            uint256,
+            uint256,
+            bool,
+            uint256,
+            bool,
+            bool,
+            bool,
+            uint256,
+            uint256
+        )
+    {
         War storage war = warIdToWar[_warId];
         return (
             war.offenseId,
@@ -394,7 +426,9 @@ contract WarContract is Ownable {
     function removeActiveWar(uint256 _warId) internal {
         (uint256 offenseId, uint256 defenseId) = getInvolvedParties(_warId);
         uint256[] storage offenseActiveWars = idToActiveWars[offenseId];
-        uint256[] storage offenseDeactivatedWars = idToDeactivatedWars[offenseId];
+        uint256[] storage offenseDeactivatedWars = idToDeactivatedWars[
+            offenseId
+        ];
         for (uint256 i = 0; i < offenseActiveWars.length; i++) {
             if (offenseActiveWars[i] == _warId) {
                 offenseDeactivatedWars.push(_warId);
@@ -412,7 +446,9 @@ contract WarContract is Ownable {
             }
         }
         uint256[] storage defenseActiveWars = idToActiveWars[defenseId];
-        uint256[] storage defenseDeactivatedWars = idToDeactivatedWars[defenseId];
+        uint256[] storage defenseDeactivatedWars = idToDeactivatedWars[
+            defenseId
+        ];
         for (uint256 i = 0; i < defenseActiveWars.length; i++) {
             if (defenseActiveWars[i] == _warId) {
                 defenseDeactivatedWars.push(_warId);
@@ -427,8 +463,7 @@ contract WarContract is Ownable {
 
     modifier onlyNavyBattle() {
         require(
-            msg.sender == breakBlockade ||
-                msg.sender == navalAttack,
+            msg.sender == breakBlockade || msg.sender == navalAttack,
             "function only callable from navy battle contract"
         );
         _;
@@ -459,15 +494,24 @@ contract WarContract is Ownable {
         uint256 day = keep.getGameDay();
         War storage war = warIdToWar[_warId];
         if (nationId == offenseId) {
-            require(war.offenseIdToCruiseMissileLaunchesToday[day] < 2, "too many launches today");
+            require(
+                war.offenseIdToCruiseMissileLaunchesToday[day] < 2,
+                "too many launches today"
+            );
             war.offenseIdToCruiseMissileLaunchesToday[day] += 1;
         } else if (nationId == defenseId) {
-            require(war.defenseIdToCruiseMissileLaunchesToday[day] < 2, "too many launches today");
+            require(
+                war.defenseIdToCruiseMissileLaunchesToday[day] < 2,
+                "too many launches today"
+            );
             war.defenseIdToCruiseMissileLaunchesToday[day] += 1;
         }
     }
 
-    function getCruiseMissileLaunchesToday(uint256 _warId, uint256 id) public view returns (uint256) {
+    function getCruiseMissileLaunchesToday(
+        uint256 _warId,
+        uint256 id
+    ) public view returns (uint256) {
         (uint256 offenseId, uint256 defenseId) = getInvolvedParties(_warId);
         uint256 day = keep.getGameDay();
         uint256 launches;
@@ -534,7 +578,7 @@ contract WarContract is Ownable {
                 msg.sender == blockade ||
                 msg.sender == cruiseMissile ||
                 msg.sender == nuke,
-            "function only callable dring an attack"
+            "function only callable during an attack"
         );
         _;
     }
@@ -656,22 +700,43 @@ contract WarContract is Ownable {
         _;
     }
 
-    ///@dev this function is only callable from the groun battle contract
-    ///@dev this function will increment ground forces casualties
+    ///@dev this function is only callable from the ground battle contract
+    ///@dev this function will decrement deployed ground forces based on casualties
     function decreaseGroundBattleLosses(
         uint256 soldierLosses,
         uint256 tankLosses,
         uint256 attackerId,
         uint256 _warId
-    ) public onlyGroundBattle {
+    ) public onlyGroundBattle returns (bool) {
         (uint256 offenseId, uint256 defenseId) = getInvolvedParties(_warId);
-        if (offenseId == attackerId) {
+
+        if (attackerId == offenseId) {
+            require(
+                warIdToOffenseDeployed1[_warId].soldiersDeployed >= soldierLosses,
+                "underflow: offense soldier losses too high"
+            );
+            require(
+                warIdToOffenseDeployed1[_warId].tanksDeployed >= tankLosses,
+                "underflow: offense tank losses too high"
+            );
             warIdToOffenseDeployed1[_warId].soldiersDeployed -= soldierLosses;
             warIdToOffenseDeployed1[_warId].tanksDeployed -= tankLosses;
-        } else if (defenseId == attackerId) {
+        } else if (attackerId == defenseId) {
+            require(
+                warIdToDefenseDeployed1[_warId].soldiersDeployed >= soldierLosses,
+                "underflow: defense soldier losses too high"
+            );
+            require(
+                warIdToDefenseDeployed1[_warId].tanksDeployed >= tankLosses,
+                "underflow: defense tank losses too high"
+            );
             warIdToDefenseDeployed1[_warId].soldiersDeployed -= soldierLosses;
             warIdToDefenseDeployed1[_warId].tanksDeployed -= tankLosses;
+        } else {
+            revert("attacker not involved in this war");
         }
+
+        return true;
     }
 
     function recallTroopsFromDeactivatedWars(uint256 id) public {
@@ -679,8 +744,8 @@ contract WarContract is Ownable {
         require(isOwner, "!nation owner");
         uint256[] memory activeWars = idToActiveWars[id];
         for (uint256 i = 0; i < activeWars.length; i++) {
-            (,bool expired) = getDaysLeft(activeWars[i]);
-            if(expired == true) {
+            (, bool expired) = getDaysLeft(activeWars[i]);
+            if (expired == true) {
                 removeActiveWar(activeWars[i]);
             }
         }

@@ -585,12 +585,12 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             defenderTankLosses,
             defenderId
         );
-        war.decreaseGroundBattleLosses(
+        require(war.decreaseGroundBattleLosses(
             attackerSoldierLosses,
             attackerTankLosses,
             attackerId,
             warId
-        );
+        ));
         emit GroundBattleResultsEvent (
             battleId,
             warId,
