@@ -24,6 +24,7 @@ contract BombersContract is Ownable, ReentrancyGuard {
     CountryMinter mint;
 
     struct Bombers {
+        bool initialized;
         uint256 ah1CobraCount;
         uint256 ah64ApacheCount;
         uint256 bristolBlenheimCount;
@@ -118,7 +119,11 @@ contract BombersContract is Ownable, ReentrancyGuard {
     ///@dev this function is only callable from the country minter contract
     ///@notice this function will initiate a nation to be bale to buy bombers when a nation is minted
     function generateBombers(uint256 id) public onlyCountryMinter {
-        Bombers memory newBombers = Bombers(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        require(
+            !idToBombers[id].initialized,
+            "Bombers already initialized for this nation"
+        );
+        Bombers memory newBombers = Bombers(true, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         idToBombers[id] = newBombers;
     }
 
@@ -616,8 +621,6 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
     TreasuryContract tsy;
     BombersContract bomb1;
 
-    event AircraftPurchased(uint256 indexed id, string aircraftType, uint256 amount, uint256 price);
-
     ///@dev this function is only callable by the contract owner
     ///@dev this function will be called immediately after contract deployment in order to set contract pointers
     function settings(
@@ -762,7 +765,7 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
         );
     }
 
-    ///@dev this is a public view function that will allow the caller to purchase an AH1 Cobra for their nation
+    ///@dev this is a public function that will allow the caller to purchase an AH1 Cobra for their nation
     ///@notice this function allowes the caller to purchase an AH1 Cobra for their nation
     ///@param amount specifies the number of aircraft being purchased
     ///@param id is the nation ID
@@ -783,9 +786,8 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
         uint256 purchasePrice = (cost * amount);
         uint256 balance = tsy.checkBalance(id);
         require(balance >= purchasePrice);
-        bomb1.increaseAh1CobraCount(id, amount);
         require(tsy.spendBalance(id, purchasePrice), "failed to purchase");
-        emit AircraftPurchased(id, "AH1 Cobra", amount, purchasePrice);
+        bomb1.increaseAh1CobraCount(id, amount);
     }
 
     function getAh1CobraCost(uint256 id) public view returns (uint256) {
@@ -794,7 +796,7 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
         return cost;
     }
 
-    ///@dev this is a public view function that will allow the caller to purchase an A64 Apache for their nation
+    ///@dev this is a public function that will allow the caller to purchase an A64 Apache for their nation
     ///@notice this function allowes the caller to purchase an A64 Apache for their nation
     ///@param amount specifies the number of aircraft being purchased
     ///@param id is the nation ID
@@ -815,9 +817,8 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
         uint256 purchasePrice = (cost * amount);
         uint256 balance = tsy.checkBalance(id);
         require(balance >= purchasePrice);
-        bomb1.increaseAh64ApacheCount(id, amount);
         require(tsy.spendBalance(id, purchasePrice), "failed to purchase");
-        emit AircraftPurchased(id, "AH64 Apache", amount, purchasePrice);
+        bomb1.increaseAh64ApacheCount(id, amount);
     }
 
     function getAh64ApacheCost(uint256 id) public view returns (uint256) {
@@ -826,7 +827,7 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
         return cost;
     }
 
-    ///@dev this is a public view function that will allow the caller to purchase a Bristol Blenheim for their nation
+    ///@dev this is a public function that will allow the caller to purchase a Bristol Blenheim for their nation
     ///@notice this function allowes the caller to purchase a Bristol Blenheim for their nation
     ///@param amount specifies the number of aircraft being purchased
     ///@param id is the nation ID
@@ -847,9 +848,8 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
         uint256 purchasePrice = (cost * amount);
         uint256 balance = tsy.checkBalance(id);
         require(balance >= purchasePrice);
-        bomb1.increaseBristolBlenheimCount(id, amount);
         require(tsy.spendBalance(id, purchasePrice), "failed to purchase");
-        emit AircraftPurchased(id, "Bristol Blenheim", amount, purchasePrice);
+        bomb1.increaseBristolBlenheimCount(id, amount);
     }
 
     function getBristolBlenheimCost(uint256 id) public view returns (uint256) {
@@ -858,7 +858,7 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
         return cost;
     }
 
-    ///@dev this is a public view function that will allow the caller to purchase a B52 Mitchell for their nation
+    ///@dev this is a public function that will allow the caller to purchase a B52 Mitchell for their nation
     ///@notice this function allowes the caller to purchase a B52 Mitchell for their nation
     ///@param amount specifies the number of aircraft being purchased
     ///@param id is the nation ID
@@ -879,9 +879,8 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
         uint256 purchasePrice = (cost * amount);
         uint256 balance = tsy.checkBalance(id);
         require(balance >= purchasePrice);
-        bomb1.increaseB52MitchellCount(id, amount);
         require(tsy.spendBalance(id, purchasePrice), "failed to purchase");
-        emit AircraftPurchased(id, "B52 Mitchell", amount, purchasePrice);
+        bomb1.increaseB52MitchellCount(id, amount);
     }
 
     function getB52MitchellCost(uint256 id) public view returns (uint256) {
@@ -890,7 +889,7 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
         return cost;
     }
 
-    ///@dev this is a public view function that will allow the caller to purchase a B17 Flying Fortress for their nation
+    ///@dev this is a public function that will allow the caller to purchase a B17 Flying Fortress for their nation
     ///@notice this function allowes the caller to purchase a B17 Flying Fortress for their nation
     ///@param amount specifies the number of aircraft being purchased
     ///@param id is the nation ID
@@ -911,9 +910,8 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
         uint256 purchasePrice = (cost * amount);
         uint256 balance = tsy.checkBalance(id);
         require(balance >= purchasePrice);
-        bomb1.increaseB17gFlyingFortressCount(id, amount);
         require(tsy.spendBalance(id, purchasePrice), "failed to purchase");
-        emit AircraftPurchased(id, "B17 Flying Fortress", amount, purchasePrice);
+        bomb1.increaseB17gFlyingFortressCount(id, amount);
     }
 
     function getB17gFlyingFortressCost(
@@ -1077,7 +1075,7 @@ contract BombersMarketplace2 is Ownable, ReentrancyGuard {
         );
     }
 
-    ///@dev this is a public view function that will allow the caller to purchase a B52 Stratofortress for their nation
+    ///@dev this is a public function that will allow the caller to purchase a B52 Stratofortress for their nation
     ///@notice this function allowes the caller to purchase a B52 Stratofortress for their nation
     ///@param amount specifies the number of aircraft being purchased
     ///@param id is the nation ID
@@ -1098,9 +1096,8 @@ contract BombersMarketplace2 is Ownable, ReentrancyGuard {
         uint256 purchasePrice = (cost * amount);
         uint256 balance = tsy.checkBalance(id);
         require(balance >= purchasePrice);
-        bomb1.increaseB52StratofortressCount(id, amount);
         require(tsy.spendBalance(id, purchasePrice), "failed to purchase");
-        emit AircraftPurchased(id, "B52 Stratofortress", amount, purchasePrice);
+        bomb1.increaseB52StratofortressCount(id, amount);
     }
 
     function getB52StratofortressCost(
@@ -1111,7 +1108,7 @@ contract BombersMarketplace2 is Ownable, ReentrancyGuard {
         return cost;
     }
 
-    ///@dev this is a public view function that will allow the caller to purchase a B2 Spirit for their nation
+    ///@dev this is a public function that will allow the caller to purchase a B2 Spirit for their nation
     ///@notice this function allowes the caller to purchase a B2 Spirit for their nation
     ///@param amount specifies the number of aircraft being purchased
     ///@param id is the nation ID
@@ -1132,9 +1129,8 @@ contract BombersMarketplace2 is Ownable, ReentrancyGuard {
         uint256 purchasePrice = (cost * amount);
         uint256 balance = tsy.checkBalance(id);
         require(balance >= purchasePrice);
-        bomb1.increaseB2SpiritCount(id, amount);
         require(tsy.spendBalance(id, purchasePrice), "failed to purchase");
-        emit AircraftPurchased(id, "B2 Spirit", amount, purchasePrice);
+        bomb1.increaseB2SpiritCount(id, amount);
     }
 
     function getB2SpiritCost(uint256 id) public view returns (uint256) {
@@ -1143,7 +1139,7 @@ contract BombersMarketplace2 is Ownable, ReentrancyGuard {
         return cost;
     }
 
-    ///@dev this is a public view function that will allow the caller to purchase a B1B Lancer for their nation
+    ///@dev this is a public function that will allow the caller to purchase a B1B Lancer for their nation
     ///@notice this function allowes the caller to purchase a B1B Lancer for their nation
     ///@param amount specifies the number of aircraft being purchased
     ///@param id is the nation ID
@@ -1164,9 +1160,8 @@ contract BombersMarketplace2 is Ownable, ReentrancyGuard {
         uint256 purchasePrice = (cost * amount);
         uint256 balance = tsy.checkBalance(id);
         require(balance >= purchasePrice);
-        bomb1.increaseB1bLancerCount(id, amount);
         require(tsy.spendBalance(id, purchasePrice), "failed to purchase");
-        emit AircraftPurchased(id, "B1B Lancer", amount, purchasePrice);
+        bomb1.increaseB1bLancerCount(id, amount);
     }
 
     function getB1bLancerCost(uint256 id) public view returns (uint256) {
@@ -1175,7 +1170,7 @@ contract BombersMarketplace2 is Ownable, ReentrancyGuard {
         return cost;
     }
 
-    ///@dev this is a public view function that will allow the caller to purchase a Tupolev TU160 for their nation
+    ///@dev this is a public function that will allow the caller to purchase a Tupolev TU160 for their nation
     ///@notice this function allowes the caller to purchase a Tupolev TU160 for their nation
     ///@param amount specifies the number of aircraft being purchased
     ///@param id is the nation ID
@@ -1196,9 +1191,8 @@ contract BombersMarketplace2 is Ownable, ReentrancyGuard {
         uint256 purchasePrice = (cost * amount);
         uint256 balance = tsy.checkBalance(id);
         require(balance >= purchasePrice);
-        bomb1.increaseTupolevTu160Count(id, amount);
         require(tsy.spendBalance(id, purchasePrice), "failed to purchase");
-        emit AircraftPurchased(id, "Tupolev TU160", amount, purchasePrice);
+        bomb1.increaseTupolevTu160Count(id, amount);
     }
 
     function getTupolevTu160Cost(uint256 id) public view returns (uint256) {

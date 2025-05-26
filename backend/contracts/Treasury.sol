@@ -65,6 +65,7 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
     KeeperContract keep;
 
     struct Treasury {
+        bool initialized;
         uint256 dayOfLastBillPaid;
         uint256 dayOfLastTaxCollection;
         uint256 balance;
@@ -192,8 +193,13 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
     ///@notice this function will be called when a nation is minted and will allow a nation to undergo treasury operations
     ///@param id is the nation id of the nation being minted
     function generateTreasury(uint256 id) public onlyCountryMinter {
+        require(
+            idToTreasury[id].initialized == false,
+            "treasury already initialized"
+        );
         uint256 gameDay = keep.getGameDay();
         Treasury memory newTreasury = Treasury(
+            true,
             gameDay,
             gameDay,
             0,

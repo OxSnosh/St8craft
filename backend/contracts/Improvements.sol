@@ -751,6 +751,7 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
     SpyContract spy;
 
     struct Improvements2 {
+        bool initialized;
         //Foreign Ministry
         //$120,000
         //Increases population income by 5%
@@ -859,10 +860,11 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
     ///@param id this is the nation ID for the nation being minted
     function generateImprovements(uint256 id) public onlyCountryMinter {
         require(
-            idToImprovements2[id].foreignMinistryCount == 0,
-            "Improvements already generated"
+            idToImprovements2[id].initialized == false,
+            "Improvements already initialized"
         );
         Improvements2 memory newImprovements2 = Improvements2(
+            true,
             0,
             0,
             0,
@@ -1384,6 +1386,7 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
     ResourcesContract res;
 
     struct Improvements4 {
+        bool initialized;
         //Missile Defense
         //$90,000
         //Reduces effectiveness of incoming cruise missiles used against your nation -10%.
@@ -1476,10 +1479,10 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
     ///@param id this is the nation ID for the nation being minted
     function generateImprovements(uint256 id) public onlyCountryMinter {
         require(
-            idToImprovements4[id].missileDefenseCount == 0,
-            "Improvements already generated"
+            idToImprovements4[id].initialized == false,
+            "Improvements already initialized"
         );
-        Improvements4 memory newImprovements4 = Improvements4(0, 0, 0, 0, 0, 0);
+        Improvements4 memory newImprovements4 = Improvements4(true, 0, 0, 0, 0, 0, 0);
         idToImprovements4[id] = newImprovements4;
     }
 
@@ -1893,6 +1896,7 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
     WondersContract4 won4;
 
     struct Improvements3 {
+        bool initialized;
         //Prison
         //$200,000
         //Incarcerates up to 5,000 criminals.
@@ -2003,10 +2007,11 @@ contract ImprovementsContract3 is Ownable, ReentrancyGuard {
     ///@param id this is the nation ID for the nation being minted
     function generateImprovements(uint256 id) public onlyCountryMinter {
         require(
-            idToImprovements3[id].prisonCount == 0,
-            "Improvements already generated"
-        );
+            idToImprovements3[id].initialized == false,
+            "Improvements already initialized"
+        ); 
         Improvements3 memory newImprovements3 = Improvements3(
+            true,
             0,
             0,
             0,

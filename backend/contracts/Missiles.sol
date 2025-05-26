@@ -52,6 +52,7 @@ contract MissilesContract is Ownable, ReentrancyGuard {
     KeeperContract keep;
 
     struct Missiles {
+        bool initialized;
         uint256 cruiseMissiles;
         uint256 nuclearWeapons;
     }
@@ -121,8 +122,20 @@ contract MissilesContract is Ownable, ReentrancyGuard {
 
     mapping(uint256 => Missiles) public idToMissiles;
 
-    function generateMissiles(uint256 id) public {
-        Missiles memory newMissiles = Missiles(0, 0);
+    modifier onlyCountryMinter() {
+        require(
+            msg.sender == countryMinter,
+            "only callable from country minter contract"
+        );
+        _;
+    }
+
+    function generateMissiles(uint256 id) public onlyCountryMinter {
+        require(
+            idToMissiles[id].initialized == false,
+            "missiles already initialized"
+        );
+        Missiles memory newMissiles = Missiles(true, 0, 0);
         idToMissiles[id] = newMissiles;
     }
 

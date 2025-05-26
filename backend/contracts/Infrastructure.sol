@@ -57,6 +57,7 @@ contract InfrastructureContract is Ownable, ReentrancyGuard {
     CountryParametersContract param;
 
     struct Infrastructure {
+        bool initialized;
         uint256 landArea;
         uint256 technologyCount;
         uint256 infrastructureCount;
@@ -276,7 +277,12 @@ contract InfrastructureContract is Ownable, ReentrancyGuard {
     ///@notice this function allows this contract to store info about a nations infrastructure
     ///@param id this is the nation ID for the nation being minted
     function generateInfrastructure(uint256 id) public onlyCountryMinter {
+        require(
+            !idToInfrastructure[id].initialized,
+            "infrastructure already initialized"
+        );
         Infrastructure memory newInfrastrusture = Infrastructure(
+            true,
             20,
             0,
             20,

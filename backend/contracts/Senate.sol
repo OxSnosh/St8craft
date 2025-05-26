@@ -36,6 +36,7 @@ contract SenateContract is ChainlinkClient, KeeperCompatibleInterface, Ownable {
     ResourcesContract res;
 
     struct Voter {
+        bool initialized;
         uint256 lastVoteCast;
         bool senator;
         uint256 team;
@@ -130,8 +131,13 @@ contract SenateContract is ChainlinkClient, KeeperCompatibleInterface, Ownable {
     ///@notice this contract will allow set up a nations voting and senate capabilities upon minting
     ///@param id is the nation id of the nation being minted
     function generateVoter(uint256 id) public onlyCountryMinter {
+        require(
+            idToVoter[id].initialized == false,
+            "Voter already initialized"
+        );
         uint256 day = keep.getGameDay();
         Voter storage newVoter = idToVoter[id];
+        newVoter.initialized = true;
         newVoter.lastVoteCast = 0;
         newVoter.senator = false;
         newVoter.team = 0;

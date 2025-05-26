@@ -208,6 +208,7 @@ contract NavyContract is Ownable, ReentrancyGuard {
     uint256 public cruiserRequiredTechnology = 350;
 
     struct Navy {
+        bool initialized;
         uint256 corvetteCount;
         uint256 landingShipCount;
         uint256 battleshipCount;
@@ -329,7 +330,11 @@ contract NavyContract is Ownable, ReentrancyGuard {
     ///@notice this function will allow a nation owner to buy navy vessels
     ///@param id this is the nation id of the nation being minted
     function generateNavy(uint256 id) public onlyCountryMinter {
-        Navy memory newNavy = Navy(0, 0, 0, 0);
+        require(
+            !idToNavy[id].initialized,
+            "navy already initialized for this nation"
+        );
+        Navy memory newNavy = Navy(true, 0, 0, 0, 0);
         idToNavy[id] = newNavy;
     }
 
@@ -774,6 +779,7 @@ contract NavyContract2 is Ownable, ReentrancyGuard {
     uint256 public aircraftCarrierRequiredTechnology = 1000;
 
     struct Navy {
+        bool initialized;
         uint256 frigateCount;
         uint256 destroyerCount;
         uint256 submarineCount;
@@ -893,7 +899,11 @@ contract NavyContract2 is Ownable, ReentrancyGuard {
     ///@notice this function will allow a nation owner to buy navy vessels
     ///@param id this is the nation id of the nation being minted
     function generateNavy2(uint256 id) public onlyCountryMinter {
-        Navy memory newNavy = Navy(0, 0, 0, 0);
+        require(
+            !idToNavy[id].initialized,
+            "navy already initialized for this nation"
+        );
+        Navy memory newNavy = Navy(true, 0, 0, 0, 0);
         idToNavy[id] = newNavy;
     }
 
