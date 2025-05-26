@@ -1580,7 +1580,7 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
     );
 
     function completeNavalAttack(
-        bytes32 requestId,
+        // bytes32 requestId,
         uint256[] memory _attackerLosses,
         uint256[] memory _defenderLosses,
         uint256 battleId

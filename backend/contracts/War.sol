@@ -11,8 +11,6 @@ import "./Forces.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
-// import "hardhat/console.sol";
-
 ///@title WarContract
 ///@author OxSnosh
 ///@notice this contact will allow a naion owner to declare war on another nation
@@ -260,14 +258,10 @@ contract WarContract is Ownable {
         require(!offenseInactive, "nation inactive");
         uint256[] memory defenseActiveWars = idToActiveWars[defenseId];
         //if you get caught spoofing wars to occupy slots your nations will be demonitized
-        require(
-            defenseActiveWars.length < 50,
-            "defender already has 50 active wars, you cannot declare another"
-        );
         uint256[] memory activeWars = idToActiveWars[offenseId];
         require(
-            activeWars.length < 50,
-            "offense already has 50 active wars, you cannot declare another"
+            defenseActiveWars.length < 50 && activeWars.length < 50,
+            "defender or attacker already has 50 active wars"
         );
         for (uint256 i = 0; i < activeWars.length; i++) {
             uint256 war = activeWars[i];
