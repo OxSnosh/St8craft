@@ -368,9 +368,9 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
     mapping(uint256 => uint256) public pendingRequestTimestamp;
     uint256 public constant RETRY_TIMEOUT = 5 minutes;
 
-    event RequestEmitted(
-        uint256 indexed requestId,
-        uint256 indexed battleId,
+    event RandomnessRequested(
+        uint256 requestId,
+        uint256 battleId,
         uint256 timestamp
     );
 
@@ -392,7 +392,7 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
         s_requestIdToRequestIndex[requestId] = battleId;
         pendingRequests[battleId] = true;
         pendingRequestTimestamp[battleId] = block.timestamp;
-        emit RequestEmitted(requestId, battleId, block.timestamp);
+        emit RandomnessRequested(requestId, battleId, block.timestamp);
     }
 
     function fulfillRequest(uint256 battleId) internal {
@@ -406,7 +406,7 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
         s_requestIdToRequestIndex[requestId] = battleId;
         pendingRequests[battleId] = true;
         pendingRequestTimestamp[battleId] = block.timestamp;
-        emit RequestEmitted(requestId, battleId, block.timestamp);
+        emit RandomnessRequested(requestId, battleId, block.timestamp);
     }
 
     bytes32 jobId;

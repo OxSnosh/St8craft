@@ -14,16 +14,14 @@ import "./Military.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title GroundBattleContract
 ///@author OxSnosh
 ///@dev this contract inherits from the openzeppelin ownable contract
 ///@dev this contract inherits from the chainlink vrf contract
 ///@notice the GroundBattleContract will allow nations at war to launch ground attacks against each other
-contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
-    using Chainlink for Chainlink.Request;
+contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 
     uint256 groundBattleId;
     address warAddress;
@@ -83,14 +81,12 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
 
     mapping(uint256 => GroundForcesToBattle) groundBattleIdToAttackerForces;
     mapping(uint256 => GroundForcesToBattle) groundBattleIdToDefenderForces;
-    mapping(uint256 => BattleResults) groundBattleIdToBattleResults;
-    mapping(uint256 => bool) groundBattleIdToAtackerVictory;
     
     mapping(uint256 => uint256) s_requestIdToRequestIndex;
     mapping(uint256 => uint256[]) public s_requestIndexToRandomWords;
 
     event BattleResultsEvent (
-        uint256 indexed battleId,
+        uint256 battleId,
         uint256 attackSolderLosses,
         uint256 attackTankLosses,
         uint256 defenderSoldierLosses,
@@ -229,7 +225,7 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         uint256 attackerId,
         uint256 defenderId,
         uint256 attackType
-    ) public {
+    ) public nonReentrant {
         bool isOwner = mint.checkOwnership(attackerId, msg.sender);
         require(isOwner, "!nation owner");
         bool isActiveWar = war.isWarActive(warId);
@@ -262,7 +258,6 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         war.cancelPeaceOffersUponAttack(warId);
         fulfillRequest(groundBattleId);
         groundBattleId++;
-        console.log("GROUND BATTLE ID: ", groundBattleId);
     }
 
     function generateAttackerForcesStruct(
@@ -371,7 +366,8 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             attackerId,
             warId
         );
-        uint256 strength = (soldierEfficiency + (15 * tanksDeployed));
+        uint256 attackerTech = inf.getTechnologyCount(attackerId);
+        uint256 strength = (soldierEfficiency + (15 * tanksDeployed) + (attackerTech));
         uint256 mod = 100;
         bool pentagon = won3.getPentagon(attackerId);
         if (pentagon) {
@@ -415,7 +411,8 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
     ) public view returns (uint256) {
         uint256 soldierEfficiency = getDefendingSoldierEfficiency(defenderId);
         uint256 tanks = force.getDefendingTankCount(defenderId);
-        uint256 strength = ((soldierEfficiency) + (17 * tanks));
+        uint256 defenderTech = inf.getTechnologyCount(defenderId);
+        uint256 strength = ((soldierEfficiency) + (17 * tanks) + (defenderTech));
         (uint256 warOffense, uint256 warDefense) = war.getInvolvedParties(
             _warId
         );
@@ -470,29 +467,12 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         return mod;
     }
 
-    bytes32 groundBattleJobId;
-    address oracleAddress;
-    uint256 fee;
-
-    function updateJobId(bytes32 _jobId) public onlyOwner {
-        groundBattleJobId = _jobId;
-    }
-
-    function updateOracleAddress(address _oracleAddress) public onlyOwner {
-        oracleAddress = _oracleAddress;
-        setChainlinkOracle(_oracleAddress);
-    }
-
-    function updateLinkAddress(address _linkToken) public onlyOwner {
-        setChainlinkToken(_linkToken);
-    }
-
-    function updateFee(uint256 _fee) public onlyOwner {
-        fee = _fee;
-    }
+    event RandomnessRequested(
+        uint256 requestId,
+        uint256 battleId
+    );
 
     function fulfillRequest(uint256 battleId) internal {
-        console.log("at fulfillRequest()");
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
@@ -501,38 +481,60 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
             NUM_WORDS
         );
         s_requestIdToRequestIndex[requestId] = battleId;
-        console.log("REQUEST ID: ", requestId);
+        emit RandomnessRequested(
+            requestId,
+            battleId
+        );        
     }
 
     function fulfillRandomWords(
         uint256 requestId,
         uint256[] memory randomWords
     ) internal override {
-        console.log("arrived at fulfillRandom()");
-        uint256 requestNumber = s_requestIdToRequestIndex[requestId];
-        s_requestIndexToRandomWords[requestNumber] = randomWords;
-        uint256 attackerStrength = groundBattleIdToAttackerForces[requestNumber]
+        uint256 battleId = s_requestIdToRequestIndex[requestId];
+        s_requestIndexToRandomWords[battleId] = randomWords;
+        uint256 attackerStrength = groundBattleIdToAttackerForces[battleId]
             .strength;
-        uint256 defenderStrength = groundBattleIdToDefenderForces[requestNumber]
+        uint256 defenderStrength = groundBattleIdToDefenderForces[battleId]
             .strength;
-        uint256 attackerId = groundBattleIdToAttackerForces[requestNumber]
+        uint256 attackerId = groundBattleIdToAttackerForces[battleId]
             .countryId;
-        uint256 defenderId = groundBattleIdToDefenderForces[requestNumber]
+        uint256 defenderId = groundBattleIdToDefenderForces[battleId]
             .countryId;
-        uint256 warId = groundBattleIdToAttackerForces[requestNumber].warId;
-        Chainlink.Request memory req = buildOperatorRequest(
-            groundBattleJobId,
-            this.completeBattleSequence.selector
+        uint256 warId = groundBattleIdToAttackerForces[battleId].warId;
+        uint256 totalStrength = (attackerStrength + defenderStrength);
+        uint256 randomVictoryNumber = randomWords[0] % totalStrength;
+        uint256 attackerSoldierLosses;
+        uint256 attackerTankLosses;
+        uint256 defenderSoldierLosses;
+        uint256 defenderTankLosses;
+        if (randomVictoryNumber < attackerStrength) {
+            //attack victorious
+            (
+                attackerSoldierLosses,
+                attackerTankLosses,
+                defenderSoldierLosses,
+                defenderTankLosses
+            ) = attackVictory(battleId);
+        } else {
+            //defense victorious
+            (
+                attackerSoldierLosses,
+                attackerTankLosses,
+                defenderSoldierLosses,
+                defenderTankLosses
+            ) = defenseVictory(battleId);
+        }
+        completeBattleSequence(
+            battleId,
+            attackerId,
+            attackerSoldierLosses,
+            attackerTankLosses,
+            defenderId,
+            defenderSoldierLosses,
+            defenderTankLosses,
+            warId
         );
-        req.addUint("attackId", requestNumber);
-        req.addBytes("randomWords", abi.encode(randomWords));
-        req.addUint("attackerStrength", attackerStrength);
-        req.addUint("defenderStrength", defenderStrength);
-        req.addUint("attackerId", attackerId);
-        req.addUint("defenderId", defenderId);
-        req.addUint("warId", warId);
-        sendOperatorRequest(req, fee);
-        console.log("request sent");
     }
 
     event GroundBattleResultsEvent (
@@ -547,7 +549,6 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
     );
 
     function completeBattleSequence(
-        bytes32 requestId,
         uint256 battleId, 
         uint256 attackerId,
         uint256 attackerSoldierLosses,
@@ -555,28 +556,8 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         uint256 defenderId,
         uint256 defenderSoldierLosses,
         uint256 defenderTankLosses,
-        uint256 warId,
-        bool attackerVictory
-    ) external recordChainlinkFulfillment(requestId) {
-        groundBattleIdToAtackerVictory[battleId] = attackerVictory;
-        emit BattleResultsEvent (
-            battleId,
-            attackerSoldierLosses,
-            attackerTankLosses,
-            defenderSoldierLosses,
-            defenderTankLosses
-        );
-        BattleResults memory newBattleResults = BattleResults(
-            attackerId,
-            attackerSoldierLosses,
-            attackerTankLosses,
-            defenderId,
-            defenderSoldierLosses,
-            defenderTankLosses
-        );
-        groundBattleIdToBattleResults[
-            battleId
-        ] = newBattleResults;
+        uint256 warId
+    ) internal {
         force.decreaseUnits(
             attackerSoldierLosses,
             attackerTankLosses,
@@ -613,48 +594,6 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         if (anarchyCheckAttacker) {
             param.inflictAnarchy(attackerId);
         }
-        // collectSpoils(battleId, attackerId);
-        console.log("BATTLE COMPLETE");
-    }
-
-    function returnBattleResults(
-        uint256 battleId
-    )
-        public
-        view
-        returns (uint256, uint256, uint256, uint256, uint256, uint256)
-    {
-        uint256 attackerId = groundBattleIdToBattleResults[battleId]
-            .nationId;
-        uint256 attackerSoldierLosses = groundBattleIdToBattleResults[
-            battleId
-        ].soldierLosses;
-        uint256 attackerTankLosses = groundBattleIdToBattleResults[
-            battleId
-        ].tankLosses;
-        uint256 defenderId = groundBattleIdToBattleResults[battleId]
-            .defenderId;
-        uint256 defenderSoldierLosses = groundBattleIdToBattleResults[
-            battleId
-        ].defenderSoldierLosses;
-        uint256 defenderTankLosses = groundBattleIdToBattleResults[
-            battleId
-        ].defenderTankLosses;
-        return (
-            attackerId,
-            attackerSoldierLosses,
-            attackerTankLosses,
-            defenderId,
-            defenderSoldierLosses,
-            defenderTankLosses
-        );
-    }
-
-    function returnAttackVictorious(
-        uint256 battleId
-    ) public view returns (bool) {
-        bool attackVictorious = groundBattleIdToAtackerVictory[battleId];
-        return attackVictorious;
     }
 
     function getPercentageLosses(
@@ -835,15 +774,12 @@ contract GroundBattleContract is Ownable, VRFConsumerBaseV2, ChainlinkClient {
         }
         uint256 attackerTech = inf.getTechnologyCount(attackerId);
         uint256 defenderTech = inf.getTechnologyCount(defenderId);
-        uint256 multiple = (attackerTech / defenderTech);
+        uint256 multiple = (attackerTech / (defenderTech + 1));
         if (multiple > 5) {
             multiple = 5;
         }
-        console.log("MULTIPLE", multiple);
         randomLandMiles = (randomLandMiles * multiple);
         randomInfrastructure = (randomInfrastructure * multiple);
-        console.log("LAND MILES", randomLandMiles);
-        console.log("INFRASTRUCTURE", randomInfrastructure);
         inf.transferLandAndInfrastructure(
             randomLandMiles,
             randomInfrastructure,
