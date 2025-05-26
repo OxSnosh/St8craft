@@ -82,6 +82,8 @@ contract TechnologyMarketContract is Ownable, ReentrancyGuard {
         crim = CrimeContract(_crime);
     }
 
+    uint256 public constant MAX_TECH_PURCHASE = 100;
+
     ///@dev this is a public function that is only callable by the nation owner
     ///@notice this function will allow a nation owner to purchase technology
     ///@param id this is the nation id of the nation buying technology
@@ -92,6 +94,7 @@ contract TechnologyMarketContract is Ownable, ReentrancyGuard {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
         require(amount > 0, "cannot be zero");
+        require(amount <= MAX_TECH_PURCHASE, "limit 100 tech per purchase");
         uint256 cost = getTechCost(id, amount);
         require(
             inf.increaseTechnologyFromMarket(id, amount),

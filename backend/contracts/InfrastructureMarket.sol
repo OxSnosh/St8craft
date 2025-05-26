@@ -79,6 +79,9 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
         bonus = BonusResourcesContract(_bonusResources);
     }
 
+    uint256 public constant MAX_INFRASTRUCTURE = 20000;
+    uint256 public constant MAX_INFRASTRUCTURE_PER_PURCHASE = 100;
+
     ///@dev this is a public view function that will allow a nation owner to buy infrastructure
     ///@dev this function is only callable by the nation owner
     ///@notice this function will allow a nation owner to purchase infrastructure
@@ -91,6 +94,15 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
         bool owner = mint.checkOwnership(id, msg.sender);
         require(owner, "!nation owner");
         require(buyAmount > 0, "cannot be zero");
+        uint256 currentInfrastructureAmount = inf.getInfrastructureCount(id);
+        require(
+            currentInfrastructureAmount + buyAmount <= MAX_INFRASTRUCTURE,
+            "exceeds max infrastructure"
+        );
+        require(
+            buyAmount <= MAX_INFRASTRUCTURE_PER_PURCHASE,
+            "limit 100 infrastructure per purchase"
+        );
         uint256 cost = getInfrastructureCost(id, buyAmount);
         require(
             inf.increaseInfrastructureFromMarket(id, buyAmount),
