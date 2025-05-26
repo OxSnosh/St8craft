@@ -18,7 +18,7 @@ contract SenateContract is Ownable {
     uint256 public epoch = 1;
     uint256 public interval;
     uint256 public dayOfLastElection;
-    uint256 maximumSanctions = 25;
+    uint256 maximumSanctions = 200;
     address public countryMinter;
     address public parameters;
     address public wonders3;
@@ -65,8 +65,7 @@ contract SenateContract is Ownable {
     mapping(uint256 => mapping(uint256 => uint256[])) epochToTeamToSenatorVotes;
     mapping(uint256 => mapping(uint256 => uint256[])) epochToTeamToWinners;
 
-    ///@param _interval is in days
-    constructor(uint _interval) {
+    constructor() {
         interval = 28;
     }
 
@@ -281,11 +280,15 @@ contract SenateContract is Ownable {
         orderId++;
     }
 
-    address public relayer = 0xdB3892b0FD38D73B65a9AD2fC3920B74B2B71dfb;
+    address public oracle = 0xdB3892b0FD38D73B65a9AD2fC3920B74B2B71dfb;
 
-    modifier onlyRelayer() {
-        require(msg.sender == relayer);
+    modifier onlyOracle() {
+        require(msg.sender == oracle, "!ORACLE");
         _;
+    }
+
+    function setOracle(address _oracle) public onlyOwner {
+        oracle = _oracle;
     }
 
     ///@dev this is a public function that will be called from an off chain source
@@ -298,7 +301,7 @@ contract SenateContract is Ownable {
     function completeElection(
         uint256 _orderId,
         uint256[] memory _winners
-    ) public onlyRelayer {
+    ) public onlyOracle {
         require(
             elections[_orderId].completed == false, "election already completed"
         );
@@ -461,14 +464,12 @@ contract SenateContract is Ownable {
         idToVoter[id].senator = true;
     }
 
-    //function for returning the current senator votes for a team
     function getSenatorVotes(
         uint256 team
     ) public view returns (uint256[] memory) {
         return epochToTeamToSenatorVotes[epoch][team];
     }
 
-    //function for returning the current senators for a team
     function getSenators(uint256 team) public view returns (uint256[] memory) {
         return epochToTeamToWinners[epoch][team];
     }
