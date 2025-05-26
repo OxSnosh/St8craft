@@ -13,7 +13,6 @@ import "./KeeperFile.sol";
 import "./Spies.sol";
 import "./Missiles.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 
 ///@title SpyOperationsContract
 ///@author OxSnosh
@@ -219,11 +218,7 @@ contract SpyOperationsContract is Ownable {
         uint256 attackType
     );
 
-    address relayer;
-
-    function setRelayer(address _relayer) public onlyOwner {
-        relayer = _relayer; 
-    }
+    address public relayer = 0xdB3892b0FD38D73B65a9AD2fC3920B74B2B71dfb;
 
     modifier onlyRelayer() {
         require(msg.sender == relayer);
@@ -242,15 +237,8 @@ contract SpyOperationsContract is Ownable {
         uint256 day = keep.getGameDay();
         return dayToDefenderIdToAttackedToday[day][defenderId];
     }
-    
 
     function spyAttack(bool success, uint256 attackType, uint256 defenderId, uint256 attackerId, uint256 cost, uint256 randomNumber) public onlyRelayer {
-        console.log("success", success);
-        console.log("defenderId", defenderId);
-        console.log("attackerId", attackerId);
-        console.log("attackType", attackType);
-        console.log("cost", cost);
-        console.log("randomNumber", randomNumber);
         uint256 day = keep.getGameDay();
         if (dayToDefenderIdToAttackedToday[day][defenderId]) {
             revert("Defender has already been attacked today");
