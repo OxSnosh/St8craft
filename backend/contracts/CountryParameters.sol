@@ -275,23 +275,6 @@ contract CountryParametersContract is
         idToGovernmentPreference[requestNumber] = governmentPreference;
     }
 
-    // ///@dev this is public function that will allow a nation ruler to reset a nations ruler name
-    // ///@notice use this function to reset a nations ruler name
-    // ///@notice this function is only callable by the nation owner
-    // ///@param newRulerName is the updated name for the nation ruler
-    // ///@param id is the nation ID for the update
-    // function setRulerName(
-    //     string memory newRulerName,
-    //     uint256 id
-    // ) public nonReentrant {
-    //     bool isOwner = mint.checkOwnership(id, msg.sender);
-    //     require(isOwner, "!nation owner");
-    //     require(bytes(newRulerName).length <= 64, "Ruler Name too long");
-    //     tres.spendBalance(id, 20000000 * (10 ** 18));
-    //     idToCountryParameters[id].rulerName = newRulerName;
-    //     emit RulerNameChanged(id, newRulerName);
-    // }
-
     ///@dev this is public function that will allow a nation ruler to reset a nations name
     ///@notice use this function to reset a nations name
     ///@notice this function is only callable by the nation owner

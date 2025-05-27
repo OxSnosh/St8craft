@@ -10,7 +10,7 @@ import { metadata } from "../scripts/deploy_localhost_node/deploy_jobs/metadata"
 import { jobId } from "../scripts/deploy_localhost_node/deploy_jobs/jobMetadata";
 import { 
     WarBucks, 
-    MetaNationsGovToken,
+    St8craftGovToken,
     AidContract,
     AirBattleContract,
     AdditionalAirBattle,
@@ -75,7 +75,7 @@ describe("Country Minter", function () {
   // const oracleAbi = OracleArtifact.abi;
   // const linkTokenAbi = LinkTokenArtifact.abi;
   let warbucks: WarBucks  
-  let metanationsgovtoken: MetaNationsGovToken
+  let st8craftgovtoken: St8craftGovToken
   let aidcontract: AidContract
   let airbattlecontract: AirBattleContract
   let additionalairbattle: AdditionalAirBattle
@@ -193,8 +193,8 @@ describe("Country Minter", function () {
     const MetaNatonsGovToken = await ethers.getContractFactory(
         "MetaNationsGovToken"
     )
-    metanationsgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as MetaNationsGovToken
-    await metanationsgovtoken.deployed()
+    st8craftgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as St8craftGovToken
+    await st8craftgovtoken.deployed()
     // console.log(`MetaNationsGovToken deployed to ${metanationsgovtoken.address}`)
 
     const AidContract = await ethers.getContractFactory("AidContract")
@@ -509,7 +509,8 @@ describe("Country Minter", function () {
             infrastructurecontract.address,
             bonusresourcescontract.address,
             navycontract2.address,
-            countryparameterscontract.address)
+            countryparameterscontract.address,
+            navalblockadecontract.address,)
         
         await bomberscontract.settings(
             countryminter.address, 
@@ -746,7 +747,8 @@ describe("Country Minter", function () {
             improvementscontract1.address,
             improvementscontract2.address,
             countryminter.address,
-            wonderscontract4.address
+            wonderscontract4.address,
+            resourcescontract.address,
             )
         
         await infrastructurecontract.settings1(
@@ -871,7 +873,10 @@ describe("Country Minter", function () {
             militarycontract.address,
             wonderscontract1.address,
             improvementscontract4.address,
-            navycontract2.address
+            navycontract2.address,
+            navalblockadecontract.address,
+            breakblockadecontract.address,
+            navalattackcontract.address,
         )
     
         await navalblockadecontract.settings(
@@ -881,7 +886,8 @@ describe("Country Minter", function () {
             warcontract.address,
             countryminter.address,
             keepercontract.address,
-            breakblockadecontract.address
+            breakblockadecontract.address,
+            billscontract.address,
         )
     
         await breakblockadecontract.settings(
@@ -891,7 +897,8 @@ describe("Country Minter", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
         )
     
         await navalattackcontract.settings(
@@ -899,7 +906,9 @@ describe("Country Minter", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
+            countryminter.address,
         )
     
         await nukecontract.settings(
@@ -1098,7 +1107,8 @@ describe("Country Minter", function () {
             wonderscontract1.address,
             wonderscontract3.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract3.settings(
@@ -1108,7 +1118,8 @@ describe("Country Minter", function () {
             wonderscontract1.address,
             wonderscontract2.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract4.settings(

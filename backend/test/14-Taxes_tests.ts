@@ -5,10 +5,12 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { INITIAL_SUPPLY } from "../helper-hardhat-config"
 import { Test, Oracle } from "../typechain-types"
 import { LinkToken } from '../typechain-types/@chainlink/contracts/src/v0.4/LinkToken';
-
+import { link } from "fs"
+import { metadata } from "../scripts/deploy_localhost_node/deploy_jobs/metadata";
+import { jobId } from "../scripts/deploy_localhost_node/deploy_jobs/jobMetadata";
 import { 
     WarBucks, 
-    MetaNationsGovToken,
+    St8craftGovToken,
     AidContract,
     AirBattleContract,
     AdditionalAirBattle,
@@ -67,13 +69,14 @@ import {
 // import OracleArtifact from "../artifacts/@chainlink/contracts/src/v0.4/Oracle.sol/Oracle.json";
 import LinkTokenArtifact from "../artifacts/@chainlink/contracts/src/v0.4/LinkToken.sol/LinkToken.json";
 import { networkConfig } from "../helper-hardhat-config"
+import { kMostFrequent } from "../scripts/SenatorImplementation";
 
-describe("Taxes", function () {
+describe("Country Minter", function () {
   
   // const oracleAbi = OracleArtifact.abi;
   // const linkTokenAbi = LinkTokenArtifact.abi;
   let warbucks: WarBucks  
-  let metanationsgovtoken: MetaNationsGovToken
+  let st8craftgovtoken: St8craftGovToken
   let aidcontract: AidContract
   let airbattlecontract: AirBattleContract
   let additionalairbattle: AdditionalAirBattle
@@ -133,6 +136,11 @@ describe("Taxes", function () {
   let signer5: SignerWithAddress
   let signer6: SignerWithAddress
   let signer7: SignerWithAddress
+  let signer8: SignerWithAddress
+  let signer9: SignerWithAddress
+  let signer10: SignerWithAddress
+  let signer11: SignerWithAddress
+  let signer12: SignerWithAddress
   let signers: SignerWithAddress[]
   let addrs
 
@@ -154,6 +162,11 @@ describe("Taxes", function () {
     signer5 = signers[5];
     signer6 = signers[6];
     signer7 = signers[7];
+    signer8 = signers[8];
+    signer9 = signers[9];
+    signer10 = signers[10];
+    signer11 = signers[11];
+    signer12 = signers[12];
     
     let chainId: any
     chainId = network.config.chainId
@@ -191,8 +204,8 @@ describe("Taxes", function () {
     const MetaNatonsGovToken = await ethers.getContractFactory(
         "MetaNationsGovToken"
     )
-    metanationsgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as MetaNationsGovToken
-    await metanationsgovtoken.deployed()
+    st8craftgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as St8craftGovToken
+    await st8craftgovtoken.deployed()
     // console.log(`MetaNationsGovToken deployed to ${metanationsgovtoken.address}`)
 
     const AidContract = await ethers.getContractFactory("AidContract")
@@ -507,7 +520,8 @@ describe("Taxes", function () {
             infrastructurecontract.address,
             bonusresourcescontract.address,
             navycontract2.address,
-            countryparameterscontract.address)
+            countryparameterscontract.address,
+            navalblockadecontract.address,)
         
         await bomberscontract.settings(
             countryminter.address, 
@@ -744,7 +758,8 @@ describe("Taxes", function () {
             improvementscontract1.address,
             improvementscontract2.address,
             countryminter.address,
-            wonderscontract4.address
+            wonderscontract4.address,
+            resourcescontract.address,
             )
         
         await infrastructurecontract.settings1(
@@ -869,7 +884,10 @@ describe("Taxes", function () {
             militarycontract.address,
             wonderscontract1.address,
             improvementscontract4.address,
-            navycontract2.address
+            navycontract2.address,
+            navalblockadecontract.address,
+            breakblockadecontract.address,
+            navalattackcontract.address,
         )
     
         await navalblockadecontract.settings(
@@ -879,7 +897,8 @@ describe("Taxes", function () {
             warcontract.address,
             countryminter.address,
             keepercontract.address,
-            breakblockadecontract.address
+            breakblockadecontract.address,
+            billscontract.address,
         )
     
         await breakblockadecontract.settings(
@@ -889,7 +908,8 @@ describe("Taxes", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
         )
     
         await navalattackcontract.settings(
@@ -897,7 +917,9 @@ describe("Taxes", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
+            countryminter.address,
         )
     
         await nukecontract.settings(
@@ -1096,7 +1118,8 @@ describe("Taxes", function () {
             wonderscontract1.address,
             wonderscontract3.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract3.settings(
@@ -1106,7 +1129,8 @@ describe("Taxes", function () {
             wonderscontract1.address,
             wonderscontract2.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract4.settings(

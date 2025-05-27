@@ -16,9 +16,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract SenateContract is Ownable {
 
     uint256 public epoch = 1;
-    uint256 public interval;
-    uint256 public dayOfLastElection;
+    uint256 public interval = 28;
     uint256 maximumSanctions = 200;
+    
+    uint256 public dayOfLastElection;
+
     address public countryMinter;
     address public parameters;
     address public wonders3;
@@ -64,10 +66,6 @@ contract SenateContract is Ownable {
     mapping(uint256 => uint256[]) public teamToCurrentSanctions;
     mapping(uint256 => mapping(uint256 => uint256[])) epochToTeamToSenatorVotes;
     mapping(uint256 => mapping(uint256 => uint256[])) epochToTeamToWinners;
-
-    constructor() {
-        interval = 28;
-    }
 
     ///@param _interval is in days
     function updateInterval(uint _interval) public onlyOwner {

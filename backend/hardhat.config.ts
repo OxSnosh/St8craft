@@ -12,6 +12,7 @@ import 'solidity-coverage'
 import { HardhatUserConfig } from "hardhat/types"
 import "./tasks/set_religion_and_govt";
 import "./tasks/set_resources";
+import "@gelatonetwork/web3-functions-sdk/hardhat-plugin";
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -40,6 +41,8 @@ const POLYGONSCAN_API_KEY =
   process.env.POLYGONSCAN_API_KEY || "Your polygonscan API key"
 const REPORT_GAS = process.env.REPORT_GAS || false
 
+
+
 const config = {
   solidity: {
     compilers: [
@@ -59,6 +62,11 @@ const config = {
         version: "0.4.11"
       },
     ],
+  },
+  w3f: {
+    rootDir: "./web3-functions",
+    debug: false,
+    networks: ["hardhat","blueberry","blackberry"], //(multiChainProvider) injects provider for these networks
   },
   defaultNetwork: "hardhat",
   networks: {
@@ -110,6 +118,21 @@ const config = {
       accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
       saveDeployments: true,
       chainId: 137,
+    },
+    blueberry: {
+      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+      chainId: 88153591557,
+      url: `https://rpc.arb-blueberry.gelato.digital`,
+    },
+    raspberry: {
+      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+      chainId: 123420111,
+      url: `https://rpc.opcelestia-raspberry.gelato.digital`,
+    },
+    blackberry: {
+      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+      chainId: 94204209,
+      url: `https://rpc.polygon-blackberry.gelato.digital`,
     },
   },
   etherscan: {

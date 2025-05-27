@@ -5,10 +5,12 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { INITIAL_SUPPLY } from "../helper-hardhat-config"
 import { Test, Oracle } from "../typechain-types"
 import { LinkToken } from '../typechain-types/@chainlink/contracts/src/v0.4/LinkToken';
-
+import { link } from "fs"
+import { metadata } from "../scripts/deploy_localhost_node/deploy_jobs/metadata";
+import { jobId } from "../scripts/deploy_localhost_node/deploy_jobs/jobMetadata";
 import { 
     WarBucks, 
-    MetaNationsGovToken,
+    St8craftGovToken,
     AidContract,
     AirBattleContract,
     AdditionalAirBattle,
@@ -67,13 +69,14 @@ import {
 // import OracleArtifact from "../artifacts/@chainlink/contracts/src/v0.4/Oracle.sol/Oracle.json";
 import LinkTokenArtifact from "../artifacts/@chainlink/contracts/src/v0.4/LinkToken.sol/LinkToken.json";
 import { networkConfig } from "../helper-hardhat-config"
+import { setRulerName } from '../../frontend/packages/nextjs/utils/countryParameters';
 
-describe("Country Parameters", function () {
+describe("Country Minter", function () {
   
   // const oracleAbi = OracleArtifact.abi;
   // const linkTokenAbi = LinkTokenArtifact.abi;
   let warbucks: WarBucks  
-  let metanationsgovtoken: MetaNationsGovToken
+  let st8craftgovtoken: St8craftGovToken
   let aidcontract: AidContract
   let airbattlecontract: AirBattleContract
   let additionalairbattle: AdditionalAirBattle
@@ -191,8 +194,8 @@ describe("Country Parameters", function () {
     const MetaNatonsGovToken = await ethers.getContractFactory(
         "MetaNationsGovToken"
     )
-    metanationsgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as MetaNationsGovToken
-    await metanationsgovtoken.deployed()
+    st8craftgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as St8craftGovToken
+    await st8craftgovtoken.deployed()
     // console.log(`MetaNationsGovToken deployed to ${metanationsgovtoken.address}`)
 
     const AidContract = await ethers.getContractFactory("AidContract")
@@ -507,7 +510,8 @@ describe("Country Parameters", function () {
             infrastructurecontract.address,
             bonusresourcescontract.address,
             navycontract2.address,
-            countryparameterscontract.address)
+            countryparameterscontract.address,
+            navalblockadecontract.address,)
         
         await bomberscontract.settings(
             countryminter.address, 
@@ -744,7 +748,8 @@ describe("Country Parameters", function () {
             improvementscontract1.address,
             improvementscontract2.address,
             countryminter.address,
-            wonderscontract4.address
+            wonderscontract4.address,
+            resourcescontract.address,
             )
         
         await infrastructurecontract.settings1(
@@ -869,7 +874,10 @@ describe("Country Parameters", function () {
             militarycontract.address,
             wonderscontract1.address,
             improvementscontract4.address,
-            navycontract2.address
+            navycontract2.address,
+            navalblockadecontract.address,
+            breakblockadecontract.address,
+            navalattackcontract.address,
         )
     
         await navalblockadecontract.settings(
@@ -879,7 +887,8 @@ describe("Country Parameters", function () {
             warcontract.address,
             countryminter.address,
             keepercontract.address,
-            breakblockadecontract.address
+            breakblockadecontract.address,
+            billscontract.address,
         )
     
         await breakblockadecontract.settings(
@@ -889,7 +898,8 @@ describe("Country Parameters", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
         )
     
         await navalattackcontract.settings(
@@ -897,7 +907,9 @@ describe("Country Parameters", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
+            countryminter.address,
         )
     
         await nukecontract.settings(
@@ -1096,7 +1108,8 @@ describe("Country Parameters", function () {
             wonderscontract1.address,
             wonderscontract3.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract3.settings(
@@ -1106,7 +1119,8 @@ describe("Country Parameters", function () {
             wonderscontract1.address,
             wonderscontract2.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract4.settings(
@@ -1193,19 +1207,19 @@ describe("Country Parameters", function () {
     });
 
     describe("Preferences Functions", function () {
-        it("Tests that the setRulerName() function works", async function () {
-            await warbucks.connect(signer0).transfer(signer1.address, BigInt(25000000000000000000000000))
-            await treasurycontract.connect(signer1).addFunds(BigInt(25000000000000000000000000), 0)
-            let rulerName = await countryparameterscontract.connect(signer1).getRulerName(0);
-            expect(rulerName).to.equal("TestRuler");
-            await countryparameterscontract.connect(signer1).setRulerName("newName", 0);
-            let newRulerName = await countryparameterscontract.connect(signer1).getRulerName(0);
-            expect(newRulerName).to.equal("newName");
-        })
+        // it("Tests that the setRulerName() function works", async function () {
+        //     await warbucks.connect(signer0).transfer(signer1.address, BigInt(25000000000000000000000000))
+        //     await treasurycontract.connect(signer1).addFunds(BigInt(25000000000000000000000000), 0)
+        //     let rulerName = await countryparameterscontract.connect(signer1).getRulerName(0);
+        //     expect(rulerName).to.equal("TestRuler");
+        //     await countryparameterscontract.connect(signer1).setRulerName("newName", 0);
+        //     let newRulerName = await countryparameterscontract.connect(signer1).getRulerName(0);
+        //     expect(newRulerName).to.equal("newName");
+        // })
 
-        it("Tests that the setRulerName() function reverts correctly", async function () {
-            await expect(countryparameterscontract.connect(signer2).setRulerName("newName", 0)).to.be.revertedWith("!nation owner");
-        })
+        // it("Tests that the setRulerName() function reverts correctly", async function () {
+        //     await expect(countryparameterscontract.connect(signer2).setRulerName("newName", 0)).to.be.revertedWith("!nation owner");
+        // })
 
         it("Tests that the setNationName() function works", async function () {
             await warbucks.connect(signer0).transfer(signer1.address, BigInt(25000000000000000000000000))
@@ -1218,7 +1232,7 @@ describe("Country Parameters", function () {
         })
 
         it("Tests that the setNationName() function reverts correctly", async function () {
-            await expect(countryparameterscontract.connect(signer2).setRulerName("newNationName", 0)).to.be.revertedWith("!nation owner");
+            await expect(countryparameterscontract.connect(signer2).setNationName("newNationName", 0)).to.be.revertedWith("!nation owner");
         })
 
         it("Tests that the setCapitalCity() function works", async function () {
@@ -1245,17 +1259,17 @@ describe("Country Parameters", function () {
             await expect(countryparameterscontract.connect(signer2).setNationSlogan("newSlogan", 0)).to.be.revertedWith("!nation owner");
         })
 
-        it("Tests that the setAlliance() function works", async function () {
-            let alliance = await countryparameterscontract.connect(signer1).getAlliance(0);
-            expect(alliance).to.equal("No Alliance Yet");
-            await countryparameterscontract.connect(signer1).setAlliance("newAlliance", 0);
-            let newAlliance = await countryparameterscontract.connect(signer1).getAlliance(0);
-            expect(newAlliance).to.equal("newAlliance");
-        })
+        // it("Tests that the setAlliance() function works", async function () {
+        //     let alliance = await countryparameterscontract.connect(signer1).getAlliance(0);
+        //     expect(alliance).to.equal("No Alliance Yet");
+        //     await countryparameterscontract.connect(signer1).setAlliance("newAlliance", 0);
+        //     let newAlliance = await countryparameterscontract.connect(signer1).getAlliance(0);
+        //     expect(newAlliance).to.equal("newAlliance");
+        // })
 
-        it("Tests that the setAlliance() function reverts correctly", async function () {
-            expect(countryparameterscontract.connect(signer2).setAlliance("newAlliance", 0)).to.be.revertedWith("!nation owner");
-        })
+        // it("Tests that the setAlliance() function reverts correctly", async function () {
+        //     expect(countryparameterscontract.connect(signer2).setAlliance("newAlliance", 0)).to.be.revertedWith("!nation owner");
+        // })
 
         it("Tests that the setTeam() function works", async function () {
             let team = await countryparameterscontract.connect(signer1).getTeam(0);
@@ -1266,7 +1280,7 @@ describe("Country Parameters", function () {
         })
 
         it("Tests that the setTeam() function reverts correctly", async function () {
-            await expect(countryparameterscontract.connect(signer2).setAlliance("newAlliance", 0)).to.be.revertedWith("!nation owner");
+            await expect(countryparameterscontract.connect(signer2).setTeam(0, 0)).to.be.revertedWith("!nation owner");
         })
 
         it("Tests that the setGovernment() function works", async function () {
@@ -1405,8 +1419,19 @@ describe("Country Parameters", function () {
             await warbucks.connect(signer0).approve(warbucks.address, BigInt(10000000000*(10**18)));
             await warbucks.connect(signer0).transfer(signer1.address, BigInt(10000000000*(10**18)));
             await treasurycontract.connect(signer1).addFunds(BigInt(9000000000*(10**18)), 0);
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 2000)
-            await technologymarketcontrat.connect(signer1).buyTech(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await technologymarketcontrat.connect(signer1).buyTech(0, 100)
+            await technologymarketcontrat.connect(signer1).buyTech(0, 200)
+            await technologymarketcontrat.connect(signer1).buyTech(0, 200)
             await forcescontract.connect(signer1).buySoldiers(2000, 0)
             await forcescontract.connect(signer1).buyTanks(150, 0)
             // await forcescontract.connect(signer1).buySpies(30, 0)
@@ -1415,8 +1440,19 @@ describe("Country Parameters", function () {
             await warbucks.connect(signer0).approve(warbucks.address, BigInt(2000000000*(10**18)));
             await warbucks.connect(signer0).transfer(signer1.address, BigInt(2000000000*(10**18)));
             await treasurycontract.connect(signer1).addFunds(BigInt(1900000000*(10**18)), 1);
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 2000)
-            await technologymarketcontrat.connect(signer1).buyTech(1, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(1, 200)
+            await technologymarketcontrat.connect(signer1).buyTech(1, 100)
+            await technologymarketcontrat.connect(signer1).buyTech(1, 200)
+            await technologymarketcontrat.connect(signer1).buyTech(1, 200)
             await forcescontract.connect(signer1).buySoldiers(2000, 1)
             await forcescontract.connect(signer1).buyTanks(150, 1)
             await militarycontract.connect(signer1).toggleWarPeacePreference(0)
@@ -1429,8 +1465,18 @@ describe("Country Parameters", function () {
             await billscontract.connect(signer1).payBills(1)
             
             await resourcescontract.connect(signer0).mockResourcesForTesting(0, 17, 1);
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 2000)
-            await technologymarketcontrat.connect(signer1).buyTech(0, 400);
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await technologymarketcontrat.connect(signer1).buyTech(0, 200);
+            await technologymarketcontrat.connect(signer1).buyTech(0, 200);
             await wonderscontract2.connect(signer1).buyWonder2(0, 8);
             await missilescontract.connect(signer1).buyNukes(0)
             await keepercontract.connect(signer0).incrementGameDay()

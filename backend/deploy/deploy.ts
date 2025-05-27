@@ -65,6 +65,7 @@ import {
 } from "../typechain-types"
 import { networkConfig } from "../helper-hardhat-config"
 import fs from "fs"
+import { blockade } from '../../frontend/packages/nextjs/utils/attacks';
 
 
 const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -254,7 +255,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     infrastructuremarketplace = await deploy("InfrastructureMarketContract", { from: deployer, args: [], log: true });
     let deployedInfrastructureMarketContract = await ethers.getContractAt("InfrastructureMarketContract", infrastructuremarketplace.address);
 
-    keepercontract = await deploy("KeeperContract", { from: deployer, args: [86400], log: true });
+    keepercontract = await deploy("KeeperContract", { from: deployer, args: [], log: true });
     let deployedKeeperContract = await ethers.getContractAt("KeeperContract", keepercontract.address);
 
     landmarketcontract = await deploy("LandMarketContract", { from: deployer, args: [], log: true });
@@ -296,7 +297,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     bonusresourcescontract = await deploy("BonusResourcesContract", { from: deployer, args: [], log: true });
     let deployedBonusResourcesContract = await ethers.getContractAt("BonusResourcesContract", bonusresourcescontract.address);
 
-    senatecontract = await deploy("SenateContract", { from: deployer, args: [20], log: true });
+    senatecontract = await deploy("SenateContract", { from: deployer, args: [], log: true });
     let deployedSenateContract = await ethers.getContractAt("SenateContract", senatecontract.address);
 
     spyoperationscontract = await deploy("SpyOperationsContract", { from: deployer, args: [], log: true });
@@ -390,7 +391,9 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         infrastructurecontract.address,
         bonusresourcescontract.address,
         navycontract2.address,
-        countryparameterscontract.address)
+        countryparameterscontract.address,
+        navalblockadecontract.address
+    )
     
     await deployedBombersContract.settings(
         countryminter.address, 
@@ -758,7 +761,10 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         militarycontract.address,
         wonderscontract1.address,
         improvementscontract4.address,
-        navycontract2.address
+        navycontract2.address,
+        navalblockadecontract.address,
+        breakblockadecontract.address,
+        navalattackcontract.address,
     )
 
     await deployedNavalBlockadeContract.settings(
@@ -769,7 +775,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         countryminter.address,
         keepercontract.address,
         breakblockadecontract.address,
-        billscontract.address,
+        billscontract.address
     )
 
     await deployedBreakBlocadeContract.settings(
@@ -779,7 +785,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         warcontract.address,
         improvementscontract4.address,
         navalactionscontract.address,
-        navycontract2.address
+        navycontract2.address,
+        additionalnavycontract.address,
     )
 
     await deployedNavalAttackContract.settings(
@@ -788,7 +795,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         improvementscontract4.address,
         navalactionscontract.address,
         navycontract2.address,
-        additionalnavycontract.address
+        additionalnavycontract.address,
+        countryminter.address,
     )
 
     await deployedNukeContract.settings(

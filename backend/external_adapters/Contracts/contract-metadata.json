@@ -1871,6 +1871,11 @@
           "name": "idToForces",
           "outputs": [
             {
+              "internalType": "bool",
+              "name": "initialized",
+              "type": "bool"
+            },
+            {
               "internalType": "uint256",
               "name": "numberOfSoldiers",
               "type": "uint256"
@@ -2057,7 +2062,13 @@
             }
           ],
           "name": "sendSoldiers",
-          "outputs": [],
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
           "stateMutability": "nonpayable",
           "type": "function"
         },
@@ -3092,6 +3103,11 @@
           "name": "idToTreasury",
           "outputs": [
             {
+              "internalType": "bool",
+              "name": "initialized",
+              "type": "bool"
+            },
+            {
               "internalType": "uint256",
               "name": "dayOfLastBillPaid",
               "type": "uint256"
@@ -3386,7 +3402,13 @@
             }
           ],
           "name": "sendAidBalance",
-          "outputs": [],
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
           "stateMutability": "nonpayable",
           "type": "function"
         },
@@ -5324,6 +5346,19 @@
         },
         {
           "inputs": [],
+          "name": "relayer",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
           "name": "renounceOwnership",
           "outputs": [],
           "stateMutability": "nonpayable",
@@ -5351,19 +5386,6 @@
             }
           ],
           "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "address",
-              "name": "_relayer",
-              "type": "address"
-            }
-          ],
-          "name": "setRelayer",
-          "outputs": [],
-          "stateMutability": "nonpayable",
           "type": "function"
         },
         {
@@ -5596,7 +5618,7 @@
           "anonymous": false,
           "inputs": [
             {
-              "indexed": true,
+              "indexed": false,
               "internalType": "uint256",
               "name": "battleId",
               "type": "uint256"
@@ -5627,45 +5649,6 @@
             }
           ],
           "name": "BattleResultsEvent",
-          "type": "event"
-        },
-        {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "bytes32",
-              "name": "id",
-              "type": "bytes32"
-            }
-          ],
-          "name": "ChainlinkCancelled",
-          "type": "event"
-        },
-        {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "bytes32",
-              "name": "id",
-              "type": "bytes32"
-            }
-          ],
-          "name": "ChainlinkFulfilled",
-          "type": "event"
-        },
-        {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "bytes32",
-              "name": "id",
-              "type": "bytes32"
-            }
-          ],
-          "name": "ChainlinkRequested",
           "type": "event"
         },
         {
@@ -5743,6 +5726,25 @@
           "type": "event"
         },
         {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "battleId",
+              "type": "uint256"
+            }
+          ],
+          "name": "RandomnessRequested",
+          "type": "event"
+        },
+        {
           "inputs": [
             {
               "internalType": "uint256",
@@ -5803,64 +5805,6 @@
             }
           ],
           "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "bytes32",
-              "name": "requestId",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "uint256",
-              "name": "battleId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "attackerId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "attackerSoldierLosses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "attackerTankLosses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "defenderId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "defenderSoldierLosses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "defenderTankLosses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "warId",
-              "type": "uint256"
-            },
-            {
-              "internalType": "bool",
-              "name": "attackerVictory",
-              "type": "bool"
-            }
-          ],
-          "name": "completeBattleSequence",
-          "outputs": [],
-          "stateMutability": "nonpayable",
           "type": "function"
         },
         {
@@ -6144,70 +6088,7 @@
               "type": "uint256"
             }
           ],
-          "name": "returnAttackVictorious",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "battleId",
-              "type": "uint256"
-            }
-          ],
           "name": "returnAttackerForcesStruct",
-          "outputs": [
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "battleId",
-              "type": "uint256"
-            }
-          ],
-          "name": "returnBattleResults",
           "outputs": [
             {
               "internalType": "uint256",
@@ -6417,19 +6298,6 @@
         {
           "inputs": [
             {
-              "internalType": "uint256",
-              "name": "_fee",
-              "type": "uint256"
-            }
-          ],
-          "name": "updateFee",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
               "internalType": "address",
               "name": "newAddress",
               "type": "address"
@@ -6462,45 +6330,6 @@
             }
           ],
           "name": "updateInfrastructureContract",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "bytes32",
-              "name": "_jobId",
-              "type": "bytes32"
-            }
-          ],
-          "name": "updateJobId",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "address",
-              "name": "_linkToken",
-              "type": "address"
-            }
-          ],
-          "name": "updateLinkAddress",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "address",
-              "name": "_oracleAddress",
-              "type": "address"
-            }
-          ],
-          "name": "updateOracleAddress",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"

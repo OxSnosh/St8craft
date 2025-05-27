@@ -5,7 +5,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { INITIAL_SUPPLY } from "../helper-hardhat-config"
 import { Test, Oracle } from "../typechain-types"
 import { LinkToken } from '../typechain-types/@chainlink/contracts/src/v0.4/LinkToken';
-
+import { link } from "fs"
+import { metadata } from "../scripts/deploy_localhost_node/deploy_jobs/metadata";
+import { jobId } from "../scripts/deploy_localhost_node/deploy_jobs/jobMetadata";
 import { 
     WarBucks, 
     St8craftGovToken,
@@ -68,12 +70,12 @@ import {
 import LinkTokenArtifact from "../artifacts/@chainlink/contracts/src/v0.4/LinkToken.sol/LinkToken.json";
 import { networkConfig } from "../helper-hardhat-config"
 
-describe("Improvements", function () {
+describe("Country Minter", function () {
   
   // const oracleAbi = OracleArtifact.abi;
   // const linkTokenAbi = LinkTokenArtifact.abi;
   let warbucks: WarBucks  
-  let metanationsgovtoken: St8craftGovToken
+  let st8craftgovtoken: St8craftGovToken
   let aidcontract: AidContract
   let airbattlecontract: AirBattleContract
   let additionalairbattle: AdditionalAirBattle
@@ -191,8 +193,8 @@ describe("Improvements", function () {
     const MetaNatonsGovToken = await ethers.getContractFactory(
         "MetaNationsGovToken"
     )
-    metanationsgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as St8craftGovToken
-    await metanationsgovtoken.deployed()
+    st8craftgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as St8craftGovToken
+    await st8craftgovtoken.deployed()
     // console.log(`MetaNationsGovToken deployed to ${metanationsgovtoken.address}`)
 
     const AidContract = await ethers.getContractFactory("AidContract")
@@ -507,7 +509,8 @@ describe("Improvements", function () {
             infrastructurecontract.address,
             bonusresourcescontract.address,
             navycontract2.address,
-            countryparameterscontract.address)
+            countryparameterscontract.address,
+            navalblockadecontract.address,)
         
         await bomberscontract.settings(
             countryminter.address, 
@@ -870,7 +873,10 @@ describe("Improvements", function () {
             militarycontract.address,
             wonderscontract1.address,
             improvementscontract4.address,
-            navycontract2.address
+            navycontract2.address,
+            navalblockadecontract.address,
+            breakblockadecontract.address,
+            navalattackcontract.address,
         )
     
         await navalblockadecontract.settings(
@@ -880,7 +886,8 @@ describe("Improvements", function () {
             warcontract.address,
             countryminter.address,
             keepercontract.address,
-            breakblockadecontract.address
+            breakblockadecontract.address,
+            billscontract.address,
         )
     
         await breakblockadecontract.settings(
@@ -890,7 +897,8 @@ describe("Improvements", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
         )
     
         await navalattackcontract.settings(
@@ -898,7 +906,9 @@ describe("Improvements", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
+            countryminter.address,
         )
     
         await nukecontract.settings(
@@ -1097,7 +1107,8 @@ describe("Improvements", function () {
             wonderscontract1.address,
             wonderscontract3.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract3.settings(
@@ -1107,7 +1118,8 @@ describe("Improvements", function () {
             wonderscontract1.address,
             wonderscontract2.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract4.settings(
@@ -1138,7 +1150,9 @@ describe("Improvements", function () {
         // await warbucks.connect(signer0).approve(warbucks.address, BigInt(6000000 000000000 000000000));
         await warbucks.connect(signer0).transfer(signer1.address, BigInt(600000000000000000000000000));
         await treasurycontract.connect(signer1).addFunds(BigInt(550000000*(10**18)), 0);
-        await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500);
+        await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200);
+        await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200);
+        await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100);
 
         await warbucks.connect(signer0).transfer(signer2.address, BigInt(21000000000000000000000000))
         await countryminter.connect(signer2).generateCountry(
@@ -1174,7 +1188,9 @@ describe("Improvements", function () {
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 1)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 1)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 1)).to.be.revertedWith("Cannot own more than 3");
             await improvementscontract1.connect(signer0).updateAirportCost(BigInt(10*10**30));
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 1)).to.be.revertedWith("Insufficient balance");
@@ -1216,7 +1232,9 @@ describe("Improvements", function () {
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 2)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 2)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 2)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract1.connect(signer0).updateBankCost(BigInt(10*10**30));
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 2)).to.be.revertedWith("Insufficient balance");
@@ -1255,7 +1273,9 @@ describe("Improvements", function () {
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 3)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 3)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 3)).to.be.revertedWith("Cannot own more than 3");
             await improvementscontract1.connect(signer0).updateBarracksCost(BigInt(10*10**30));
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 3)).to.be.revertedWith("Insufficient balance");
@@ -1299,7 +1319,11 @@ describe("Improvements", function () {
             await improvementscontract1.connect(signer1).buyImprovement1(1, 0, 5);
             await improvementscontract2.connect(signer1).buyImprovement2(1, 0, 2);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 4)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 1000)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 4)).to.be.revertedWith("Cannot own if forward operating base is owned");
             await improvementscontract2.connect(signer1).deleteImprovement2(1, 0, 2);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 1, 4)).to.be.revertedWith("!nation owner");
@@ -1342,7 +1366,9 @@ describe("Improvements", function () {
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 5)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 5)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 5)).to.be.revertedWith("Boarder walls can only be purchased 1 at a time");
             await improvementscontract1.connect(signer1).buyImprovement1(1, 0, 5);
             await improvementscontract1.connect(signer1).buyImprovement1(1, 0, 5);
@@ -1390,7 +1416,12 @@ describe("Improvements", function () {
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 1, 6)).to.be.revertedWith("!nation owner");
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 6)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 1000)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 6)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract2.connect(signer1).buyImprovement2(1, 0, 2);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 6)).to.be.revertedWith("Cannot own if forward operating base is owned");
@@ -1435,7 +1466,9 @@ describe("Improvements", function () {
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 7)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 7)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 7)).to.be.revertedWith("Cannot own more than 2");
             await improvementscontract1.connect(signer0).updateCasinoCost(BigInt(10*10**30));
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 7)).to.be.revertedWith("Insufficient balance");
@@ -1474,7 +1507,9 @@ describe("Improvements", function () {
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 8)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 8)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 8)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract1.connect(signer0).updateChurchCost(BigInt(10*10**30));
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 8)).to.be.revertedWith("Insufficient balance");
@@ -1511,7 +1546,9 @@ describe("Improvements", function () {
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 9)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 9)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 9)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract1.connect(signer0).updateClinicCost(BigInt(10*10**30));
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 9)).to.be.revertedWith("Insufficient balance");
@@ -1551,7 +1588,9 @@ describe("Improvements", function () {
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 10)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 10)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 10)).to.be.revertedWith("Cannot own more than 5");
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 10)).to.be.revertedWith("Must own a harbor first");
             await improvementscontract1.connect(signer0).updateDrydockCost(BigInt(10*10**30));
@@ -1591,7 +1630,9 @@ describe("Improvements", function () {
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 11)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 11)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract1.connect(signer1).buyImprovement1(6, 0, 11)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract1.connect(signer0).updateFactoryCost(BigInt(10*10**30));
             await expect(improvementscontract1.connect(signer1).buyImprovement1(1, 0, 11)).to.be.revertedWith("Insufficient balance");
@@ -1630,7 +1671,9 @@ describe("Improvements", function () {
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 1)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 1)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract2.connect(signer1).buyImprovement2(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 1)).to.be.revertedWith("Cannot own more than 1");
             await improvementscontract2.connect(signer0).updateForeignMinistryCost(BigInt(10*10**30));
@@ -1669,7 +1712,9 @@ describe("Improvements", function () {
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 2)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 2)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract2.connect(signer1).buyImprovement2(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 2)).to.be.revertedWith("Cannot own more than 2");
             await improvementscontract2.connect(signer0).updateForwardOperatingBaseCost(BigInt(10*10**30));
@@ -1708,7 +1753,9 @@ describe("Improvements", function () {
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 3)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 3)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract2.connect(signer1).buyImprovement2(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 3)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract2.connect(signer0).updateGuerillaCampCost(BigInt(10*10**30));
@@ -1744,7 +1791,9 @@ describe("Improvements", function () {
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 4)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 4)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract2.connect(signer1).buyImprovement2(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 4)).to.be.revertedWith("Cannot own more than 1");
             await improvementscontract2.connect(signer0).updateHarborCost(BigInt(10*10**30));
@@ -1783,7 +1832,9 @@ describe("Improvements", function () {
             await improvementscontract1.connect(signer1).buyImprovement1(2, 0, 9);
             await expect(improvementscontract2.connect(signer1).buyImprovement2(1, 1, 5)).to.be.revertedWith("!nation owner");
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 5)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract2.connect(signer1).buyImprovement2(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 5)).to.be.revertedWith("Cannot own more than 1");
             await improvementscontract2.connect(signer0).updateHospitalCost(BigInt(10*10**30));
@@ -1827,7 +1878,9 @@ describe("Improvements", function () {
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 6)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 6)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract2.connect(signer1).buyImprovement2(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 6)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract2.connect(signer0).updateIntelligenceAgencyCost(BigInt(10*10**30));
@@ -1866,7 +1919,9 @@ describe("Improvements", function () {
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 7)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 7)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract2.connect(signer1).buyImprovement2(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 7)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract2.connect(signer0).updateJailCost(BigInt(10*10**30));
@@ -1905,7 +1960,9 @@ describe("Improvements", function () {
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 8)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 8)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract2.connect(signer1).buyImprovement2(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract2.connect(signer1).buyImprovement2(6, 0, 8)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract2.connect(signer0).updateLaborCampCost(BigInt(10*10**30));
@@ -1951,7 +2008,9 @@ describe("Improvements", function () {
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 1)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 1)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract4.connect(signer1).buyImprovement4(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 1)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract4.connect(signer0).updateMissileDefenseCost(BigInt(10*10**30));
@@ -1994,7 +2053,9 @@ describe("Improvements", function () {
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 2)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 2)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract4.connect(signer1).buyImprovement4(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 2)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract4.connect(signer0).updateMunitionsFactoryCost(BigInt(10*10**30));
@@ -2036,7 +2097,9 @@ describe("Improvements", function () {
             await improvementscontract2.connect(signer1).buyImprovement2(1, 0, 4);
             await expect(improvementscontract4.connect(signer1).buyImprovement4(1, 1, 3)).to.be.revertedWith("!nation owner");
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 3)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract4.connect(signer1).buyImprovement4(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 3)).to.be.revertedWith("Cannot own more than 2");
             await improvementscontract4.connect(signer0).updateNavalAcademyCost(BigInt(10*10**30));
@@ -2078,7 +2141,9 @@ describe("Improvements", function () {
             await improvementscontract2.connect(signer1).buyImprovement2(1, 0, 4);
             await expect(improvementscontract4.connect(signer1).buyImprovement4(1, 1, 4)).to.be.revertedWith("!nation owner");
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 4)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract4.connect(signer1).buyImprovement4(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 4)).to.be.revertedWith("Cannot own more than 3");
             await improvementscontract4.connect(signer0).updateNavalConstructionYardCost(BigInt(10*10**30));
@@ -2120,7 +2185,9 @@ describe("Improvements", function () {
             await improvementscontract2.connect(signer1).buyImprovement2(1, 0, 2);
             await expect(improvementscontract4.connect(signer1).buyImprovement4(1, 1, 5)).to.be.revertedWith("!nation owner");
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 5)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract4.connect(signer1).buyImprovement4(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 5)).to.be.revertedWith("Cannot own more than 2");
             await improvementscontract4.connect(signer0).updateOfficeOfPropagandaCost(BigInt(10*10**30));
@@ -2159,7 +2226,9 @@ describe("Improvements", function () {
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 6)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 6)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract4.connect(signer1).buyImprovement4(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract4.connect(signer1).buyImprovement4(6, 0, 6)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract4.connect(signer0).updatePoliceHeadquartersCost(BigInt(10*10**30));
@@ -2200,7 +2269,9 @@ describe("Improvements", function () {
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 1)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 1)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 1)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract3.connect(signer0).updatePrisonCost(BigInt(10*10**30));
@@ -2220,7 +2291,9 @@ describe("Improvements", function () {
         //radiation containment chamber
         it("improvement3 radiation containment chamber tests", async function () {
             await billscontract.connect(signer1).payBills(0);
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 2)).to.be.revertedWith("Must own a bunker for each radiation containment chamber")            
             await improvementscontract1.connect(signer1).buyImprovement1(2, 0, 3);
             await improvementscontract1.connect(signer1).buyImprovement1(2, 0, 6);
@@ -2297,7 +2370,9 @@ describe("Improvements", function () {
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 2)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 2)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 2)).to.be.revertedWith("Cannot own more than 2");
             await improvementscontract3.connect(signer0).updateRadiationContainmentChamberCost(BigInt(10*10**30));
@@ -2336,7 +2411,9 @@ describe("Improvements", function () {
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 3)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 3)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 3)).to.be.revertedWith("Cannot own more than 2");
             await improvementscontract3.connect(signer0).updateRedLightDistrictCost(BigInt(10*10**30));
@@ -2375,7 +2452,9 @@ describe("Improvements", function () {
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 4)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 4)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 4)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract3.connect(signer0).updateRehabilitationFacilityCost(BigInt(10*10**30));
@@ -2406,7 +2485,12 @@ describe("Improvements", function () {
             expect(newCount.toNumber()).to.equal(3);
             const improvementCount = await improvementscontract1.getImprovementCount(0);
             expect(improvementCount).to.equal(3);
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 1000)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await improvementscontract4.connect(signer1).buyImprovement4(3, 0, 1);
             await improvementscontract3.connect(signer1).buyImprovement3(1, 0, 5);
             await wonderscontract4.connect(signer1).buyWonder4(0, 4);
@@ -2422,7 +2506,9 @@ describe("Improvements", function () {
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 5)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 5)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 5)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract3.connect(signer0).updateSatelliteCost(BigInt(10*10**30));
@@ -2461,7 +2547,9 @@ describe("Improvements", function () {
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 6)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 6)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 6)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract3.connect(signer0).updateSchoolCost(BigInt(10*10**30));
@@ -2500,7 +2588,9 @@ describe("Improvements", function () {
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 7)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 7)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 7)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract3.connect(signer0).updateShipyardCost(BigInt(10*10**30));
@@ -2539,7 +2629,9 @@ describe("Improvements", function () {
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 8)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 8)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 8)).to.be.revertedWith("Cannot own more than 5");
             await improvementscontract3.connect(signer0).updateStadiumCost(BigInt(10*10**30));
@@ -2559,7 +2651,9 @@ describe("Improvements", function () {
         //university
         it("improvement3 university tests", async function () {
             await billscontract.connect(signer1).payBills(0);
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 9)).to.be.revertedWith("Must own 3 schools to own a university");
             await improvementscontract3.connect(signer1).buyImprovement3(3, 0, 6);
             await improvementscontract3.connect(signer1).buyImprovement3(1, 0, 9);
@@ -2581,7 +2675,9 @@ describe("Improvements", function () {
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 9)).to.be.revertedWith("must pay bills before buying improvements");
             await billscontract.connect(signer1).payBills(0);
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 9)).to.be.revertedWith("population too low to purchase improvement");
-            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 500)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 200)
+            await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100)
             await expect(improvementscontract3.connect(signer1).buyImprovement3(1, 0, 15)).to.be.revertedWith("Invalid improvement ID");
             await expect(improvementscontract3.connect(signer1).buyImprovement3(6, 0, 9)).to.be.revertedWith("Cannot own more than 2");
             await improvementscontract3.connect(signer0).updateUniversityCost(BigInt(10*10**30));

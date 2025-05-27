@@ -1,13 +1,16 @@
 //St8kraft © 2022 by OxSnosh is licensed under Attribution-NonCommercial-NoDerivatives 4.0 International
 import { expect } from "chai"
-import { ethers, network, artifacts } from "hardhat"
+import { ethers, network } from "hardhat"
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address"
 import { INITIAL_SUPPLY } from "../helper-hardhat-config"
 import { Test, Oracle } from "../typechain-types"
 import { LinkToken } from '../typechain-types/@chainlink/contracts/src/v0.4/LinkToken';
+import { link } from "fs"
+import { metadata } from "../scripts/deploy_localhost_node/deploy_jobs/metadata";
+import { jobId } from "../scripts/deploy_localhost_node/deploy_jobs/jobMetadata";
 import { 
     WarBucks, 
-    MetaNationsGovToken,
+    St8craftGovToken,
     AidContract,
     AirBattleContract,
     AdditionalAirBattle,
@@ -62,16 +65,18 @@ import {
     VRFConsumerBaseV2,
     VRFCoordinatorV2Mock
 } from "../typechain-types"
+// import operatorArtifact from "../artifacts/contracts/tests/Operator.sol/Operator.json";
+// import OracleArtifact from "../artifacts/@chainlink/contracts/src/v0.4/Oracle.sol/Oracle.json";
+import LinkTokenArtifact from "../artifacts/@chainlink/contracts/src/v0.4/LinkToken.sol/LinkToken.json";
 import { networkConfig } from "../helper-hardhat-config"
-import { relaySpyOperation } from "../scripts/spy_attack_relayer"
-import fs from "fs"
+import { kMostFrequent } from "../scripts/SenatorImplementation";
 
-describe("Spy Relayer Test", function () {
+describe("Country Minter", function () {
   
   // const oracleAbi = OracleArtifact.abi;
   // const linkTokenAbi = LinkTokenArtifact.abi;
   let warbucks: WarBucks  
-  let metanationsgovtoken: MetaNationsGovToken
+  let st8craftgovtoken: St8craftGovToken
   let aidcontract: AidContract
   let airbattlecontract: AirBattleContract
   let additionalairbattle: AdditionalAirBattle
@@ -131,6 +136,11 @@ describe("Spy Relayer Test", function () {
   let signer5: SignerWithAddress
   let signer6: SignerWithAddress
   let signer7: SignerWithAddress
+  let signer8: SignerWithAddress
+  let signer9: SignerWithAddress
+  let signer10: SignerWithAddress
+  let signer11: SignerWithAddress
+  let signer12: SignerWithAddress
   let signers: SignerWithAddress[]
   let addrs
 
@@ -152,6 +162,11 @@ describe("Spy Relayer Test", function () {
     signer5 = signers[5];
     signer6 = signers[6];
     signer7 = signers[7];
+    signer8 = signers[8];
+    signer9 = signers[9];
+    signer10 = signers[10];
+    signer11 = signers[11];
+    signer12 = signers[12];
     
     let chainId: any
     chainId = network.config.chainId
@@ -189,8 +204,8 @@ describe("Spy Relayer Test", function () {
     const MetaNatonsGovToken = await ethers.getContractFactory(
         "MetaNationsGovToken"
     )
-    metanationsgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as MetaNationsGovToken
-    await metanationsgovtoken.deployed()
+    st8craftgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as St8craftGovToken
+    await st8craftgovtoken.deployed()
     // console.log(`MetaNationsGovToken deployed to ${metanationsgovtoken.address}`)
 
     const AidContract = await ethers.getContractFactory("AidContract")
@@ -505,7 +520,8 @@ describe("Spy Relayer Test", function () {
             infrastructurecontract.address,
             bonusresourcescontract.address,
             navycontract2.address,
-            countryparameterscontract.address)
+            countryparameterscontract.address,
+            navalblockadecontract.address,)
         
         await bomberscontract.settings(
             countryminter.address, 
@@ -742,7 +758,8 @@ describe("Spy Relayer Test", function () {
             improvementscontract1.address,
             improvementscontract2.address,
             countryminter.address,
-            wonderscontract4.address
+            wonderscontract4.address,
+            resourcescontract.address,
             )
         
         await infrastructurecontract.settings1(
@@ -867,7 +884,10 @@ describe("Spy Relayer Test", function () {
             militarycontract.address,
             wonderscontract1.address,
             improvementscontract4.address,
-            navycontract2.address
+            navycontract2.address,
+            navalblockadecontract.address,
+            breakblockadecontract.address,
+            navalattackcontract.address,
         )
     
         await navalblockadecontract.settings(
@@ -877,7 +897,8 @@ describe("Spy Relayer Test", function () {
             warcontract.address,
             countryminter.address,
             keepercontract.address,
-            breakblockadecontract.address
+            breakblockadecontract.address,
+            billscontract.address,
         )
     
         await breakblockadecontract.settings(
@@ -887,7 +908,8 @@ describe("Spy Relayer Test", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
         )
     
         await navalattackcontract.settings(
@@ -895,7 +917,9 @@ describe("Spy Relayer Test", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
+            countryminter.address,
         )
     
         await nukecontract.settings(
@@ -1094,7 +1118,8 @@ describe("Spy Relayer Test", function () {
             wonderscontract1.address,
             wonderscontract3.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract3.settings(
@@ -1104,7 +1129,8 @@ describe("Spy Relayer Test", function () {
             wonderscontract1.address,
             wonderscontract2.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract4.settings(

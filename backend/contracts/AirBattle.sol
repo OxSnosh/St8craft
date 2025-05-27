@@ -63,7 +63,7 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
     AdditionalAirBattle addAirBattle;
 
     uint256[] private s_randomWords;
-    VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
+    VRFCoordinatorV2Interface public i_vrfCoordinator;
     uint64 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
@@ -139,6 +139,12 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
         mint = CountryMinter(_mint);
         addAirBattleAddress = _addAirBattle;
         addAirBattle = AdditionalAirBattle(_addAirBattle);
+    }
+
+    function updateVRFCoordinator(
+        address vrfCoordinatorV2
+    ) public onlyOwner {
+        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
     }
 
     ///@dev this function is a public function
@@ -417,7 +423,7 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
         uint256 battleId,
         uint256 attackerId,
         uint256 defenderId,
-        uint256[] randomWords,
+        uint256[] randomNumbers,
         uint256[] attackerFighters,
         uint256[] attackerBombers,
         uint256[] defenderFighters,

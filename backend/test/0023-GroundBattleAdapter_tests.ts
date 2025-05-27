@@ -1,6 +1,6 @@
 //St8kraft © 2022 by OxSnosh is licensed under Attribution-NonCommercial-NoDerivatives 4.0 International
 import { expect } from "chai"
-import { ethers, network, artifacts } from "hardhat"
+import { ethers, network } from "hardhat"
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address"
 import { INITIAL_SUPPLY } from "../helper-hardhat-config"
 import { Test, Oracle } from "../typechain-types"
@@ -8,10 +8,9 @@ import { LinkToken } from '../typechain-types/@chainlink/contracts/src/v0.4/Link
 import { link } from "fs"
 import { metadata } from "../scripts/deploy_localhost_node/deploy_jobs/metadata";
 import { jobId } from "../scripts/deploy_localhost_node/deploy_jobs/jobMetadata";
-import fs from "fs"
 import { 
     WarBucks, 
-    MetaNationsGovToken,
+    St8craftGovToken,
     AidContract,
     AirBattleContract,
     AdditionalAirBattle,
@@ -70,13 +69,14 @@ import {
 // import OracleArtifact from "../artifacts/@chainlink/contracts/src/v0.4/Oracle.sol/Oracle.json";
 import LinkTokenArtifact from "../artifacts/@chainlink/contracts/src/v0.4/LinkToken.sol/LinkToken.json";
 import { networkConfig } from "../helper-hardhat-config"
+import { kMostFrequent } from "../scripts/SenatorImplementation";
 
-describe("Ground Battle Adapter Test", function () {
+describe("Country Minter", function () {
   
   // const oracleAbi = OracleArtifact.abi;
   // const linkTokenAbi = LinkTokenArtifact.abi;
   let warbucks: WarBucks  
-  let metanationsgovtoken: MetaNationsGovToken
+  let st8craftgovtoken: St8craftGovToken
   let aidcontract: AidContract
   let airbattlecontract: AirBattleContract
   let additionalairbattle: AdditionalAirBattle
@@ -136,6 +136,11 @@ describe("Ground Battle Adapter Test", function () {
   let signer5: SignerWithAddress
   let signer6: SignerWithAddress
   let signer7: SignerWithAddress
+  let signer8: SignerWithAddress
+  let signer9: SignerWithAddress
+  let signer10: SignerWithAddress
+  let signer11: SignerWithAddress
+  let signer12: SignerWithAddress
   let signers: SignerWithAddress[]
   let addrs
 
@@ -157,6 +162,11 @@ describe("Ground Battle Adapter Test", function () {
     signer5 = signers[5];
     signer6 = signers[6];
     signer7 = signers[7];
+    signer8 = signers[8];
+    signer9 = signers[9];
+    signer10 = signers[10];
+    signer11 = signers[11];
+    signer12 = signers[12];
     
     let chainId: any
     chainId = network.config.chainId
@@ -194,8 +204,8 @@ describe("Ground Battle Adapter Test", function () {
     const MetaNatonsGovToken = await ethers.getContractFactory(
         "MetaNationsGovToken"
     )
-    metanationsgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as MetaNationsGovToken
-    await metanationsgovtoken.deployed()
+    st8craftgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as St8craftGovToken
+    await st8craftgovtoken.deployed()
     // console.log(`MetaNationsGovToken deployed to ${metanationsgovtoken.address}`)
 
     const AidContract = await ethers.getContractFactory("AidContract")
@@ -291,7 +301,7 @@ describe("Ground Battle Adapter Test", function () {
     const GroundBattleContract = await ethers.getContractFactory("GroundBattleContract")
     groundbattlecontract = await GroundBattleContract.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit) as GroundBattleContract
     await groundbattlecontract.deployed()
-    console.log(`GroundBattleContract deployed to ${groundbattlecontract.address}`)
+    // console.log(`GroundBattleContract deployed to ${groundbattlecontract.address}`)
     
     const ImprovementsContract1 = await ethers.getContractFactory("ImprovementsContract1")
     improvementscontract1 = await ImprovementsContract1.deploy() as ImprovementsContract1
@@ -490,638 +500,649 @@ describe("Ground Battle Adapter Test", function () {
         countryminter.address,
         airbattlecontract.address
     )
-    
-    await billscontract.settings(
-        countryminter.address,
-        treasurycontract.address,
-        wonderscontract1.address,
-        wonderscontract2.address,
-        wonderscontract3.address,
-        wonderscontract4.address,
-        forcescontract.address,
-        fighterscontract.address,
-        navycontract.address,
-        resourcescontract.address)
-    await billscontract.settings2(
-        improvementscontract1.address,
-        improvementscontract2.address,
-        missilescontract.address,
-        wonderscontract4.address,
-        infrastructurecontract.address,
-        bonusresourcescontract.address,
-        navycontract2.address,
-        countryparameterscontract.address)
-    
-    await bomberscontract.settings(
-        countryminter.address, 
-        bombersmarketplace1.address,
-        bombersmarketplace2.address,
-        airbattlecontract.address,
-        treasurycontract.address,
-        fighterscontract.address,
-        infrastructurecontract.address,
-        warcontract.address)
-
-    await bombersmarketplace1.settings(
-        countryminter.address,
-        bomberscontract.address,
-        fighterscontract.address,
-        fightersmarketplace1.address,
-        infrastructurecontract.address,
-        treasurycontract.address)
-
-    await bombersmarketplace2.settings(
-        countryminter.address,
-        bomberscontract.address,
-        fighterscontract.address,
-        fightersmarketplace1.address,
-        infrastructurecontract.address,
-        treasurycontract.address)
-    
-    await countryminter.settings(
-        countryparameterscontract.address,
-        treasurycontract.address,
-        infrastructurecontract.address,
-        resourcescontract.address,
-        missilescontract.address,
-        senatecontract.address,
-        warbucks.address,
-        bonusresourcescontract.address)
-    await countryminter.settings2(
-        improvementscontract1.address,
-        improvementscontract2.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        wonderscontract1.address,
-        wonderscontract2.address,
-        wonderscontract3.address,
-        wonderscontract4.address)
-    await countryminter.settings3(
-        militarycontract.address,
-        forcescontract.address,
-        navycontract.address,
-        navycontract2.address,
-        navalactionscontract.address,
-        fighterscontract.address,
-        bomberscontract.address)
-    
-    await countryparameterscontract.settings(
-        spyoperationscontract.address,
-        countryminter.address,
-        senatecontract.address,
-        keepercontract.address,
-        nukecontract.address,
-        groundbattlecontract.address,
-        wonderscontract1.address,
-        treasurycontract.address
-    )
-
-    await crimecontract.settings(
-        infrastructurecontract.address,
-        improvementscontract1.address,
-        improvementscontract2.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        countryparameterscontract.address,
-        wonderscontract2.address)
-    
-    await cruisemissilecontract.settings(
-        forcescontract.address,
-        countryminter.address,
-        warcontract.address,
-        infrastructurecontract.address,
-        missilescontract.address)
-    await cruisemissilecontract.settings2(
-        improvementscontract1.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        wonderscontract2.address)
-    
-    await environmentcontract.settings(
-        countryminter.address,
-        resourcescontract.address,
-        infrastructurecontract.address,
-        wonderscontract3.address,
-        wonderscontract4.address,
-        forcescontract.address,
-        countryparameterscontract.address,
-        additionaltaxescontract.address,
-        missilescontract.address,
-        nukecontract.address)
-    await environmentcontract.settings2(
-        improvementscontract1.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        bonusresourcescontract.address)
-    
-    await fighterscontract.settings(
-        countryminter.address,
-        fightersmarketplace1.address,
-        fightersmarketplace2.address,
-        treasurycontract.address,
-        warcontract.address,
-        infrastructurecontract.address,
-        resourcescontract.address,
-        improvementscontract1.address,
-        airbattlecontract.address,
-        wonderscontract1.address,
-        fighterlosses.address)
-    await fighterscontract.settings2(
-        navycontract.address,
-        bomberscontract.address)
-    
-    await fighterlosses.settings(
-        fighterscontract.address,
-        airbattlecontract.address)
-    
-    await fightersmarketplace1.settings(
-        countryminter.address,
-        bomberscontract.address,
-        fighterscontract.address,
-        treasurycontract.address,
-        infrastructurecontract.address,
-        resourcescontract.address,
-        improvementscontract1.address,
-        wonderscontract1.address,
-        wonderscontract4.address,
-        navycontract.address)
-    await fightersmarketplace1.settings2(
-        bonusresourcescontract.address,
-        navycontract2.address
-    )
-    
-    await fightersmarketplace2.settings(
-        countryminter.address,
-        bomberscontract.address,
-        fighterscontract.address,
-        fightersmarketplace1.address,
-        treasurycontract.address,
-        infrastructurecontract.address,
-        resourcescontract.address,
-        improvementscontract1.address)
-    
-    await forcescontract.settings(
-        treasurycontract.address,
-        aidcontract.address,
-        spyoperationscontract.address,
-        cruisemissilecontract.address,
-        nukecontract.address,
-        airbattlecontract.address,
-        groundbattlecontract.address,
-        warcontract.address)
-    await forcescontract.settings2(
-        infrastructurecontract.address,
-        resourcescontract.address,
-        improvementscontract1.address,
-        improvementscontract2.address,
-        wonderscontract1.address,
-        countryminter.address,
-        keepercontract.address,
-        countryparameterscontract.address)
-    
-    await missilescontract.settings(
-        treasurycontract.address,
-        spyoperationscontract.address,
-        nukecontract.address,
-        airbattlecontract.address,
-        wonderscontract2.address,
-        nationstrengthcontract.address,
-        infrastructurecontract.address)
-    await missilescontract.settings2(
-        resourcescontract.address,
-        improvementscontract1.address,
-        wonderscontract1.address,
-        wonderscontract4.address,
-        countryminter.address,
-        keepercontract.address)
         
-    await groundbattlecontract.settings(
-        warcontract.address,
-        infrastructurecontract.address,
-        forcescontract.address,
-        treasurycontract.address,
-        countryminter.address,
-        militarycontract.address)
-    await groundbattlecontract.settings2(
-        improvementscontract2.address,
-        improvementscontract4.address,
-        wonderscontract3.address,
-        wonderscontract4.address,
-        additionaltaxescontract.address,
-        countryparameterscontract.address,)
+        await billscontract.settings(
+            countryminter.address,
+            treasurycontract.address,
+            wonderscontract1.address,
+            wonderscontract2.address,
+            wonderscontract3.address,
+            wonderscontract4.address,
+            forcescontract.address,
+            fighterscontract.address,
+            navycontract.address,
+            resourcescontract.address)
+        await billscontract.settings2(
+            improvementscontract1.address,
+            improvementscontract2.address,
+            missilescontract.address,
+            wonderscontract4.address,
+            infrastructurecontract.address,
+            bonusresourcescontract.address,
+            navycontract2.address,
+            countryparameterscontract.address,
+            navalblockadecontract.address,)
+        
+        await bomberscontract.settings(
+            countryminter.address, 
+            bombersmarketplace1.address,
+            bombersmarketplace2.address,
+            airbattlecontract.address,
+            treasurycontract.address,
+            fighterscontract.address,
+            infrastructurecontract.address,
+            warcontract.address)
     
-    await improvementscontract1.settings(
-        treasurycontract.address,
-        improvementscontract2.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        navycontract.address,
-        additionalnavycontract.address,
-        countryminter.address,
-        wonderscontract1.address,
-        infrastructurecontract.address)
-
-    await improvementscontract2.settings(
-        treasurycontract.address,
-        forcescontract.address,
-        wonderscontract1.address,
-        countryminter.address,
-        improvementscontract1.address,
-        resourcescontract.address,
-        spycontract.address
+        await bombersmarketplace1.settings(
+            countryminter.address,
+            bomberscontract.address,
+            fighterscontract.address,
+            fightersmarketplace1.address,
+            infrastructurecontract.address,
+            treasurycontract.address)
+    
+        await bombersmarketplace2.settings(
+            countryminter.address,
+            bomberscontract.address,
+            fighterscontract.address,
+            fightersmarketplace1.address,
+            infrastructurecontract.address,
+            treasurycontract.address)
+        
+        await countryminter.settings(
+            countryparameterscontract.address,
+            treasurycontract.address,
+            infrastructurecontract.address,
+            resourcescontract.address,
+            missilescontract.address,
+            senatecontract.address,
+            warbucks.address,
+            bonusresourcescontract.address)
+        await countryminter.settings2(
+            improvementscontract1.address,
+            improvementscontract2.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            wonderscontract1.address,
+            wonderscontract2.address,
+            wonderscontract3.address,
+            wonderscontract4.address)
+        await countryminter.settings3(
+            militarycontract.address,
+            forcescontract.address,
+            navycontract.address,
+            navycontract2.address,
+            navalactionscontract.address,
+            fighterscontract.address,
+            bomberscontract.address)
+        
+        await countryparameterscontract.settings(
+            spyoperationscontract.address,
+            countryminter.address,
+            senatecontract.address,
+            keepercontract.address,
+            nukecontract.address,
+            groundbattlecontract.address,
+            wonderscontract1.address,
+            treasurycontract.address
         )
     
-    await improvementscontract3.settings(
-        treasurycontract.address,
-        additionalnavycontract.address,
-        improvementscontract1.address,
-        improvementscontract2.address,
-        countryminter.address,
-        bonusresourcescontract.address,
-        wonderscontract4.address
+        await crimecontract.settings(
+            infrastructurecontract.address,
+            improvementscontract1.address,
+            improvementscontract2.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            countryparameterscontract.address,
+            wonderscontract2.address)
+        
+        await cruisemissilecontract.settings(
+            forcescontract.address,
+            countryminter.address,
+            warcontract.address,
+            infrastructurecontract.address,
+            missilescontract.address)
+        await cruisemissilecontract.settings2(
+            improvementscontract1.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            wonderscontract2.address)
+        
+        await environmentcontract.settings(
+            countryminter.address,
+            resourcescontract.address,
+            infrastructurecontract.address,
+            wonderscontract3.address,
+            wonderscontract4.address,
+            forcescontract.address,
+            countryparameterscontract.address,
+            additionaltaxescontract.address,
+            missilescontract.address,
+            nukecontract.address)
+        await environmentcontract.settings2(
+            improvementscontract1.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            bonusresourcescontract.address)
+        
+        await fighterscontract.settings(
+            countryminter.address,
+            fightersmarketplace1.address,
+            fightersmarketplace2.address,
+            treasurycontract.address,
+            warcontract.address,
+            infrastructurecontract.address,
+            resourcescontract.address,
+            improvementscontract1.address,
+            airbattlecontract.address,
+            wonderscontract1.address,
+            fighterlosses.address)
+        await fighterscontract.settings2(
+            navycontract.address,
+            bomberscontract.address)
+        
+        await fighterlosses.settings(
+            fighterscontract.address,
+            airbattlecontract.address)
+        
+        await fightersmarketplace1.settings(
+            countryminter.address,
+            bomberscontract.address,
+            fighterscontract.address,
+            treasurycontract.address,
+            infrastructurecontract.address,
+            resourcescontract.address,
+            improvementscontract1.address,
+            wonderscontract1.address,
+            wonderscontract4.address,
+            navycontract.address)
+        await fightersmarketplace1.settings2(
+            bonusresourcescontract.address,
+            navycontract2.address
+        )
+        
+        await fightersmarketplace2.settings(
+            countryminter.address,
+            bomberscontract.address,
+            fighterscontract.address,
+            fightersmarketplace1.address,
+            treasurycontract.address,
+            infrastructurecontract.address,
+            resourcescontract.address,
+            improvementscontract1.address)
+        
+        await forcescontract.settings(
+            treasurycontract.address,
+            aidcontract.address,
+            spyoperationscontract.address,
+            cruisemissilecontract.address,
+            nukecontract.address,
+            airbattlecontract.address,
+            groundbattlecontract.address,
+            warcontract.address)
+        await forcescontract.settings2(
+            infrastructurecontract.address,
+            resourcescontract.address,
+            improvementscontract1.address,
+            improvementscontract2.address,
+            wonderscontract1.address,
+            countryminter.address,
+            keepercontract.address,
+            countryparameterscontract.address)
+        
+        await missilescontract.settings(
+            treasurycontract.address,
+            spyoperationscontract.address,
+            nukecontract.address,
+            airbattlecontract.address,
+            wonderscontract2.address,
+            nationstrengthcontract.address,
+            infrastructurecontract.address)
+        await missilescontract.settings2(
+            resourcescontract.address,
+            improvementscontract1.address,
+            wonderscontract1.address,
+            wonderscontract4.address,
+            countryminter.address,
+            keepercontract.address)
+            
+        await groundbattlecontract.settings(
+            warcontract.address,
+            infrastructurecontract.address,
+            forcescontract.address,
+            treasurycontract.address,
+            countryminter.address,
+            militarycontract.address)
+        await groundbattlecontract.settings2(
+            improvementscontract2.address,
+            improvementscontract4.address,
+            wonderscontract3.address,
+            wonderscontract4.address,
+            additionaltaxescontract.address,
+            countryparameterscontract.address,)
+        
+        await improvementscontract1.settings(
+            treasurycontract.address,
+            improvementscontract2.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            navycontract.address,
+            additionalnavycontract.address,
+            countryminter.address,
+            wonderscontract1.address,
+            infrastructurecontract.address)
+    
+        await improvementscontract2.settings(
+            treasurycontract.address,
+            forcescontract.address,
+            wonderscontract1.address,
+            countryminter.address,
+            improvementscontract1.address,
+            resourcescontract.address,
+            spycontract.address
+            )
+        
+        await improvementscontract3.settings(
+            treasurycontract.address,
+            additionalnavycontract.address,
+            improvementscontract1.address,
+            improvementscontract2.address,
+            countryminter.address,
+            bonusresourcescontract.address,
+            wonderscontract4.address
+            )
+        
+        await improvementscontract4.settings(
+            treasurycontract.address,
+            forcescontract.address,
+            improvementscontract1.address,
+            improvementscontract2.address,
+            countryminter.address,
+            wonderscontract4.address,
+            resourcescontract.address,
+            )
+        
+        await infrastructurecontract.settings1(
+            resourcescontract.address,
+            improvementscontract1.address,
+            improvementscontract2.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            infrastructuremarketplace.address,
+            technologymarketcontrat.address,
+            landmarketcontract.address,
+            bonusresourcescontract.address
+        )
+        await infrastructurecontract.settings2(
+            wonderscontract1.address,
+            wonderscontract2.address,
+            wonderscontract3.address,
+            wonderscontract4.address,
+            treasurycontract.address,
+            countryparameterscontract.address,
+            forcescontract.address,
+            aidcontract.address
+        )
+        await infrastructurecontract.settings3(
+            spyoperationscontract.address,
+            taxescontract.address,
+            cruisemissilecontract.address,
+            nukecontract.address,
+            airbattlecontract.address,
+            groundbattlecontract.address,
+            countryminter.address,
+            crimecontract.address,
+            countryparameterscontract.address
         )
     
-    await improvementscontract4.settings(
-        treasurycontract.address,
-        forcescontract.address,
-        improvementscontract1.address,
-        improvementscontract2.address,
-        countryminter.address,
-        wonderscontract4.address
+        await infrastructuremarketplace.settings(
+            resourcescontract.address,
+            countryparameterscontract.address,
+            improvementscontract1.address,
+            countryminter.address,
+            wonderscontract2.address,
+            wonderscontract3.address,
+            treasurycontract.address,
+            infrastructurecontract.address,
+            bonusresourcescontract.address
         )
     
-    await infrastructurecontract.settings1(
-        resourcescontract.address,
-        improvementscontract1.address,
-        improvementscontract2.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        infrastructuremarketplace.address,
-        technologymarketcontrat.address,
-        landmarketcontract.address,
-        bonusresourcescontract.address
-    )
-    await infrastructurecontract.settings2(
-        wonderscontract1.address,
-        wonderscontract2.address,
-        wonderscontract3.address,
-        wonderscontract4.address,
-        treasurycontract.address,
-        countryparameterscontract.address,
-        forcescontract.address,
-        aidcontract.address
-    )
-    await infrastructurecontract.settings3(
-        spyoperationscontract.address,
-        taxescontract.address,
-        cruisemissilecontract.address,
-        nukecontract.address,
-        airbattlecontract.address,
-        groundbattlecontract.address,
-        countryminter.address,
-        crimecontract.address,
-        countryparameterscontract.address
-    )
-
-    await infrastructuremarketplace.settings(
-        resourcescontract.address,
-        countryparameterscontract.address,
-        improvementscontract1.address,
-        countryminter.address,
-        wonderscontract2.address,
-        wonderscontract3.address,
-        treasurycontract.address,
-        infrastructurecontract.address,
-        bonusresourcescontract.address
-    )
-
-    await landmarketcontract.settings(
-        resourcescontract.address,
-        countryminter.address,
-        infrastructurecontract.address,
-        treasurycontract.address
-    )
-
-    await militarycontract.settings(
-        spyoperationscontract.address,
-        countryminter.address,
-        keepercontract.address
-    )
-
-    await nationstrengthcontract.settings(
-        infrastructurecontract.address,
-        forcescontract.address,
-        fighterscontract.address,
-        bomberscontract.address,
-        navycontract.address,
-        missilescontract.address,
-        navycontract2.address
-    )
-
-    await navycontract.settings(
-        treasurycontract.address,
-        improvementscontract1.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        resourcescontract.address,
-        militarycontract.address,
-        nukecontract.address,
-        wonderscontract1.address,
-        navalactionscontract.address,
-        additionalnavycontract.address
-    )
-    await navycontract.settings2(
-        countryminter.address,
-        bonusresourcescontract.address,
-        navycontract2.address,
-        infrastructurecontract.address
-    )
-
-    await navycontract2.settings(
-        treasurycontract.address,
-        improvementscontract1.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        resourcescontract.address,
-        militarycontract.address,
-        nukecontract.address,
-        wonderscontract1.address,
-        navalactionscontract.address,
-        additionalnavycontract.address
-    )
-    await navycontract2.settings2(
-        countryminter.address,
-        bonusresourcescontract.address,
-        navycontract.address,
-        infrastructurecontract.address
-    ) 
-
-    await navalactionscontract.settings(
-        navalblockadecontract.address,
-        breakblockadecontract.address,
-        navalattackcontract.address,
-        keepercontract.address,
-        navycontract.address,
-        navycontract2.address,
-        countryminter.address
-    )
-
-    await additionalnavycontract.settings(
-        navycontract.address,
-        navalactionscontract.address,
-        militarycontract.address,
-        wonderscontract1.address,
-        improvementscontract4.address,
-        navycontract2.address
-    )
-
-    await navalblockadecontract.settings(
-        navycontract.address,
-        additionalnavycontract.address,
-        navalactionscontract.address,
-        warcontract.address,
-        countryminter.address,
-        keepercontract.address,
-        breakblockadecontract.address
-    )
-
-    await breakblockadecontract.settings(
-        countryminter.address,
-        navalblockadecontract.address,
-        navycontract.address,
-        warcontract.address,
-        improvementscontract4.address,
-        navalactionscontract.address,
-        navycontract2.address
-    )
-
-    await navalattackcontract.settings(
-        navycontract.address,
-        warcontract.address,
-        improvementscontract4.address,
-        navalactionscontract.address,
-        navycontract2.address
-    )
-
-    await nukecontract.settings(
-        countryminter.address,
-        warcontract.address,
-        wonderscontract1.address,
-        wonderscontract4.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        infrastructurecontract.address,
-        forcescontract.address,
-        navycontract.address,
-        missilescontract.address,
-        keepercontract.address
-    )
-    await nukecontract.settings2(
-        countryparameterscontract.address
-    )
-
-    await resourcescontract.settings(
-        infrastructurecontract.address,
-        improvementscontract2.address,
-        countryminter.address,
-        bonusresourcescontract.address,
-        senatecontract.address,
-        technologymarketcontrat.address,
-        countryparameterscontract.address
-    )
-    await bonusresourcescontract.settings(
-        infrastructurecontract.address,
-        countryminter.address,
-        resourcescontract.address,
-        crimecontract.address
-    )
-
-    await senatecontract.settings(
-        countryminter.address,
-        countryparameterscontract.address,
-        wonderscontract3.address,
-        keepercontract.address,
-        resourcescontract.address
-    )
-
-    await spycontract.settings(
-        spyoperationscontract.address,
-        treasurycontract.address,
-        countryminter.address,
-        improvementscontract2.address,
-        wonderscontract1.address,
-    )
-
-    await spyoperationscontract.settings(
-        infrastructurecontract.address,
-        forcescontract.address,
-        militarycontract.address,
-        nationstrengthcontract.address,
-        wonderscontract1.address,
-        wonderscontract2.address,
-        treasurycontract.address,
-        countryparameterscontract.address,
-        missilescontract.address,
-        countryminter.address
-    )
-    await spyoperationscontract.settings2(
-        keepercontract.address,
-        spycontract.address
-    )
-
-    await taxescontract.settings1(
-        countryminter.address,
-        infrastructurecontract.address,
-        treasurycontract.address,
-        improvementscontract1.address,
-        improvementscontract2.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        additionaltaxescontract.address,
-        bonusresourcescontract.address,
-        keepercontract.address,
-        environmentcontract.address
-    )
-    await taxescontract.settings2(
-        countryparameterscontract.address,
-        wonderscontract1.address,
-        wonderscontract2.address,
-        wonderscontract3.address,
-        wonderscontract4.address,
-        resourcescontract.address,
-        forcescontract.address,
-        militarycontract.address,
-        crimecontract.address,
-        navalblockadecontract.address
-    )
-
-    await additionaltaxescontract.settings(
-        countryparameterscontract.address,
-        wonderscontract1.address,
-        wonderscontract2.address,
-        wonderscontract3.address,
-        wonderscontract4.address,
-        resourcescontract.address,
-        militarycontract.address,
-        infrastructurecontract.address,
-        bonusresourcescontract.address
-    )
-    await additionaltaxescontract.settings2(
-        improvementscontract2.address,
-        improvementscontract3.address,
-        forcescontract.address,
-    )
-
-    await technologymarketcontrat.settings(
-        resourcescontract.address,
-        improvementscontract3.address,
-        infrastructurecontract.address,
-        wonderscontract2.address,
-        wonderscontract3.address,
-        wonderscontract4.address,
-        treasurycontract.address,
-        countryminter.address,
-        bonusresourcescontract.address,
-        crimecontract.address
-    )
-
-    await treasurycontract.settings1(
-        warbucks.address,
-        wonderscontract1.address,
-        wonderscontract2.address,
-        wonderscontract3.address,
-        wonderscontract4.address,
-        improvementscontract1.address,
-        improvementscontract2.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        infrastructurecontract.address
-    )
-    await treasurycontract.settings2(
-        groundbattlecontract.address,
-        countryminter.address,
-        keepercontract.address,
-        forcescontract.address,
-        navycontract.address,
-        fighterscontract.address,
-        bomberscontract.address,
-        aidcontract.address,
-        taxescontract.address,
-        billscontract.address,
-        spyoperationscontract.address
-    )
-    await treasurycontract.settings3(
-        navycontract2.address,
-        missilescontract.address,
-        infrastructuremarketplace.address,
-        landmarketcontract.address,
-        technologymarketcontrat.address,
-        fightersmarketplace1.address,
-        fightersmarketplace2.address,
-        bombersmarketplace1.address,
-        bombersmarketplace2.address,
-        countryparameterscontract.address,
-        spycontract.address
-    )
-
-    await warcontract.settings(
-        countryminter.address,
-        nationstrengthcontract.address,
-        militarycontract.address,
-        breakblockadecontract.address,
-        navalattackcontract.address,
-        airbattlecontract.address,
-        groundbattlecontract.address,
-        cruisemissilecontract.address,
-        forcescontract.address,
-        wonderscontract1.address,
-        keepercontract.address
-    )
-    await warcontract.settings2(
-        treasurycontract.address,
-        forcescontract.address,
-        navalblockadecontract.address,
-        nukecontract.address
-    )
-
-    await wonderscontract1.settings(
-        treasurycontract.address,
-        wonderscontract2.address,
-        wonderscontract3.address,
-        wonderscontract4.address,
-        infrastructurecontract.address,
-        countryminter.address
-    )
-
-    await wonderscontract2.settings(
-        treasurycontract.address,
-        infrastructurecontract.address,
-        wonderscontract1.address,
-        wonderscontract3.address,
-        wonderscontract4.address,
-        countryminter.address
-    )
-
-    await wonderscontract3.settings(
-        treasurycontract.address,
-        infrastructurecontract.address,
-        forcescontract.address,
-        wonderscontract1.address,
-        wonderscontract2.address,
-        wonderscontract4.address,
-        countryminter.address
-    )
-
-    await wonderscontract4.settings(
-        treasurycontract.address,
-        improvementscontract2.address,
-        improvementscontract3.address,
-        improvementscontract4.address,
-        infrastructurecontract.address,
-        wonderscontract1.address,
-        wonderscontract3.address,
-        countryminter.address
-    )
+        await landmarketcontract.settings(
+            resourcescontract.address,
+            countryminter.address,
+            infrastructurecontract.address,
+            treasurycontract.address
+        )
+    
+        await militarycontract.settings(
+            spyoperationscontract.address,
+            countryminter.address,
+            keepercontract.address
+        )
+    
+        await nationstrengthcontract.settings(
+            infrastructurecontract.address,
+            forcescontract.address,
+            fighterscontract.address,
+            bomberscontract.address,
+            navycontract.address,
+            missilescontract.address,
+            navycontract2.address
+        )
+    
+        await navycontract.settings(
+            treasurycontract.address,
+            improvementscontract1.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            resourcescontract.address,
+            militarycontract.address,
+            nukecontract.address,
+            wonderscontract1.address,
+            navalactionscontract.address,
+            additionalnavycontract.address
+        )
+        await navycontract.settings2(
+            countryminter.address,
+            bonusresourcescontract.address,
+            navycontract2.address,
+            infrastructurecontract.address
+        )
+    
+        await navycontract2.settings(
+            treasurycontract.address,
+            improvementscontract1.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            resourcescontract.address,
+            militarycontract.address,
+            nukecontract.address,
+            wonderscontract1.address,
+            navalactionscontract.address,
+            additionalnavycontract.address
+        )
+        await navycontract2.settings2(
+            countryminter.address,
+            bonusresourcescontract.address,
+            navycontract.address,
+            infrastructurecontract.address
+        ) 
+    
+        await navalactionscontract.settings(
+            navalblockadecontract.address,
+            breakblockadecontract.address,
+            navalattackcontract.address,
+            keepercontract.address,
+            navycontract.address,
+            navycontract2.address,
+            countryminter.address
+        )
+    
+        await additionalnavycontract.settings(
+            navycontract.address,
+            navalactionscontract.address,
+            militarycontract.address,
+            wonderscontract1.address,
+            improvementscontract4.address,
+            navycontract2.address,
+            navalblockadecontract.address,
+            breakblockadecontract.address,
+            navalattackcontract.address,
+        )
+    
+        await navalblockadecontract.settings(
+            navycontract.address,
+            additionalnavycontract.address,
+            navalactionscontract.address,
+            warcontract.address,
+            countryminter.address,
+            keepercontract.address,
+            breakblockadecontract.address,
+            billscontract.address,
+        )
+    
+        await breakblockadecontract.settings(
+            countryminter.address,
+            navalblockadecontract.address,
+            navycontract.address,
+            warcontract.address,
+            improvementscontract4.address,
+            navalactionscontract.address,
+            navycontract2.address,
+            additionalnavycontract.address,
+        )
+    
+        await navalattackcontract.settings(
+            navycontract.address,
+            warcontract.address,
+            improvementscontract4.address,
+            navalactionscontract.address,
+            navycontract2.address,
+            additionalnavycontract.address,
+            countryminter.address,
+        )
+    
+        await nukecontract.settings(
+            countryminter.address,
+            warcontract.address,
+            wonderscontract1.address,
+            wonderscontract4.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            infrastructurecontract.address,
+            forcescontract.address,
+            navycontract.address,
+            missilescontract.address,
+            keepercontract.address
+        )
+        await nukecontract.settings2(
+            countryparameterscontract.address
+        )
+    
+        await resourcescontract.settings(
+            infrastructurecontract.address,
+            improvementscontract2.address,
+            countryminter.address,
+            bonusresourcescontract.address,
+            senatecontract.address,
+            technologymarketcontrat.address,
+            countryparameterscontract.address
+        )
+        await bonusresourcescontract.settings(
+            infrastructurecontract.address,
+            countryminter.address,
+            resourcescontract.address,
+            crimecontract.address
+        )
+    
+        await senatecontract.settings(
+            countryminter.address,
+            countryparameterscontract.address,
+            wonderscontract3.address,
+            keepercontract.address,
+            resourcescontract.address
+        )
+    
+        await spycontract.settings(
+            spyoperationscontract.address,
+            treasurycontract.address,
+            countryminter.address,
+            improvementscontract2.address,
+            wonderscontract1.address,
+        )
+    
+        await spyoperationscontract.settings(
+            infrastructurecontract.address,
+            forcescontract.address,
+            militarycontract.address,
+            nationstrengthcontract.address,
+            wonderscontract1.address,
+            wonderscontract2.address,
+            treasurycontract.address,
+            countryparameterscontract.address,
+            missilescontract.address,
+            countryminter.address
+        )
+        await spyoperationscontract.settings2(
+            keepercontract.address,
+            spycontract.address
+        )
+    
+        await taxescontract.settings1(
+            countryminter.address,
+            infrastructurecontract.address,
+            treasurycontract.address,
+            improvementscontract1.address,
+            improvementscontract2.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            additionaltaxescontract.address,
+            bonusresourcescontract.address,
+            keepercontract.address,
+            environmentcontract.address
+        )
+        await taxescontract.settings2(
+            countryparameterscontract.address,
+            wonderscontract1.address,
+            wonderscontract2.address,
+            wonderscontract3.address,
+            wonderscontract4.address,
+            resourcescontract.address,
+            forcescontract.address,
+            militarycontract.address,
+            crimecontract.address,
+            navalblockadecontract.address
+        )
+    
+        await additionaltaxescontract.settings(
+            countryparameterscontract.address,
+            wonderscontract1.address,
+            wonderscontract2.address,
+            wonderscontract3.address,
+            wonderscontract4.address,
+            resourcescontract.address,
+            militarycontract.address,
+            infrastructurecontract.address,
+            bonusresourcescontract.address
+        )
+        await additionaltaxescontract.settings2(
+            improvementscontract2.address,
+            improvementscontract3.address,
+            forcescontract.address,
+        )
+    
+        await technologymarketcontrat.settings(
+            resourcescontract.address,
+            improvementscontract3.address,
+            infrastructurecontract.address,
+            wonderscontract2.address,
+            wonderscontract3.address,
+            wonderscontract4.address,
+            treasurycontract.address,
+            countryminter.address,
+            bonusresourcescontract.address,
+            crimecontract.address
+        )
+    
+        await treasurycontract.settings1(
+            warbucks.address,
+            wonderscontract1.address,
+            wonderscontract2.address,
+            wonderscontract3.address,
+            wonderscontract4.address,
+            improvementscontract1.address,
+            improvementscontract2.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            infrastructurecontract.address
+        )
+        await treasurycontract.settings2(
+            groundbattlecontract.address,
+            countryminter.address,
+            keepercontract.address,
+            forcescontract.address,
+            navycontract.address,
+            fighterscontract.address,
+            bomberscontract.address,
+            aidcontract.address,
+            taxescontract.address,
+            billscontract.address,
+            spyoperationscontract.address
+        )
+        await treasurycontract.settings3(
+            navycontract2.address,
+            missilescontract.address,
+            infrastructuremarketplace.address,
+            landmarketcontract.address,
+            technologymarketcontrat.address,
+            fightersmarketplace1.address,
+            fightersmarketplace2.address,
+            bombersmarketplace1.address,
+            bombersmarketplace2.address,
+            countryparameterscontract.address,
+            spycontract.address
+        )
+    
+        await warcontract.settings(
+            countryminter.address,
+            nationstrengthcontract.address,
+            militarycontract.address,
+            breakblockadecontract.address,
+            navalattackcontract.address,
+            airbattlecontract.address,
+            groundbattlecontract.address,
+            cruisemissilecontract.address,
+            forcescontract.address,
+            wonderscontract1.address,
+            keepercontract.address
+        )
+        await warcontract.settings2(
+            treasurycontract.address,
+            forcescontract.address,
+            navalblockadecontract.address,
+            nukecontract.address
+        )
+    
+        await wonderscontract1.settings(
+            treasurycontract.address,
+            wonderscontract2.address,
+            wonderscontract3.address,
+            wonderscontract4.address,
+            infrastructurecontract.address,
+            countryminter.address
+        )
+    
+        await wonderscontract2.settings(
+            treasurycontract.address,
+            infrastructurecontract.address,
+            wonderscontract1.address,
+            wonderscontract3.address,
+            wonderscontract4.address,
+            countryminter.address,
+            resourcescontract.address,
+        )
+    
+        await wonderscontract3.settings(
+            treasurycontract.address,
+            infrastructurecontract.address,
+            forcescontract.address,
+            wonderscontract1.address,
+            wonderscontract2.address,
+            wonderscontract4.address,
+            countryminter.address,
+            resourcescontract.address,
+        )
+    
+        await wonderscontract4.settings(
+            treasurycontract.address,
+            improvementscontract2.address,
+            improvementscontract3.address,
+            improvementscontract4.address,
+            infrastructurecontract.address,
+            wonderscontract1.address,
+            wonderscontract3.address,
+            countryminter.address
+        )
     
     if(chainId == 31337 || chainId == 1337) {
         await vrfCoordinatorV2Mock.addConsumer(subscriptionId, cruisemissilecontract.address);

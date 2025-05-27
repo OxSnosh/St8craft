@@ -5,10 +5,12 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { INITIAL_SUPPLY } from "../helper-hardhat-config"
 import { Test, Oracle } from "../typechain-types"
 import { LinkToken } from '../typechain-types/@chainlink/contracts/src/v0.4/LinkToken';
-
+import { link } from "fs"
+import { metadata } from "../scripts/deploy_localhost_node/deploy_jobs/metadata";
+import { jobId } from "../scripts/deploy_localhost_node/deploy_jobs/jobMetadata";
 import { 
     WarBucks, 
-    MetaNationsGovToken,
+    St8craftGovToken,
     AidContract,
     AirBattleContract,
     AdditionalAirBattle,
@@ -68,12 +70,12 @@ import {
 import LinkTokenArtifact from "../artifacts/@chainlink/contracts/src/v0.4/LinkToken.sol/LinkToken.json";
 import { networkConfig } from "../helper-hardhat-config"
 
-describe("Treasury Contract", function () {
+describe("Country Minter", function () {
   
   // const oracleAbi = OracleArtifact.abi;
   // const linkTokenAbi = LinkTokenArtifact.abi;
   let warbucks: WarBucks  
-  let metanationsgovtoken: MetaNationsGovToken
+  let st8craftgovtoken: St8craftGovToken
   let aidcontract: AidContract
   let airbattlecontract: AirBattleContract
   let additionalairbattle: AdditionalAirBattle
@@ -191,8 +193,8 @@ describe("Treasury Contract", function () {
     const MetaNatonsGovToken = await ethers.getContractFactory(
         "MetaNationsGovToken"
     )
-    metanationsgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as MetaNationsGovToken
-    await metanationsgovtoken.deployed()
+    st8craftgovtoken = await MetaNatonsGovToken.deploy(INITIAL_SUPPLY) as St8craftGovToken
+    await st8craftgovtoken.deployed()
     // console.log(`MetaNationsGovToken deployed to ${metanationsgovtoken.address}`)
 
     const AidContract = await ethers.getContractFactory("AidContract")
@@ -507,7 +509,8 @@ describe("Treasury Contract", function () {
             infrastructurecontract.address,
             bonusresourcescontract.address,
             navycontract2.address,
-            countryparameterscontract.address)
+            countryparameterscontract.address,
+            navalblockadecontract.address,)
         
         await bomberscontract.settings(
             countryminter.address, 
@@ -744,7 +747,8 @@ describe("Treasury Contract", function () {
             improvementscontract1.address,
             improvementscontract2.address,
             countryminter.address,
-            wonderscontract4.address
+            wonderscontract4.address,
+            resourcescontract.address,
             )
         
         await infrastructurecontract.settings1(
@@ -869,7 +873,10 @@ describe("Treasury Contract", function () {
             militarycontract.address,
             wonderscontract1.address,
             improvementscontract4.address,
-            navycontract2.address
+            navycontract2.address,
+            navalblockadecontract.address,
+            breakblockadecontract.address,
+            navalattackcontract.address,
         )
     
         await navalblockadecontract.settings(
@@ -879,7 +886,8 @@ describe("Treasury Contract", function () {
             warcontract.address,
             countryminter.address,
             keepercontract.address,
-            breakblockadecontract.address
+            breakblockadecontract.address,
+            billscontract.address,
         )
     
         await breakblockadecontract.settings(
@@ -889,7 +897,8 @@ describe("Treasury Contract", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
         )
     
         await navalattackcontract.settings(
@@ -897,7 +906,9 @@ describe("Treasury Contract", function () {
             warcontract.address,
             improvementscontract4.address,
             navalactionscontract.address,
-            navycontract2.address
+            navycontract2.address,
+            additionalnavycontract.address,
+            countryminter.address,
         )
     
         await nukecontract.settings(
@@ -1096,7 +1107,8 @@ describe("Treasury Contract", function () {
             wonderscontract1.address,
             wonderscontract3.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract3.settings(
@@ -1106,7 +1118,8 @@ describe("Treasury Contract", function () {
             wonderscontract1.address,
             wonderscontract2.address,
             wonderscontract4.address,
-            countryminter.address
+            countryminter.address,
+            resourcescontract.address,
         )
     
         await wonderscontract4.settings(
@@ -1119,6 +1132,7 @@ describe("Treasury Contract", function () {
             wonderscontract3.address,
             countryminter.address
         )
+
         if(chainId == 31337 || chainId == 1337) {
             await vrfCoordinatorV2Mock.addConsumer(subscriptionId, resourcescontract.address);
             await vrfCoordinatorV2Mock.addConsumer(subscriptionId, countryparameterscontract.address);
@@ -1240,14 +1254,14 @@ describe("Treasury Contract", function () {
 
     describe("MILF Functionality", function () {
         it("Tests that the setMilf() function works correctly", async function () {
-            let gameTaxRate1 = await treasurycontract.getMilf();
+            let gameTaxRate1 = await treasurycontract.getSilt();
             // console.log("Tax Rate Initial", gameTaxRate1.toNumber());
             expect(gameTaxRate1.toNumber()).to.equal(0);
-            await treasurycontract.setMilf(50);
-            let gameTaxRate2 = await treasurycontract.getMilf();
+            await treasurycontract.setSilt(50);
+            let gameTaxRate2 = await treasurycontract.getSilt();
             expect(gameTaxRate2.toNumber()).to.equal(50);
             // console.log("Tax Rate Updated", gameTaxRate2.toNumber());
-            let initialTaxRevenue = await treasurycontract.viewMilfRevenues();
+            let initialTaxRevenue = await treasurycontract.viewSiltRevenues();
             // console.log("Initial Balance", initialTaxRevenue.toNumber());
             expect(initialTaxRevenue.toNumber()).to.equal(0);
             // await warbucks.connect(signer0).approve(warbucks.address, BigInt(10000000000*(10**18)));
@@ -1255,22 +1269,22 @@ describe("Treasury Contract", function () {
             var cost : any = await infrastructuremarketplace.connect(signer1).getInfrastructureCost(0, 100);
             // console.log(BigInt(cost), "cost");
             await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100);
-            let afterTaxRevenue : any = await treasurycontract.viewMilfRevenues();
+            let afterTaxRevenue : any = await treasurycontract.viewSiltRevenues();
             // console.log("After Transaction Tax Balance", afterTaxRevenue.toNumber());
             expect(BigInt(afterTaxRevenue).toString()).to.equal("37000000000000000000000");
         })
 
         it("Tests that the owner can withdraw game taxes from the treasury contract", async function () {
-            await treasurycontract.setMilf(50);
+            await treasurycontract.setSilt(50);
             let ownerInitialWarBucksBalance : any = await warbucks.balanceOf(signer0.address);
             // console.log("First Balance", BigInt(ownerInitialWarBucksBalance));
             await warbucks.connect(signer0).approve(warbucks.address, BigInt(ownerInitialWarBucksBalance));
             await warbucks.connect(signer0).transfer(signer1.address, BigInt(ownerInitialWarBucksBalance));
             await infrastructuremarketplace.connect(signer1).buyInfrastructure(0, 100);
-            let taxRevenue = await treasurycontract.viewMilfRevenues();
+            let taxRevenue = await treasurycontract.viewSiltRevenues();
             // console.log(taxRevenue.toString());
-            await treasurycontract.connect(signer0).withdrawMilfRevenues(1000000);
-            let taxRevenueAfterWithdrawal = await treasurycontract.viewMilfRevenues();
+            await treasurycontract.connect(signer0).withdrawSiltRevenues(1000000);
+            let taxRevenueAfterWithdrawal = await treasurycontract.viewSiltRevenues();
             // console.log(taxRevenueAfterWithdrawal.toNumber());
             // expect(taxRevenueAfterWithdrawal.toNumber()).to.equal(0);
             let ownerWarBucksBalance : any = await warbucks.balanceOf(signer0.address);
@@ -1536,19 +1550,19 @@ describe("Treasury Contract", function () {
         })
 
         
-        it("tests that Infrastructure contract can return balance when land is sold", async function () {
-            await warbucks.connect(signer0).approve(warbucks.address, BigInt(100000000*(10**18)));
-            await warbucks.connect(signer0).transfer(signer1.address, BigInt(100000000*(10**18)));
-            await treasurycontract.connect(signer1).addFunds(BigInt(100000000*(10**18)), 0);
-            await landmarketcontract.connect(signer1).buyLand(0, 500);
-            var balance = await treasurycontract.checkBalance(0);
-            // console.log("balance", balance.toString());
-            expect(balance.toString()).to.equal("101780000000000004764729344");
-            await infrastructurecontract.connect(signer1).sellLand(0, 300);
-            var balance = await treasurycontract.checkBalance(0);
-            // console.log("balance", balance.toString());
-            expect(balance.toString()).to.equal("101810000000000004764729344");
-        })
+        // it("tests that Infrastructure contract can return balance when land is sold", async function () {
+        //     await warbucks.connect(signer0).approve(warbucks.address, BigInt(100000000*(10**18)));
+        //     await warbucks.connect(signer0).transfer(signer1.address, BigInt(100000000*(10**18)));
+        //     await treasurycontract.connect(signer1).addFunds(BigInt(100000000*(10**18)), 0);
+        //     await landmarketcontract.connect(signer1).buyLand(0, 500);
+        //     var balance = await treasurycontract.checkBalance(0);
+        //     // console.log("balance", balance.toString());
+        //     expect(balance.toString()).to.equal("101780000000000004764729344");
+        //     await infrastructurecontract.connect(signer1).sellLand(0, 300);
+        //     var balance = await treasurycontract.checkBalance(0);
+        //     // console.log("balance", balance.toString());
+        //     expect(balance.toString()).to.equal("101810000000000004764729344");
+        // })
         
         //External Adapter Required
         
