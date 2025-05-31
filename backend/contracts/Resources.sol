@@ -22,9 +22,7 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     address public infrastructure;
     address public improvements2;
     address public countryMinter;
-    address public bonusResources;
     address public senate;
-    address public parameters;
     address public techMkt;
 
     CountryMinter mint;
@@ -33,7 +31,7 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     SenateContract sen;
 
     //Chainlik Variables
-    VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
+    VRFCoordinatorV2Interface public i_vrfCoordinator;
     uint64 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
@@ -194,6 +192,12 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
         i_callbackGasLimit = callbackGasLimit;
     }
 
+    function updateVRFCoordinator(
+        address vrfCoordinatorV2
+    ) public onlyOwner {
+        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+    }
+
     ///@dev this function is only callable by the contract owner
     ///@dev this function will be called immediately after contract deployment in order to set contract pointers
     function settings(
@@ -209,12 +213,10 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
         improvements2 = _improvements2;
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
-        bonusResources = _bonusResources;
         bonus = BonusResourcesContract(_bonusResources);
         senate = _senate;
         sen = SenateContract(_senate);
         techMkt = _technologyMarket;
-        parameters = _parameters;
         params = CountryParametersContract(_parameters);
     }
 
@@ -223,7 +225,7 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     ///@notice this function will allow a nation to store the resources they have access to
     ///@dev this function will call the chainlink vrf contract to assign the minted nation two resources randomly
     ///@param id is the nation id of the nation being minted
-    function generateResources(uint256 id) public onlyCountryMinter {
+    function generateResources(uint256 id) external onlyCountryMinter {
         require(
             idToResources1[id].initialized == false,
             "this nation already has resources"
@@ -493,15 +495,15 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
         bool isOwner = mint.checkOwnership(requestorId, msg.sender);
         require(isOwner, "!nation owner");
 
-        require(requestorId != recipientId, "cannot trade with self");
+        require(requestorId != recipientId, "!self");
 
         bool isAlreadyTrading = isActiveTrade(requestorId, recipientId);
-        require(!isAlreadyTrading, "Already active trading partners");
+        require(!isAlreadyTrading, "trade already active");
 
         bool isPossibleRequestor = isTradePossibleForRequestor(requestorId);
         bool isPossibleRecipient = isTradePossibleForRecipient(recipientId);
-        require(isPossibleRequestor == true, "trade is not possible");
-        require(isPossibleRecipient == true, "trade is not possible");
+        require(isPossibleRequestor == true, "!possible");
+        require(isPossibleRecipient == true, "!possible");
 
         bool sanctioned = sen.isSanctioned(requestorId, recipientId);
         require(sanctioned == false, "trade is sanctioned");

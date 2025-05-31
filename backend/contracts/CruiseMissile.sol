@@ -30,7 +30,7 @@ contract CruiseMissileContract is Ownable, VRFConsumerBaseV2 {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
+    VRFCoordinatorV2Interface public i_vrfCoordinator;
     uint64 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
@@ -87,6 +87,12 @@ contract CruiseMissileContract is Ownable, VRFConsumerBaseV2 {
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
+    }
+
+    function updateVRFCoordinator(
+        address vrfCoordinatorV2
+    ) public onlyOwner {
+        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
     }
 
     ///@dev this function is only callable by the contract owner

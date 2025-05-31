@@ -86,6 +86,10 @@ const config = {
       chainId: 1337,
       url: "http://127.0.0.1:8545/"
     },
+    base_sepolia: {
+      url: "https://sepolia.base.org",
+      chainId: 84532
+    },
     kovan: {
       url: KOVAN_RPC_URL,
       accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],

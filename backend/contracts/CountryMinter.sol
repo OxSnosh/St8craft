@@ -266,10 +266,13 @@ contract CountryMinter is ERC721, Ownable, ReentrancyGuard {
 
         ownerCountryIds[newOwner].push(nationId);
 
-        emit Transfer(
-            previousOwner,
-            newOwner,
-            nationId
-        );
+        emit Transfer(previousOwner, newOwner, nationId);
+    }
+
+    ///to my darling, i made this for you because without you this game does not exist
+    ///thank you for making this dream real
+    function loveLetter() public pure returns (string memory) {
+        return
+            "To my darling wife, I made this for you. Without you this game does not exist. Thank you for being by my side for every step and making this dream real. I hope playing this will enrich your life because you enrich mine. My love for you is immutable.";
     }
 }

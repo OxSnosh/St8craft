@@ -35,6 +35,14 @@ const networkConfig: any = {
       callbackGasLimit: "500000", // 500,000 gas
       vrfCoordinatorV2: "0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D",
   },
+  84532: {
+      name: "base_sepolia",
+      subscriptionId: "588",
+      gasLane: "0x9e1344a1247c8a1785d0a4681a27152bffdb43666ae5bf7d14d24a5efd44bf71", // 30 gwei
+      keepersUpdateInterval: "30",
+      callbackGasLimit: "5000000", // 5,000,000 gas
+      vrfCoordinatorV2: "0x5C210eF41CD1a72de73bF76eC39637bB0d3d7BEE",
+  },
   1: {
       name: "mainnet",
       keepersUpdateInterval: "30",
