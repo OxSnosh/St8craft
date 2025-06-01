@@ -2,7 +2,8 @@
 import { network, artifacts } from "hardhat"
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
+import { LedgerSigner } from "@ethers-ext/signer-ledger";
+import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 
 import { 
     WarBucks, 
@@ -65,6 +66,7 @@ import {
 } from "../typechain-types"
 import { networkConfig } from "../helper-hardhat-config"
 import fs from "fs"
+import deployedContracts from '../../frontend/packages/hardhat/deploy/99_generateTsAbis';
 
 
 const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -82,7 +84,6 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const FUND_AMOUNT = ethers.utils.parseEther("1")
 
     let provider
-    let ledgerSigner
 
     if (chainId == 31337) {
         const BASE_FEE = "250000000000000000" // 0.25 is this the premium in LINK?
@@ -105,11 +106,6 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
         provider = new ethers.providers.JsonRpcProvider("https://sepolia.base.org");
 
-        ledgerSigner = new LedgerSigner(
-            provider,
-            "default", // or "hid" depending on how you connect
-            "m/44'/60'/0'/0/0" // derivation path
-        );
     } else {
         // vrfCoordinatorV2Address = networkConfig[chainId]["vrfCoordinatorV2"]
         // subscriptionId = networkConfig[chainId]["subscriptionId"]
@@ -1650,282 +1646,342 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         }
 
     } else if (chainId === 84532) {
-        const provider = new ethers.providers.JsonRpcProvider("https://sepolia.base.org");
-        const ledgerSigner = new LedgerSigner(provider, "hid", "m/44'/60'/0'/0/0");
-        deployer = await ledgerSigner.getAddress();
-        console.log("Deploying with Ledger account:", deployer);
-        const WarBucksFactory = await ethers.getContractFactory("WarBucks", ledgerSigner);
-        const deployedWarBucks = await WarBucksFactory.deploy(INITIAL_SUPPLY_WARBUCKS);
+        const provider = await new ethers.providers.JsonRpcProvider("https://sepolia.base.org");
+
+        const transport = await TransportNodeHid.create();
+
+        const ledgerSigner = new LedgerSigner(transport, provider, "m/44'/60'/0'/0/0");
+
+        const deployer = await ledgerSigner.getAddress();
+    
+        console.log("Using Ledger address:", deployer);
+        const WarBucksFactory = await ethers.getContractFactory("WarBucks");
+        const connectedWarBucksFactory = await WarBucksFactory.connect(ledgerSigner);
+        const deployedWarBucks = await connectedWarBucksFactory.deploy(INITIAL_SUPPLY_WARBUCKS);
         await deployedWarBucks.deployed();
         console.log("WarBucks deployed at:", deployedWarBucks.address);
     
         const St8craftGovTokenFactory = await ethers.getContractFactory("St8craftGovToken", ledgerSigner);
-        const deployedSt8craftGovToken = await St8craftGovTokenFactory.deploy(INITIAL_SUPPLY_ST8CRAFT);
+        const connectedSt8craftGovToken = await St8craftGovTokenFactory.connect(ledgerSigner);
+        const deployedSt8craftGovToken = await connectedSt8craftGovToken.deploy();
         await deployedSt8craftGovToken.deployed();
         console.log("St8craftGovToken deployed at:", deployedSt8craftGovToken.address);
     
         const AidContractFactory = await ethers.getContractFactory("AidContract", ledgerSigner);
-        const deployedAidContract = await AidContractFactory.deploy();
+        const connecteddAidContract = await AidContractFactory.connect(ledgerSigner)
+        const deployedAidContract = await connecteddAidContract.deploy();     
         await deployedAidContract.deployed();
         console.log("AidContract deployed at:", deployedAidContract.address);
     
         const AirBattleContractFactory = await ethers.getContractFactory("AirBattleContract", ledgerSigner);
-        const deployedAirBattleContract = await AirBattleContractFactory.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
+        const connectedAirBattleContract = await AirBattleContractFactory.connect(ledgerSigner)
+        const deployedAirBattleContract = await connectedAirBattleContract.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
         await deployedAirBattleContract.deployed();
         console.log("AirBattleContract deployed at:", deployedAirBattleContract.address);
     
         const AdditionalAirBattleFactory = await ethers.getContractFactory("AdditionalAirBattle", ledgerSigner);
-        const deployedAdditionalAirBattle = await AdditionalAirBattleFactory.deploy();
+        const connectedAdditionalAirBattle = await AdditionalAirBattleFactory.connect(ledgerSigner)
+        const deployedAdditionalAirBattle = await connectedAdditionalAirBattle.deploy();
         await deployedAdditionalAirBattle.deployed();
         console.log("AdditionalAirBattle deployed at:", deployedAdditionalAirBattle.address);
     
         const BillsContractFactory = await ethers.getContractFactory("BillsContract", ledgerSigner);
-        const deployedBillsContract = await BillsContractFactory.deploy();
+        const connectedBillsContract = await BillsContractFactory.connect(ledgerSigner)
+        const deployedBillsContract = await connectedBillsContract.deploy();
         await deployedBillsContract.deployed();
         console.log("BillsContract deployed at:", deployedBillsContract.address);
     
         const BombersContractFactory = await ethers.getContractFactory("BombersContract", ledgerSigner);
-        const deployedBombersContract = await BombersContractFactory.deploy();
+        const connectedBombersContract = await BombersContractFactory.connect(ledgerSigner)
+        const deployedBombersContract = await connectedBombersContract.deploy()
         await deployedBombersContract.deployed();
         console.log("BombersContract deployed at:", deployedBombersContract.address);
     
         const BombersMarketplace1Factory = await ethers.getContractFactory("BombersMarketplace1", ledgerSigner);
-        const deployedBombersMarketplace1 = await BombersMarketplace1Factory.deploy();
+        const connectedBombersMarketplace1 = await BombersMarketplace1Factory.connect(ledgerSigner)
+        const deployedBombersMarketplace1 = await connectedBombersMarketplace1.deploy();
         await deployedBombersMarketplace1.deployed();
         console.log("BombersMarketplace1 deployed at:", deployedBombersMarketplace1.address);
     
         const BombersMarketplace2Factory = await ethers.getContractFactory("BombersMarketplace2", ledgerSigner);
-        const deployedBombersMarketplace2 = await BombersMarketplace2Factory.deploy();
+        const connectedBombersMarketplace2 = await BombersMarketplace2Factory.connect(ledgerSigner);
+        const deployedBombersMarketplace2 = await connectedBombersMarketplace2.deploy();
         await deployedBombersMarketplace2.deployed();
         console.log("BombersMarketplace2 deployed at:", deployedBombersMarketplace2.address);
     
         const CountryMinterFactory = await ethers.getContractFactory("CountryMinter", ledgerSigner);
-        const deployedCountryMinter = await CountryMinterFactory.deploy();
+        const connectedCountryMinter = await CountryMinterFactory.connect(ledgerSigner);
+        const deployedCountryMinter = await connectedCountryMinter.deploy();
         await deployedCountryMinter.deployed();
         console.log("CountryMinter deployed at:", deployedCountryMinter.address);
     
         const CountryParametersContractFactory = await ethers.getContractFactory("CountryParametersContract", ledgerSigner);
-        const deployedCountryParametersContract = await CountryParametersContractFactory.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
+        const connectedCountryParametersContract = await CountryParametersContractFactory.connect(ledgerSigner)
+        const deployedCountryParametersContract = await connectedCountryParametersContract.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
         await deployedCountryParametersContract.deployed();
         console.log("CountryParametersContract deployed at:", deployedCountryParametersContract.address);
     
         const AllianceManagerFactory = await ethers.getContractFactory("AllianceManager", ledgerSigner);
-        const deployedAllianceManager = await AllianceManagerFactory.deploy();
+        const connectedAllianceManager = await AllianceManagerFactory.connect(ledgerSigner);
+        const deployedAllianceManager = await connectedAllianceManager.deploy();
         await deployedAllianceManager.deployed();
         console.log("AllianceManager deployed at:", deployedAllianceManager.address);
     
         const CrimeContractFactory = await ethers.getContractFactory("CrimeContract", ledgerSigner);
-        const deployedCrimeContract = await CrimeContractFactory.deploy();
+        const connectedCrimeContract = await CrimeContractFactory.connect(ledgerSigner)
+        const deployedCrimeContract = await connectedCrimeContract.deploy()
         await deployedCrimeContract.deployed();
         console.log("CrimeContract deployed at:", deployedCrimeContract.address);
     
         const CruiseMissileContractFactory = await ethers.getContractFactory("CruiseMissileContract", ledgerSigner);
-        const deployedCruiseMissileContract = await CruiseMissileContractFactory.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
+        const connectedCruiseMissileContract = await CruiseMissileContractFactory.connect(ledgerSigner)
+        const deployedCruiseMissileContract = await connectedCruiseMissileContract.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
         await deployedCruiseMissileContract.deployed();
         console.log("CruiseMissileContract deployed at:", deployedCruiseMissileContract.address);
     
         const EnvironmentContractFactory = await ethers.getContractFactory("EnvironmentContract", ledgerSigner);
-        const deployedEnvironmentContract = await EnvironmentContractFactory.deploy();
+        const connectedEnvironmentContract = await EnvironmentContractFactory.connect(ledgerSigner)
+        const deployedEnvironmentContract = await connectedEnvironmentContract.deploy();
         await deployedEnvironmentContract.deployed();
         console.log("EnvironmentContract deployed at:", deployedEnvironmentContract.address);
     
         const FightersContractFactory = await ethers.getContractFactory("FightersContract", ledgerSigner);
-        const deployedFightersContract = await FightersContractFactory.deploy();
+        const connectedFightersContract = await FightersContractFactory.connect(ledgerSigner);
+        const deployedFightersContract = await connectedFightersContract.deploy();
         await deployedFightersContract.deployed();
         console.log("FightersContract deployed at:", deployedFightersContract.address);
     
         const FighterLossesFactory = await ethers.getContractFactory("FighterLosses", ledgerSigner);
-        const deployedFighterLosses = await FighterLossesFactory.deploy();
+        const connectedFighterLosses = await FighterLossesFactory.connect(ledgerSigner);
+        const deployedFighterLosses = await connectedFighterLosses.deploy()
         await deployedFighterLosses.deployed();
         console.log("FighterLosses deployed at:", deployedFighterLosses.address);
     
         const FightersMarketplace1Factory = await ethers.getContractFactory("FightersMarketplace1", ledgerSigner);
-        const deployedFightersMarketplace1 = await FightersMarketplace1Factory.deploy();
+        const connectedFightersMarketplace1 = await FightersMarketplace1Factory.connect(ledgerSigner);
+        const deployedFightersMarketplace1 = await connectedFightersMarketplace1.deploy()
         await deployedFightersMarketplace1.deployed();
         console.log("FightersMarketplace1 deployed at:", deployedFightersMarketplace1.address);
     
         const FightersMarketplace2Factory = await ethers.getContractFactory("FightersMarketplace2", ledgerSigner);
-        const deployedFightersMarketplace2 = await FightersMarketplace2Factory.deploy();
+        const connectedFightersMarketplace2 = await FightersMarketplace2Factory.connect(ledgerSigner);
+        const deployedFightersMarketplace2 = await connectedFightersMarketplace2.deploy();
         await deployedFightersMarketplace2.deployed();
         console.log("FightersMarketplace2 deployed at:", deployedFightersMarketplace2.address);
     
         const ForcesContractFactory = await ethers.getContractFactory("ForcesContract", ledgerSigner);
-        const deployedForcesContract = await ForcesContractFactory.deploy();
+        const connectedForcesContract = await ForcesContractFactory.connect(ledgerSigner);
+        const deployedForcesContract = await connectedForcesContract.deploy();
         await deployedForcesContract.deployed();
         console.log("ForcesContract deployed at:", deployedForcesContract.address);
     
         const SpyContractFactory = await ethers.getContractFactory("SpyContract", ledgerSigner);
-        const deployedSpyContract = await SpyContractFactory.deploy();
+        const connectedSpyContract = await SpyContractFactory.connect(ledgerSigner);
+        const deployedSpyContract = await connectedSpyContract.deploy()
         await deployedSpyContract.deployed();
         console.log("SpyContract deployed at:", deployedSpyContract.address);
     
         const MissilesContractFactory = await ethers.getContractFactory("MissilesContract", ledgerSigner);
-        const deployedMissilesContract = await MissilesContractFactory.deploy();
+        const connectedMissilesContract = await MissilesContractFactory.connect(ledgerSigner);
+        const deployedMissilesContract = await connectedMissilesContract.deploy();
         await deployedMissilesContract.deployed();
         console.log("MissilesContract deployed at:", deployedMissilesContract.address);
     
         const GroundBattleContractFactory = await ethers.getContractFactory("GroundBattleContract", ledgerSigner);
-        const deployedGroundBattleContract = await GroundBattleContractFactory.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
+        const connectedGroundBattleContract = await GroundBattleContractFactory.connect(ledgerSigner)
+        const deployedGroundBattleContract = await connectedGroundBattleContract.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
         await deployedGroundBattleContract.deployed();
         console.log("GroundBattleContract deployed at:", deployedGroundBattleContract.address);
     
         const ImprovementsContract1Factory = await ethers.getContractFactory("ImprovementsContract1", ledgerSigner);
-        const deployedImprovementsContract1 = await ImprovementsContract1Factory.deploy();
+        const connectedImprovementsContract1 = await ImprovementsContract1Factory.connect(ledgerSigner);
+        const deployedImprovementsContract1 = await connectedImprovementsContract1.deploy();
         await deployedImprovementsContract1.deployed();
         console.log("ImprovementsContract1 deployed at:", deployedImprovementsContract1.address);
     
         const ImprovementsContract2Factory = await ethers.getContractFactory("ImprovementsContract2", ledgerSigner);
-        const deployedImprovementsContract2 = await ImprovementsContract2Factory.deploy();
+        const connectedImprovementsContract2 = await ImprovementsContract2Factory.connect(ledgerSigner);
+        const deployedImprovementsContract2 = await connectedImprovementsContract2.deploy();
         await deployedImprovementsContract2.deployed();
         console.log("ImprovementsContract2 deployed at:", deployedImprovementsContract2.address);
     
         const ImprovementsContract3Factory = await ethers.getContractFactory("ImprovementsContract3", ledgerSigner);
-        const deployedImprovementsContract3 = await ImprovementsContract3Factory.deploy();
+        const connectedImprovementsContract3 = await ImprovementsContract3Factory.connect(ledgerSigner);
+        const deployedImprovementsContract3 = await connectedImprovementsContract3.deploy();
         await deployedImprovementsContract3.deployed();
         console.log("ImprovementsContract3 deployed at:", deployedImprovementsContract3.address);
     
         const ImprovementsContract4Factory = await ethers.getContractFactory("ImprovementsContract4", ledgerSigner);
-        const deployedImprovementsContract4 = await ImprovementsContract4Factory.deploy();
+        const connectedImprovementsContract4 = await ImprovementsContract4Factory.connect(ledgerSigner);
+        const deployedImprovementsContract4 = await connectedImprovementsContract4.deploy();        
         await deployedImprovementsContract4.deployed();
         console.log("ImprovementsContract4 deployed at:", deployedImprovementsContract4.address);
     
         const InfrastructureContractFactory = await ethers.getContractFactory("InfrastructureContract", ledgerSigner);
-        const deployedInfrastructureContract = await InfrastructureContractFactory.deploy();
+        const connectedInfrastructureContract = await InfrastructureContractFactory.connect(ledgerSigner)
+        const deployedInfrastructureContract = await connectedInfrastructureContract.deploy();
         await deployedInfrastructureContract.deployed();
         console.log("InfrastructureContract deployed at:", deployedInfrastructureContract.address);
     
         const InfrastructureMarketContractFactory = await ethers.getContractFactory("InfrastructureMarketContract", ledgerSigner);
-        const deployedInfrastructureMarketContract = await InfrastructureMarketContractFactory.deploy();
+        const connectedInfrastructureMarketContract = await InfrastructureMarketContractFactory.connect(ledgerSigner);
+        const deployedInfrastructureMarketContract = await connectedInfrastructureMarketContract.deploy();
         await deployedInfrastructureMarketContract.deployed();
         console.log("InfrastructureMarketContract deployed at:", deployedInfrastructureMarketContract.address);
     
         const KeeperContractFactory = await ethers.getContractFactory("KeeperContract", ledgerSigner);
-        const deployedKeeperContract = await KeeperContractFactory.deploy();
+        const connectedKeeperContract = await KeeperContractFactory.connect(ledgerSigner);
+        const deployedKeeperContract = await connectedKeeperContract.deploy()
         await deployedKeeperContract.deployed();
         console.log("KeeperContract deployed at:", deployedKeeperContract.address);
     
         const LandMarketContractFactory = await ethers.getContractFactory("LandMarketContract", ledgerSigner);
-        const deployedLandMarketContract = await LandMarketContractFactory.deploy();
+        const connectedLandMarketContract = await LandMarketContractFactory.connect(ledgerSigner);
+        const deployedLandMarketContract = await connectedLandMarketContract.deploy();
         await deployedLandMarketContract.deployed();
         console.log("LandMarketContract deployed at:", deployedLandMarketContract.address);
     
         const MilitaryContractFactory = await ethers.getContractFactory("MilitaryContract", ledgerSigner);
-        const deployedMilitaryContract = await MilitaryContractFactory.deploy();
+        const connectedMilitaryContract = await MilitaryContractFactory.connect(ledgerSigner);
+        const deployedMilitaryContract = await connectedMilitaryContract.deploy();
         await deployedMilitaryContract.deployed();
         console.log("MilitaryContract deployed at:", deployedMilitaryContract.address);
     
         const NationStrengthContractFactory = await ethers.getContractFactory("NationStrengthContract", ledgerSigner);
-        const deployedNationStrengthContract = await NationStrengthContractFactory.deploy();
+        const connectedNationStrengthContract = await NationStrengthContractFactory.connect(ledgerSigner);
+        const deployedNationStrengthContract = await connectedNationStrengthContract.deploy();
         await deployedNationStrengthContract.deployed();
         console.log("NationStrengthContract deployed at:", deployedNationStrengthContract.address);
     
         const NavyContractFactory = await ethers.getContractFactory("NavyContract", ledgerSigner);
-        const deployedNavyContract = await NavyContractFactory.deploy();
+        const connectedNavyContract = await NavyContractFactory.connect(ledgerSigner);
+        const deployedNavyContract = await connectedNavyContract.deploy();
         await deployedNavyContract.deployed();
         console.log("NavyContract deployed at:", deployedNavyContract.address);
     
         const NavyContract2Factory = await ethers.getContractFactory("NavyContract2", ledgerSigner);
-        const deployedNavyContract2 = await NavyContract2Factory.deploy();
+        const connectedNavyContract2 = await NavyContract2Factory.connect(ledgerSigner);
+        const deployedNavyContract2 = await connectedNavyContract2.deploy();
         await deployedNavyContract2.deployed();
         console.log("NavyContract2 deployed at:", deployedNavyContract2.address);
     
         const AdditionalNavyContractFactory = await ethers.getContractFactory("AdditionalNavyContract", ledgerSigner);
-        const deployedAdditionalNavyContract = await AdditionalNavyContractFactory.deploy();
+        const connectedAdditionalNavyContract = await AdditionalNavyContractFactory.connect(ledgerSigner);
+        const deployedAdditionalNavyContract = await connectedAdditionalNavyContract.deploy();
         await deployedAdditionalNavyContract.deployed();
         console.log("AdditionalNavyContract deployed at:", deployedAdditionalNavyContract.address);
     
         const NavalActionsContractFactory = await ethers.getContractFactory("NavalActionsContract", ledgerSigner);
-        const deployedNavalActionsContract = await NavalActionsContractFactory.deploy();
+        const connectedNavalActionsContract = await NavalActionsContractFactory.connect(ledgerSigner);
+        const deployedNavalActionsContract = await connectedNavalActionsContract.deploy();
         await deployedNavalActionsContract.deployed();
         console.log("NavalActionsContract deployed at:", deployedNavalActionsContract.address);
     
         const NavalBlockadeContractFactory = await ethers.getContractFactory("NavalBlockadeContract", ledgerSigner);
-        const deployedNavalBlockadeContract = await NavalBlockadeContractFactory.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
+        const connectedNavalBlockadeContract = await NavalBlockadeContractFactory.connect(ledgerSigner)
+        const deployedNavalBlockadeContract = await connectedNavalBlockadeContract.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
         await deployedNavalBlockadeContract.deployed();
         console.log("NavalBlockadeContract deployed at:", deployedNavalBlockadeContract.address);
     
         const BreakBlocadeContractFactory = await ethers.getContractFactory("BreakBlocadeContract", ledgerSigner);
-        const deployedBreakBlocadeContract = await BreakBlocadeContractFactory.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
+        const connectedBreakBlocadeContract = await BreakBlocadeContractFactory.connect(ledgerSigner)
+        const deployedBreakBlocadeContract = await connectedBreakBlocadeContract.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
         await deployedBreakBlocadeContract.deployed();
         console.log("BreakBlocadeContract deployed at:", deployedBreakBlocadeContract.address);
     
         const NavalAttackContractFactory = await ethers.getContractFactory("NavalAttackContract", ledgerSigner);
-        const deployedNavalAttackContract = await NavalAttackContractFactory.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
+        const connectedNavalAttackContract = await NavalAttackContractFactory.connect(ledgerSigner)
+        const deployedNavalAttackContract = await connectedNavalAttackContract.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
         await deployedNavalAttackContract.deployed();
         console.log("NavalAttackContract deployed at:", deployedNavalAttackContract.address);
     
         const NukeContractFactory = await ethers.getContractFactory("NukeContract", ledgerSigner);
-        const deployedNukeContract = await NukeContractFactory.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
+        const connectedNukeContract = await NukeContractFactory.connect(ledgerSigner)
+        const deployedNukeContract = await connectedNukeContract.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
         await deployedNukeContract.deployed();
         console.log("NukeContract deployed at:", deployedNukeContract.address);
     
         const ResourcesContractFactory = await ethers.getContractFactory("ResourcesContract", ledgerSigner);
-        const deployedResourcesContract = await ResourcesContractFactory.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
+        const connectedResourcesContract = await ResourcesContractFactory.connect(ledgerSigner)
+        const deployedResourcesContract = await connectedResourcesContract.deploy(vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit);
         await deployedResourcesContract.deployed();
         console.log("ResourcesContract deployed at:", deployedResourcesContract.address);
     
         const BonusResourcesContractFactory = await ethers.getContractFactory("BonusResourcesContract", ledgerSigner);
-        const deployedBonusResourcesContract = await BonusResourcesContractFactory.deploy();
+        const connectedBonusResourcesContract = await BonusResourcesContractFactory.connect(ledgerSigner);
+        const deployedBonusResourcesContract = await connectedBonusResourcesContract.deploy();
         await deployedBonusResourcesContract.deployed();
         console.log("BonusResourcesContract deployed at:", deployedBonusResourcesContract.address);
     
         const SenateContractFactory = await ethers.getContractFactory("SenateContract", ledgerSigner);
-        const deployedSenateContract = await SenateContractFactory.deploy();
+        const connectedSenateContract = await SenateContractFactory.connect(ledgerSigner)
+        const deployedSenateContract = await connectedSenateContract.deploy();
         await deployedSenateContract.deployed();
         console.log("SenateContract deployed at:", deployedSenateContract.address);
     
         const SpyOperationsContractFactory = await ethers.getContractFactory("SpyOperationsContract", ledgerSigner);
-        const deployedSpyOperationsContract = await SpyOperationsContractFactory.deploy();
+        const connectedSpyOperationsContract = await SpyOperationsContractFactory.connect(ledgerSigner);
+        const deployedSpyOperationsContract = await connectedSpyOperationsContract.deploy();
         await deployedSpyOperationsContract.deployed();
         console.log("SpyOperationsContract deployed at:", deployedSpyOperationsContract.address);
     
         const TaxesContractFactory = await ethers.getContractFactory("TaxesContract", ledgerSigner);
-        const deployedTaxesContract = await TaxesContractFactory.deploy();
+        const connectedTaxesContract = await TaxesContractFactory.connect(ledgerSigner);
+        const deployedTaxesContract = await connectedTaxesContract.deploy();
         await deployedTaxesContract.deployed();
         console.log("TaxesContract deployed at:", deployedTaxesContract.address);
     
         const AdditionalTaxesContractFactory = await ethers.getContractFactory("AdditionalTaxesContract", ledgerSigner);
-        const deployedAdditionalTaxesContract = await AdditionalTaxesContractFactory.deploy();
+        const connectedAdditionalTaxesContract = await AdditionalTaxesContractFactory.connect(ledgerSigner)
+        const deployedAdditionalTaxesContract = await connectedAdditionalTaxesContract.deploy();
         await deployedAdditionalTaxesContract.deployed();
         console.log("AdditionalTaxesContract deployed at:", deployedAdditionalTaxesContract.address);
     
         const TechnologyMarketContractFactory = await ethers.getContractFactory("TechnologyMarketContract", ledgerSigner);
-        const deployedTechnologyMarketContract = await TechnologyMarketContractFactory.deploy();
+        const connectedTechnologyMarketContract = await TechnologyMarketContractFactory.connect(ledgerSigner);
+        const deployedTechnologyMarketContract = await connectedTechnologyMarketContract.deploy();
         await deployedTechnologyMarketContract.deployed();
         console.log("TechnologyMarketContract deployed at:", deployedTechnologyMarketContract.address);
     
         const TreasuryContractFactory = await ethers.getContractFactory("TreasuryContract", ledgerSigner);
-        const deployedTreasuryContract = await TreasuryContractFactory.deploy();
+        const connectedTreasuryContract = await TreasuryContractFactory.connect(ledgerSigner);
+        const deployedTreasuryContract = await connectedTreasuryContract.deploy();
         await deployedTreasuryContract.deployed();
         console.log("TreasuryContract deployed at:", deployedTreasuryContract.address);
     
         const WarContractFactory = await ethers.getContractFactory("WarContract", ledgerSigner);
-        const deployedWarContract = await WarContractFactory.deploy();
+        const connectedWarContract = await WarContractFactory.connect(ledgerSigner);
+        const deployedWarContract = await connectedWarContract.deploy();
         await deployedWarContract.deployed();
         console.log("WarContract deployed at:", deployedWarContract.address);
     
         const WondersContract1Factory = await ethers.getContractFactory("WondersContract1", ledgerSigner);
-        const deployedWondersContract1 = await WondersContract1Factory.deploy();
+        const connectedWondersContract1 = await WondersContract1Factory.connect(ledgerSigner);
+        const deployedWondersContract1 = await connectedWondersContract1.deploy();
         await deployedWondersContract1.deployed();
         console.log("WondersContract1 deployed at:", deployedWondersContract1.address);
     
         const WondersContract2Factory = await ethers.getContractFactory("WondersContract2", ledgerSigner);
-        const deployedWondersContract2 = await WondersContract2Factory.deploy();
+        const connectedWondersContract2 = await WondersContract2Factory.connect(ledgerSigner);
+        const deployedWondersContract2 = await connectedWondersContract2.deploy();
         await deployedWondersContract2.deployed();
         console.log("WondersContract2 deployed at:", deployedWondersContract2.address);
     
         const WondersContract3Factory = await ethers.getContractFactory("WondersContract3", ledgerSigner);
-        const deployedWondersContract3 = await WondersContract3Factory.deploy();
+        const connectedWondersContract3 = await WondersContract3Factory.connect(ledgerSigner);
+        const deployedWondersContract3 = await connectedWondersContract3.deploy();
         await deployedWondersContract3.deployed();
         console.log("WondersContract3 deployed at:", deployedWondersContract3.address);
     
         const WondersContract4Factory = await ethers.getContractFactory("WondersContract4", ledgerSigner);
-        const deployedWondersContract4 = await WondersContract4Factory.deploy();
+        const connectedWondersContract4 = await WondersContract4Factory.connect(ledgerSigner);
+        const deployedWondersContract4 = await connectedWondersContract4.deploy();
         await deployedWondersContract4.deployed();
         console.log("WondersContract4 deployed at:", deployedWondersContract4.address);
     
         const MessengerFactory = await ethers.getContractFactory("Messenger", ledgerSigner);
-        const deployedMessenger = await MessengerFactory.deploy();
+        const connectedMessenger = await MessengerFactory.connect(ledgerSigner);
+        const deployedMessenger = await connectedMessenger.deploy();
         await deployedMessenger.deployed();
         console.log("Messenger deployed at:", deployedMessenger.address);
 

@@ -5,7 +5,8 @@
       "strict": true,
       "esModuleInterop": true,
       "outDir": "dist",
-      "resolveJsonModule": true
+      "resolveJsonModule": true,
+      "types": []
     },
     "include": ["./scripts", "test", "src/**/*.ts"],
     "exclude": ["node_modules", "dist"],

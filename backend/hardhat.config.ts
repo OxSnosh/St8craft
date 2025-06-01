@@ -88,7 +88,7 @@ const config = {
     },
     base_sepolia: {
       url: "https://sepolia.base.org",
-      chainId: 84532
+      chainId: 84532,
     },
     kovan: {
       url: KOVAN_RPC_URL,
