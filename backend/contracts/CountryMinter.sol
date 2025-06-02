@@ -22,7 +22,7 @@ import "hardhat/console.sol";
 
 ///@title CountryMinter
 ///@author OxSnosh
-///@notice this is the contract that will allow the user to mint a nation!
+///@notice this is the contract that will allow the user to mint a nation at St8craft.gg!
 contract CountryMinter is ERC721, Ownable, ReentrancyGuard {
     uint256 public countryId;
 

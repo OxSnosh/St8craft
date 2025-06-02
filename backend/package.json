@@ -11,6 +11,7 @@
   "devDependencies": {
     "@chainlink/contracts": "^0.4.1",
     "@gelatonetwork/web3-functions-sdk": "^2.4.4",
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@nomicfoundation/hardhat-ledger": "^1.1.0",
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
@@ -38,7 +39,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-promise": "^5.1.0",
     "ethereum-waffle": "^3.0.0",
-    "ethers": "^5.0.0",
+    "ethers": "^6",
     "hardhat": "^2.9.9",
     "hardhat-contract-sizer": "^2.5.1",
     "hardhat-deploy": "^0.11.11",
@@ -54,6 +55,7 @@
   },
   "dependencies": {
     "@ethers-ext/signer-ledger": "^6.0.0-beta.1",
+    "@ethersproject/hardware-wallets": "^5.8.0",
     "@ledgerhq/hw-transport": "^6.31.5",
     "@ledgerhq/hw-transport-node-hid": "^6.29.6",
     "@openzeppelin/contracts": "^4.7.0",

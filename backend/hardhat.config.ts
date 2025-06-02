@@ -13,6 +13,8 @@ import { HardhatUserConfig } from "hardhat/types"
 import "./tasks/set_religion_and_govt";
 import "./tasks/set_resources";
 import "@gelatonetwork/web3-functions-sdk/hardhat-plugin";
+import "@nomicfoundation/hardhat-ethers";
+
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
