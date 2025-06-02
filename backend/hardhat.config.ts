@@ -1,5 +1,5 @@
 import "@nomiclabs/hardhat-waffle"
-import "@nomiclabs/hardhat-etherscan"
+// import "@nomiclabs/hardhat-etherscan"
 import "hardhat-deploy"
 import "solidity-coverage"
 import "hardhat-gas-reporter"
@@ -14,6 +14,7 @@ import "./tasks/set_religion_and_govt";
 import "./tasks/set_resources";
 import "@gelatonetwork/web3-functions-sdk/hardhat-plugin";
 import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-verify"
 
 
 /**
@@ -147,6 +148,7 @@ const config = {
       rinkeby: ETHERSCAN_API_KEY,
       kovan: ETHERSCAN_API_KEY,
       polygon: POLYGONSCAN_API_KEY,
+      baseSepolia: process.env.BASESCAN_API_KEY,
     },
   },
   gasReporter: {
@@ -173,6 +175,9 @@ const config = {
   },
   docgen: {
     
+  },
+  sourcify: {
+    enabled: true
   }
 }
 

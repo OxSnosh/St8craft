@@ -468,6 +468,19 @@
         },
         {
           "inputs": [],
+          "name": "loveLetter",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
           "name": "military",
           "outputs": [
             {
@@ -6044,6 +6057,19 @@
         },
         {
           "inputs": [],
+          "name": "i_vrfCoordinator",
+          "outputs": [
+            {
+              "internalType": "contract VRFCoordinatorV2Interface",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
           "name": "owner",
           "outputs": [
             {
@@ -6343,6 +6369,19 @@
             }
           ],
           "name": "updateTreasuryContract",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "vrfCoordinatorV2",
+              "type": "address"
+            }
+          ],
+          "name": "updateVRFCoordinator",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
