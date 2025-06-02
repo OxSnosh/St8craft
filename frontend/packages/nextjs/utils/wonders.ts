@@ -24,7 +24,7 @@ export const getWonders = async (
     try {
         const wonderNames1 = [
             { key: "getAgriculturalDevelopmentProgram", name: "Agricultural Development Program" },
-            { key: "getAntiAirDefenseNewtwork", name: "Anti-Air Defense Network" },
+            { key: "getAntiAirDefenseNetwork", name: "Anti-Air Defense Network" },
             { key: "getCentralIntelligenceAgency", name: "Central Intelligence Agency" },
             { key: "getDisasterReliefAgency", name: "Disaster Relief Agency" },
             { key: "getEmpWeaponization", name: "EMP Weaponization" },

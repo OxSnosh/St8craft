@@ -105,6 +105,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         gasLane = networkConfig[31337]["gasLane"]
         callbackGasLimit =  networkConfig[31337]["callbackGasLimit"] 
         await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT)
+
+        console.log("subscription funded")
     } else if (chainId == 84532) {
         vrfCoordinatorV2Address = networkConfig[chainId]["vrfCoordinatorV2"]
         subscriptionId = networkConfig[chainId]["subscriptionId"]
@@ -607,6 +609,9 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const wonderscontract3 = deployedWondersContract3;
         const wonderscontract4 = deployedWondersContract4;
         const messenger = deployedMessenger;
+
+        await vrfCoordinatorV2Mock.addConsumer(subscriptionId, deployedCountryParametersContract.getAddress());
+        await vrfCoordinatorV2Mock.addConsumer(subscriptionId, deployedResourcesContract.getAddress());
 
         await deployedWarBucks.settings(
             deployedTreasuryContract.getAddress(),

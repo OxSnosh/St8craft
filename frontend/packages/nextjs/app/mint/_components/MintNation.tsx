@@ -10,7 +10,7 @@ import {
 import { simulateContract, writeContract } from 'wagmi/actions';
 import { wagmiConfig } from '../../../utils/wagmiConfig';
 import { useAllContracts } from '~~/utils/scaffold-eth/contractsData';
-
+import { useWalletClient } from 'wagmi';
 import { encodeFunctionData } from 'viem';
 // import { useAccount } from 'wagmi';
 import { useTransactor } from '~~/hooks/scaffold-eth/useTransactor';
@@ -18,6 +18,7 @@ import { useTransactor } from '~~/hooks/scaffold-eth/useTransactor';
 
 export function MintNation() {
   
+  const { data: walletClient } = useWalletClient();
   const [form, setForm] = useState({
     rulerName: '',
     nationName: '',
@@ -94,30 +95,46 @@ export function MintNation() {
   useEffect(() => {
     fetchNationDetails();
   }, [fetchNationDetails]);
-
+  
   const handleMint = async () => {
-    console.log(writeContractAsync, "writeContractAsync");
-
-    console.log("Mint button clicked");
-    
     if (!walletAddress) {
-      console.log("No wallet address found");
       alert("Connect wallet first");
       return;
     }
     
-    console.log("Wallet connected with address:", walletAddress);
-    
-    if (!countryMinterContract?.abi || !countryMinterContract?.address) {
-      console.error("Contract not initialized");
-      alert('Contract not initialized');
+    if (!walletClient) {
+      alert("Wallet not connected.");
       return;
     }
     
+    if (!countryMinterContract?.abi || !countryMinterContract?.address) {
+      alert('Contract not initialized');
+      return;
+    }
+  
     try {
-      console.log("Preparing transaction data...");
-      const data = encodeFunctionData({
+      setIsPending(true);
+  
+      console.log("Simulating transaction...");
+  
+      const simulation = await simulateContract(wagmiConfig, {
         abi: countryMinterContract.abi,
+        address: countryMinterContract.address,
+        functionName: 'generateCountry',
+        args: [
+          form.rulerName,
+          form.nationName,
+          form.capitalCity,
+          form.nationSlogan,
+        ],
+        account: walletAddress,
+      });
+  
+      console.log("Simulation successful, sending transaction...");
+  
+      const tx = await writeContractAsync({
+        abi: countryMinterContract.abi,
+        address: countryMinterContract.address,
         functionName: 'generateCountry',
         args: [
           form.rulerName,
@@ -126,22 +143,14 @@ export function MintNation() {
           form.nationSlogan,
         ],
       });
-      
-      console.log("Encoded transaction data:", data);
-      console.log("About to send transaction with writeTx");
-      
-      // Try direct wallet connection without using writeTx
-      const tx = await writeTx({
-        to: countryMinterContract.address,
-        data,
-        account: walletAddress,
-      });
-      
-      console.log("Transaction sent, hash:", tx);
-    } catch (err) {
-      console.error("Transaction failed:", err);
-      console.dir(err); // Log the full error object
-      alert("Transaction error: " + (err || "unknown error"));
+  
+      setTxHash(tx);
+      console.log("Transaction sent:", tx);
+    } catch (err: any) {
+      console.error("Transaction simulation or send failed:", err);
+      alert(`Error: ${err?.shortMessage || err?.message || 'Transaction failed'}`);
+    } finally {
+      setIsPending(false);
     }
   };
   

@@ -191,6 +191,10 @@ contract CountryParametersContract is
         string memory capitalCity,
         string memory nationSlogan
     ) public onlyCountryMinter {
+        console.log("generateCountryParameters called");
+        console.log("id: ", id);
+        console.log(idToCountryParameters[id].id, " idToCountryParameters[id].id");
+        console.log(idToCountryParameters[id].id == 0, "idToCountryParameters[id].id == 0");
         require(idToCountryParameters[id].id == 0, "Already initialized");
         CountryParameters memory newCountryParameters = CountryParameters(
             id,
@@ -211,6 +215,7 @@ contract CountryParametersContract is
         );
         idToCountryParameters[id] = newCountryParameters;
         idToCountrySettings[id] = newCountrySettings;
+        console.log("just before fulfill request");
         fulfillRequest(id);
     }
 
@@ -221,8 +226,15 @@ contract CountryParametersContract is
     ///@dev this is an internal function that will initalize the call for randomness from the chainlink VRF contract
     ///@param id is the nation ID of the nation being minted
     function fulfillRequest(uint256 id) internal {
+        console.log("fulfillRequest called");
+        console.log(!pendingRequests[id], "pendingRequests[id] is false");
         require(!pendingRequests[id], "Randomness already requested");
 
+        console.log("requesting random words for id: ", id);
+        console.log(
+            "i_vrfCoordinator: ",
+            address(i_vrfCoordinator)
+        );
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
@@ -230,7 +242,7 @@ contract CountryParametersContract is
             i_callbackGasLimit,
             NUM_WORDS
         );
-
+        console.log("requestId: ", requestId);
         s_requestIdToRequestIndex[requestId] = id;
         pendingRequests[id] = true;
         pendingRequestTimestamp[id] = block.timestamp;

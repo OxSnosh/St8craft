@@ -12590,7 +12590,7 @@
         },
         {
           "inputs": [],
-          "name": "bombers1",
+          "name": "bombers",
           "outputs": [
             {
               "internalType": "address",
@@ -13021,7 +13021,7 @@
             },
             {
               "internalType": "address",
-              "name": "_bombers1",
+              "name": "_bombers",
               "type": "address"
             },
             {
@@ -13365,7 +13365,7 @@
         },
         {
           "inputs": [],
-          "name": "bombers1",
+          "name": "bombers",
           "outputs": [
             {
               "internalType": "address",
@@ -13697,7 +13697,7 @@
             },
             {
               "internalType": "address",
-              "name": "_bombers1",
+              "name": "_bombers",
               "type": "address"
             },
             {
@@ -39654,7 +39654,7 @@
       "address": "0xC7a7A79f174c97Eddf5832843821a9bd0743218C"
     },
     "wonderscontract2": {
-      "address": "0x76E1cE7AA6172Bc9Bf57327E85e95c0BB3D51E68"
+      "address": "0x76E1cE7AA6172Bc9Bf57327E85e95c0BB3D51C68"
     },
     "wonderscontract3": {
       "address": "0x79EE8Afd9F54B9a8996bB26b855A3Fec0F2A6001"

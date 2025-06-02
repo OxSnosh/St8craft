@@ -593,7 +593,7 @@ contract BombersContract is Ownable, ReentrancyGuard {
 ///@notice this is the contract that will allow nation owners to purchase AH1 Cobras, AH64 Apaches, Bristol Blenheims, B52 Mitchells and B17 Flying Fortresses
 contract BombersMarketplace1 is Ownable, ReentrancyGuard {
     address public countryMinter;
-    address public bombers1;
+    address public bombers;
     address public fighters;
     address public fightersMarket1;
     address public infrastructure;
@@ -625,7 +625,7 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
     ///@dev this function will be called immediately after contract deployment in order to set contract pointers
     function settings(
         address _countryMinter,
-        address _bombers1,
+        address _bombers,
         address _fighters,
         address _fightersMarket1,
         address _infrastructure,
@@ -633,8 +633,8 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
     ) public onlyOwner {
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
-        bombers1 = _bombers1;
-        bomb1 = BombersContract(_bombers1);
+        bombers = _bombers;
+        bomb1 = BombersContract(_bombers);
         fighters = _fighters;
         fight = FightersContract(_fighters);
         fightersMarket1 = _fightersMarket1;
@@ -928,7 +928,7 @@ contract BombersMarketplace1 is Ownable, ReentrancyGuard {
 ///@notice this contract allows nation owners to purchase B52 Stratofortresses, B2 Spirits, B1B Lancers and Tupolev TO160s
 contract BombersMarketplace2 is Ownable, ReentrancyGuard {
     address public countryMinter;
-    address public bombers1;
+    address public bombers;
     address public fighters;
     address public fightersMarket1;
     address public infrastructure;
@@ -959,7 +959,7 @@ contract BombersMarketplace2 is Ownable, ReentrancyGuard {
     ///@dev this function will be called immediately after contract deployment in order to set contract pointers
     function settings(
         address _countryMinter,
-        address _bombers1,
+        address _bombers,
         address _fighters,
         address _fightersMarket1,
         address _infrastructure,
@@ -967,8 +967,8 @@ contract BombersMarketplace2 is Ownable, ReentrancyGuard {
     ) public onlyOwner {
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
-        bombers1 = _bombers1;
-        bomb1 = BombersContract(_bombers1);
+        bombers = _bombers;
+        bomb1 = BombersContract(_bombers);
         fighters = _fighters;
         fight = FightersContract(_fighters);
         fightersMarket1 = _fightersMarket1;

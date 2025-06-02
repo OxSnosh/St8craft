@@ -131,6 +131,9 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
   const navyContract2 = contractsData?.NavyContract2;
   const missilesContract = contractsData?.MissilesContract;
   const spiesContract = contractsData?.SpyContract;
+  const allianceContract = contractsData?.AllianceManager
+
+  console.log(allianceContract, "allianceContract")
 
   const [activeTab, setActiveTab] = useState("Government Information");
 
@@ -392,7 +395,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
 
         const casualties = await getCasualties(tokenIdString, publicClient, forcesContract)
 
-        const allianceDetails = await getNationAllianceAndPlatoon(tokenIdString, publicClient, countryParametersContract);
+        const allianceDetails = await getNationAllianceAndPlatoon(tokenIdString, publicClient, allianceContract);
 
         const details: NationDetails = {
           nationName: (await publicClient.readContract({
