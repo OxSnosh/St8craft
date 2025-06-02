@@ -158,7 +158,6 @@ contract CountryMinter is ERC721, Ownable, ReentrancyGuard {
         ownerCountryCount[msg.sender]++;
         ownerCountryIds[msg.sender].push(countryId);
         BombersContract(bombers).generateBombers(countryId);
-        console.log("1");
         CountryParametersContract(countryParameters).generateCountryParameters(
             countryId,
             ruler,
@@ -167,11 +166,8 @@ contract CountryMinter is ERC721, Ownable, ReentrancyGuard {
             nationSlogan
         );
         FightersContract(fighters).generateFighters(countryId);
-        console.log("2");
         ForcesContract(forces).generateForces(countryId);
-        console.log("3");
         MissilesContract(missiles).generateMissiles(countryId);
-        console.log("4");
         ImprovementsContract1(improvements1).generateImprovements(countryId);
         ImprovementsContract2(improvements2).generateImprovements(countryId);
         ImprovementsContract3(improvements3).generateImprovements(countryId);

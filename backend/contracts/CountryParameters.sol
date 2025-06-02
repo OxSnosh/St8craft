@@ -191,10 +191,6 @@ contract CountryParametersContract is
         string memory capitalCity,
         string memory nationSlogan
     ) public onlyCountryMinter {
-        console.log("generateCountryParameters called");
-        console.log("id: ", id);
-        console.log(idToCountryParameters[id].id, " idToCountryParameters[id].id");
-        console.log(idToCountryParameters[id].id == 0, "idToCountryParameters[id].id == 0");
         require(idToCountryParameters[id].id == 0, "Already initialized");
         CountryParameters memory newCountryParameters = CountryParameters(
             id,
@@ -215,7 +211,6 @@ contract CountryParametersContract is
         );
         idToCountryParameters[id] = newCountryParameters;
         idToCountrySettings[id] = newCountrySettings;
-        console.log("just before fulfill request");
         fulfillRequest(id);
     }
 

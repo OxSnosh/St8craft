@@ -234,6 +234,10 @@ const externalContracts: GenericContractsDeclaration = {
       address: metadata.HARDHAT.messenger.address as Address,
       abi: fixAbi(metadata.HARDHAT.messenger.ABI)
     },
+    AllianceManager: {
+      address: metadata.HARDHAT.alliancemanger.address as Address,
+      abi: fixAbi(metadata.HARDHAT.alliancemanger.ABI) as Abi
+    }
   },
   84532: {
     CountryMinter: {

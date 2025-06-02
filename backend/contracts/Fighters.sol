@@ -136,20 +136,10 @@ contract FightersContract is Ownable {
     ///@notice this function allows a nation to purchase fighter aircraft once a country is minted
     ///@param id this is the nation ID of the nation being minted
     function generateFighters(uint256 id) public onlyCountryMinter {
-        console.log(id, "id");
-        console.log(
-            idToFighters[id].initialized,
-            "initialized"
-        );
-        console.log(
-            !idToFighters[id].initialized,
-            "!initialized"
-        );
         require(
             idToFighters[id].initialized == false,
             "fighters already initialized for this nation"
         );
-        console.log(idToFighters[id].initialized, "initialized");
         Fighters memory newFighters = Fighters(true, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         idToFighters[id] = newFighters;
     }
