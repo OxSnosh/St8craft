@@ -29,7 +29,7 @@ export const getWonders = async (
             { key: "getDisasterReliefAgency", name: "Disaster Relief Agency" },
             { key: "getEmpWeaponization", name: "EMP Weaponization" },
             { key: "getFalloutShelterSystem", name: "Fallout Shelter System" },
-            { key: "getFederalAidComission", name: "Federal Aid Commission" },
+            { key: "getFederalAidCommission", name: "Federal Aid Commission" },
             { key: "getFederalReserve", name: "Federal Reserve" },
             { key: "getForeignAirforceBase", name: "Foreign Air Force Base" },
             { key: "getForeignArmyBase", name: "Foreign Army Base" },
