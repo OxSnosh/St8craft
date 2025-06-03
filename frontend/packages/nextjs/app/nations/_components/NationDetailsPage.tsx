@@ -138,7 +138,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
   const [nationDetails, setNationDetails] = useState<NationDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [showManageTrades, setShowManageTrades] = useState(false);
-  const [message, setMessage] = useState("");
+  const [post, setPost] = useState("");
   const [isOwner, setIsOwner] = useState(false);
   const [waterAccess, setWaterAccess] = useState(false);
 
@@ -183,8 +183,77 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
 
   const { writeContractAsync } = useWriteContract();
 
+  // const handlePostMessage = async () => {
+  //   if (!nationIdForPost || !message || !contractsData?.Messenger || !walletAddress) {
+  //     console.error("Missing required parameters for posting message.");
+  //     alert("Missing required parameters.");
+  //     return;
+  //   }
+  
+  //   const contractData = contractsData.Messenger;
+  //   const abi = contractData.abi;
+  
+  //   if (!contractData.address || !abi) {
+  //     console.error("Contract address or ABI is missing.");
+  //     alert("Contract configuration is missing.");
+  //     return;
+  //   }
+  
+  //   try {
+  //     const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //     await provider.send("eth_requestAccounts", []);
+  //     const signer = provider.getSigner();
+  //     const userAddress = await signer.getAddress();
+  
+  //     const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+  
+  //     const data = contract.interface.encodeFunctionData("postMessage", [
+  //       nationIdForPost,
+  //       message,
+  //     ]);
+  
+  //     try {
+  //       // Simulating the transaction call
+  //       const result = await provider.call({
+  //         to: contract.address,
+  //         data: data,
+  //         from: userAddress,
+  //       });
+  
+  //       if (result.startsWith("0x08c379a0")) {
+  //         const errorMessage = parseRevertReason({ data: result });
+  //         alert(`Transaction failed: ${errorMessage}`);
+  //         return;
+  //       }
+  
+  //     } catch (error: any) {
+  //       const errorMessage = parseRevertReason(error);
+  //       console.error("Transaction simulation failed:", errorMessage);
+  //       alert(`Transaction failed: ${errorMessage}`);
+  //       return;
+  //     }
+  
+  //     // Sending the actual transaction
+  //     await writeContractAsync({
+  //       abi: contractData.abi,
+  //       address: contractData.address,
+  //       functionName: "postMessage",
+  //       args: [nationIdForPost, message],
+  //     });
+  
+  //     alert("Posted successfully!");
+  //     setMessage(""); // Clear message input
+  
+  //     window.location.reload()
+  //   } catch (error: any) {
+  //     const errorMessage = parseRevertReason(error);
+  //     console.error("Transaction failed:", errorMessage);
+  //     alert(`Transaction failed: ${errorMessage}`);
+  //   }
+  // };
+
   const handlePostMessage = async () => {
-    if (!nationIdForPost || !message || !contractsData?.Messenger || !walletAddress) {
+    if (!nationId || !post || !contractsData?.Messenger || !walletAddress) {
       console.error("Missing required parameters for posting message.");
       alert("Missing required parameters.");
       return;
@@ -207,29 +276,19 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
   
       const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
   
-      const data = contract.interface.encodeFunctionData("postMessage", [
-        nationIdForPost,
-        message,
-      ]);
-  
+      console.log("nationId", nationId);
+      console.log("message", post);
+
       try {
-        // Simulating the transaction call
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
+        // Simulating the transaction using callStatic
+        await contract.callStatic.postMessage(nationId, post, {
           from: userAddress,
         });
-  
-        if (result.startsWith("0x08c379a0")) {
-          const errorMessage = parseRevertReason({ data: result });
-          alert(`Transaction failed: ${errorMessage}`);
-          return;
-        }
-  
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
-        console.error("Transaction simulation failed:", errorMessage);
-        alert(`Transaction failed: ${errorMessage}`);
+        console.log("Simulation successful — proceeding to transaction.");
+      } catch (simulationError: any) {
+        const errorMessage = parseRevertReason(simulationError);
+        console.error("Simulation failed:", errorMessage);
+        alert(`Simulation failed: ${errorMessage}`);
         return;
       }
   
@@ -238,13 +297,12 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
         abi: contractData.abi,
         address: contractData.address,
         functionName: "postMessage",
-        args: [nationIdForPost, message],
+        args: [nationId, post],
       });
   
       alert("Posted successfully!");
-      setMessage(""); // Clear message input
-  
-      window.location.reload()
+      setPost(""); // Clear message input
+      window.location.reload();
     } catch (error: any) {
       const errorMessage = parseRevertReason(error);
       console.error("Transaction failed:", errorMessage);
@@ -1069,8 +1127,8 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
                       <textarea
                           className="w-full p-2 border rounded-lg bg-base-100 text-base-content"
                           placeholder="Create post..."
-                          value={message}
-                          onChange={(e) => setMessage(e.target.value)}
+                          value={post}
+                          onChange={(e) => setPost(e.target.value)}
                       />
                       <button 
                           className="mt-2 px-4 py-2 bg-primary text-primary-content rounded-lg shadow-md w-full hover:bg-primary/80"
