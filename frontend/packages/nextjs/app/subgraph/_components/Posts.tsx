@@ -36,12 +36,16 @@ const PostsTable = () => {
   
       try {
   
+        console.log("Fetching posts for nationId:", nationId);
+        
         const { data: result, errors } = await execute(GetPostsDocument, {sender : nationId});
     
         if (errors) {
           console.error("GraphQL Error:", errors);
         }
   
+        console.log("Fetched posts:", result);
+
         if (result?.posts?.length > 0) {
           setPostData(result.posts);
         } else {
@@ -90,7 +94,7 @@ const PostsTable = () => {
       await writeContractAsync({
         abi: messenger.abi,
         address: messenger.address,
-        functionName: "post",
+        functionName: "postMessage",
         args: [nationId, newPost],
       });
 

@@ -203,9 +203,6 @@ export const getNationAllianceAndPlatoon = async (
     publicClient: any,
     allianceContract: any
 ) => {
-    console.log("Getting nation alliance and platoon for nationId:", nationId);
-    console.log("Public Client:", publicClient);
-    console.log("Alliance Contract:", allianceContract);
     if (!publicClient || !allianceContract || !nationId) {
         console.error("Missing required data: publicClient, allianceContract, or nationId.");
         return;

@@ -133,8 +133,6 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
   const spiesContract = contractsData?.SpyContract;
   const allianceContract = contractsData?.AllianceManager
 
-  console.log(allianceContract, "allianceContract")
-
   const [activeTab, setActiveTab] = useState("Government Information");
 
   const [nationDetails, setNationDetails] = useState<NationDetails | null>(null);
@@ -243,7 +241,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
         args: [nationIdForPost, message],
       });
   
-      alert("Message posted successfully!");
+      alert("Posted successfully!");
       setMessage(""); // Clear message input
   
       window.location.reload()
