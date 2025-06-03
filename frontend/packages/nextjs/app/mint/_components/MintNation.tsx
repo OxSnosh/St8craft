@@ -115,22 +115,22 @@ export function MintNation() {
     try {
       setIsPending(true);
   
-      console.log("Simulating transaction...");
+      // console.log("Simulating transaction...");
   
-      const simulation = await simulateContract(wagmiConfig, {
-        abi: countryMinterContract.abi,
-        address: countryMinterContract.address,
-        functionName: 'generateCountry',
-        args: [
-          form.rulerName,
-          form.nationName,
-          form.capitalCity,
-          form.nationSlogan,
-        ],
-        account: walletAddress,
-      });
+      // const simulation = await simulateContract(wagmiConfig, {
+      //   abi: countryMinterContract.abi,
+      //   address: countryMinterContract.address,
+      //   functionName: 'generateCountry',
+      //   args: [
+      //     form.rulerName,
+      //     form.nationName,
+      //     form.capitalCity,
+      //     form.nationSlogan,
+      //   ],
+      //   account: walletAddress,
+      // });
   
-      console.log("Simulation successful, sending transaction...");
+      // console.log("Simulation successful, sending transaction...");
   
       const tx = await writeContractAsync({
         abi: countryMinterContract.abi,
