@@ -81,8 +81,8 @@ async function main () {
 
     let subscriptionId = 1  
     let vrfCoordinatorV2Address =  "0x20Dc424c5fa468CbB1c702308F0cC9c14DA2825C";
-    let gasLane= "0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc";
-    let callbackGasLimit = "5000000";
+    let gasLane= "0x9e1344a1247c8a1785d0a4681a27152bffdb43666ae5bf7d14d24a5efd44bf71";
+    let callbackGasLimit = "2500000";
 
     if (chainId == 84532) {
         // const BASE_FEE = "250000000000000000" // 0.25 is this the premium in LINK?

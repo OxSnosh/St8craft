@@ -34,6 +34,7 @@ const POLYGON_MAINNET_RPC_URL =
   process.env.POLYGON_MAINNET_RPC_URL ||
   "https://polygon-mainnet.alchemyapi.io/v2/your-api-key"
 const PRIVATE_KEY = process.env.PRIVATE_KEY
+
 // optional
 const MNEMONIC = process.env.MNEMONIC || "your mnemonic"
 
@@ -83,6 +84,8 @@ const config = {
     },
     localhost: {
       chainId: 31337,
+      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+      url: "http://127.0.0.1:8545/"
     },
     // yarn hardhat coverage --network coverage (no node running on localhost:8545)
     coverage: { // for running solidity coverage tests
@@ -92,6 +95,8 @@ const config = {
     base_sepolia: {
       url: "https://sepolia.base.org",
       chainId: 84532,
+      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+
     },
     kovan: {
       url: KOVAN_RPC_URL,
