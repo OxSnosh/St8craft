@@ -1,4 +1,4 @@
-import "@nomiclabs/hardhat-waffle"
+// import "@nomiclabs/hardhat-waffle"
 // import "@nomiclabs/hardhat-etherscan"
 import "hardhat-deploy"
 import "solidity-coverage"
@@ -84,7 +84,7 @@ const config = {
     },
     localhost: {
       chainId: 31337,
-      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+      // accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
       url: "http://127.0.0.1:8545/"
     },
     // yarn hardhat coverage --network coverage (no node running on localhost:8545)
@@ -170,6 +170,7 @@ const config = {
     deployer: {
       default: 0,
       1: 0,
+      84532: 0 
     },
     user1: {
       default: 1,

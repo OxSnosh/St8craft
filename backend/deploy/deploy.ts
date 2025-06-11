@@ -1,113 +1,57 @@
 //St8kraft © 2022 by OxSnosh is licensed under Attribution-NonCommercial-NoDerivatives 4.0 International
-import { network, artifacts } from "hardhat"
+// import { network, artifacts } from "hardhat"
+// import { HardhatRuntimeEnvironment } from "hardhat/types";
+// import { DeployFunction } from "hardhat-deploy/types";
+// import { ContractFactory, JsonRpcProvider, parseEther } from "ethers";
+// import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+
+import { network } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { ContractFactory, parseEther, JsonRpcProvider } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-
-
-import { 
-    WarBucks, 
-    St8craftGovToken,
-    AidContract,
-    AirBattleContract,
-    AdditionalAirBattle,
-    BillsContract,
-    BombersContract,
-    BombersMarketplace1,
-    BombersMarketplace2,
-    CountryMinter,
-    CountryParametersContract,
-    AllianceManager,
-    CrimeContract,
-    CruiseMissileContract,
-    EnvironmentContract,
-    FightersContract,
-    FighterLosses,
-    FightersMarketplace1,
-    FightersMarketplace2,
-    ForcesContract,
-    MissilesContract,
-    GroundBattleContract,
-    ImprovementsContract1,
-    ImprovementsContract2,
-    ImprovementsContract3,
-    ImprovementsContract4,
-    InfrastructureContract,
-    InfrastructureMarketContract,
-    KeeperContract,
-    LandMarketContract,
-    MilitaryContract,
-    NationStrengthContract,
-    NavalActionsContract,
-    NavyContract,
-    NavyContract2,
-    AdditionalNavyContract,
-    NavalBlockadeContract,
-    BreakBlocadeContract,
-    NavalAttackContract,
-    NukeContract,
-    ResourcesContract,
-    SenateContract,
-    SpyContract,
-    SpyOperationsContract,
-    TaxesContract,
-    AdditionalTaxesContract,
-    TechnologyMarketContract,
-    TreasuryContract,
-    WarContract,
-    WondersContract1,
-    WondersContract2,
-    WondersContract3,
-    WondersContract4,
-    VRFConsumerBaseV2,
-    VRFCoordinatorV2Mock,
-    BonusResourcesContract,
-    Messenger
-} from "../typechain-types"
-import { networkConfig } from "../helper-hardhat-config"
+import { networkConfig } from "../helper-hardhat-config";
+import { VRFCoordinatorV2Mock } from "../typechain-types";
+import { JsonRpcProvider, Wallet } from "ethers";
 
 const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployments, getNamedAccounts, ethers } = hre as any;
     const { deploy } = deployments;
     let { deployer } = await getNamedAccounts();
-
-    // const balance = await ethers.provider.getBalance(deployer.address);
-    // console.log(` balance: ${ethers.formatEther(balance)} ETH`);
-
-    // console.log(, " address")
     
     let chainId = network.config.chainId
+
     let subscriptionId    
     let vrfCoordinatorV2Mock
     let vrfCoordinatorV2Address 
     let gasLane
     let callbackGasLimit   
 
-    const FUND_AMOUNT = parseEther("1")
+    const FUND_AMOUNT = ethers.parseEther("1")
 
     let provider
 
-
-    const signers = await ethers.getSigners();
-
-    const signer0 = signers[0] as unknown as HardhatEthersSigner;
-
-    const signer1 = signers[1] as unknown as HardhatEthersSigner;
-
-    console.log("Signer1 address:", await signer1.address);
-
-    console.log("Signer0 address:", await signer0.address);
+    let signer
 
     if (chainId == 31337) {
 
-        const tx = await signer1.sendTransaction({
-          to: deployer,
-          value: ethers.parseEther("5.0"), // 5 ETH
-        });
+      const signers = await ethers.getSigners();
+
+      const signer1 = signers[1] as unknown as HardhatEthersSigner;
+
+      console.log("Signer1 address:", signer1.address);
+
+      // const provider = new JsonRpcProvider("http://127.0.0.1:8545");
+      // deployer = new Wallet(process.env.PRIVATE_KEY!, provider);
+
+      // console.log("Deployer address NOW:", deployer.address);
+
+        // const tx = await deployer.sendTransaction({
+        //   to: deployer,
+        //   value: ethers.parseEther("5.0"), // 5 ETH
+        // });
     
-        await tx.wait();
-        console.log(`✅ Sent 5 ETH from signer0 to  (${deployer.address}) on localhost`);
+        // await tx.wait();
+        // console.log(`✅ Sent 5 ETH from deployer to  (${deployer.address}) on localhost`);
 
         const BASE_FEE = "250000000000000000" // 0.25 is this the premium in LINK?
         const GAS_PRICE_LINK = 1e9 // link per gas, is this the gas lane? // 0.000000001 LINK per gas
@@ -119,8 +63,13 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         });
         const { address } = await deployments.get("VRFCoordinatorV2Mock");
         console.log("VRFCoordinatorV2Mock address:", address);
-        vrfCoordinatorV2Mock = await ethers.getContractAt("VRFCoordinatorV2Mock", address, signer0);
-        console.log("VRFCoordinatorV2Mock contract:", vrfCoordinatorV2Mock);
+        signer = await ethers.getSigner(deployer) as HardhatEthersSigner;
+        vrfCoordinatorV2Mock = await ethers.getContractAt(
+          "VRFCoordinatorV2Mock",
+          address,
+          signer
+        ) as VRFCoordinatorV2Mock
+        // console.log("VRFCoordinatorV2Mock contract:", vrfCoordinatorV2Mock);
         vrfCoordinatorV2Address = address;
         console.log("VRFCoordinatorV2Mock deployed at:", vrfCoordinatorV2Address);
         // vrfCoordinatorV2Address = await vrfCoordinatorV2Mock.address
@@ -130,8 +79,6 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         gasLane = networkConfig[31337]["gasLane"]
         callbackGasLimit =  networkConfig[31337]["callbackGasLimit"] 
         await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT)
-
-        vrfCoordinatorV2Mock = vrfCoordinatorV2Mock as VRFCoordinatorV2Mock
 
         console.log("subscription funded")
 
@@ -144,21 +91,19 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
         provider = new JsonRpcProvider("https://sepolia.base.org");
 
+        console.log("base_sepolia")
 
     }
 
-    console.log("Deploying contracts with account:", signer0.address);
-
-    const INITIAL_SUPPLY_ST8CRAFT = parseEther("200000000"); 
-    const INITIAL_SUPPLY_WARBUCKS = parseEther("200000000000"); 
-
+    const INITIAL_SUPPLY_ST8CRAFT = ethers.parseEther("200000000"); 
+    const INITIAL_SUPPLY_WARBUCKS = ethers.parseEther("200000000000"); 
 
         const warBucks = await deploy("WarBucks", {
           from: deployer,
           args: [INITIAL_SUPPLY_WARBUCKS],
           log: true,
         })
-        const deployedWarBucks = await ethers.getContractAt("WarBucks", warBucks.address, signer0);
+        const deployedWarBucks = await ethers.getContractAt("WarBucks", warBucks.address, signer);
 
           // Deploy St8craftGovToken
         const st8craftGovToken = await deploy("St8craftGovToken", {
@@ -166,7 +111,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           args: [INITIAL_SUPPLY_ST8CRAFT],
           log: true,
         });
-        const deployedSt8craftGovToken = await ethers.getContractAt("St8craftGovToken", st8craftGovToken.address, signer0);
+        const deployedSt8craftGovToken = await ethers.getContractAt("St8craftGovToken", st8craftGovToken.address, signer);
 
         // Deploy AidContract
         const aidContract = await deploy("AidContract", {
@@ -174,7 +119,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           args: [],
           log: true,
         });
-        const deployedAidContract = await ethers.getContractAt("AidContract", aidContract.address, signer0);
+        const deployedAidContract = await ethers.getContractAt("AidContract", aidContract.address, signer);
 
         // Deploy AirBattleContract
         const airBattleContract = await deploy("AirBattleContract", {
@@ -182,367 +127,364 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
-        const deployedAirBattleContract = await ethers.getContractAt("AirBattleContract", airBattleContract.address, signer0);
+        const deployedAirBattleContract = await ethers.getContractAt("AirBattleContract", airBattleContract.address, signer);
 
         const additionalAirBattle = await deploy("AdditionalAirBattle", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedAdditionalAirBattle = await ethers.getContractAt("AdditionalAirBattle", additionalAirBattle.address, signer0);
+        const deployedAdditionalAirBattle = await ethers.getContractAt("AdditionalAirBattle", additionalAirBattle.address, signer);
       
         const billsContract = await deploy("BillsContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedBillsContract = await ethers.getContractAt("BillsContract", billsContract.address, signer0);
+        const deployedBillsContract = await ethers.getContractAt("BillsContract", billsContract.address, signer);
       
         const bombersContract = await deploy("BombersContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedBombersContract = await ethers.getContractAt("BombersContract", bombersContract.address, signer0);
+        const deployedBombersContract = await ethers.getContractAt("BombersContract", bombersContract.address, signer);
       
         const bombersMarketplace1 = await deploy("BombersMarketplace1", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedBombersMarketplace1 = await ethers.getContractAt("BombersMarketplace1", bombersMarketplace1.address, signer0);
+        const deployedBombersMarketplace1 = await ethers.getContractAt("BombersMarketplace1", bombersMarketplace1.address, signer);
       
         const bombersMarketplace2 = await deploy("BombersMarketplace2", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedBombersMarketplace2 = await ethers.getContractAt("BombersMarketplace2", bombersMarketplace2.address, signer0);
+        const deployedBombersMarketplace2 = await ethers.getContractAt("BombersMarketplace2", bombersMarketplace2.address, signer);
       
         const countryMinter = await deploy("CountryMinter", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedCountryMinter = await ethers.getContractAt("CountryMinter", countryMinter.address, signer0);
+        const deployedCountryMinter = await ethers.getContractAt("CountryMinter", countryMinter.address, signer);
       
         const countryParametersContract = await deploy("CountryParametersContract", {
           from: deployer,
           args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
-        const deployedCountryParametersContract = await ethers.getContractAt("CountryParametersContract", countryParametersContract.address, signer0);
+        const deployedCountryParametersContract = await ethers.getContractAt("CountryParametersContract", countryParametersContract.address, signer);
       
         const allianceManager = await deploy("AllianceManager", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedAllianceManager = await ethers.getContractAt("AllianceManager", allianceManager.address, signer0);
+        const deployedAllianceManager = await ethers.getContractAt("AllianceManager", allianceManager.address, signer);
       
         const crimeContract = await deploy("CrimeContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedCrimeContract = await ethers.getContractAt("CrimeContract", crimeContract.address, signer0);
+        const deployedCrimeContract = await ethers.getContractAt("CrimeContract", crimeContract.address, signer);
       
         const cruiseMissileContract = await deploy("CruiseMissileContract", {
           from: deployer,
           args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
-        const deployedCruiseMissileContract = await ethers.getContractAt("CruiseMissileContract", cruiseMissileContract.address, signer0);
+        const deployedCruiseMissileContract = await ethers.getContractAt("CruiseMissileContract", cruiseMissileContract.address, signer);
       
         const environmentContract = await deploy("EnvironmentContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedEnvironmentContract = await ethers.getContractAt("EnvironmentContract", environmentContract.address, signer0);
+        const deployedEnvironmentContract = await ethers.getContractAt("EnvironmentContract", environmentContract.address, signer);
       
         const fightersContract = await deploy("FightersContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedFightersContract = await ethers.getContractAt("FightersContract", fightersContract.address, signer0);
+        const deployedFightersContract = await ethers.getContractAt("FightersContract", fightersContract.address, signer);
       
         const fighterLosses = await deploy("FighterLosses", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedFighterLosses = await ethers.getContractAt("FighterLosses", fighterLosses.address, signer0);
+        const deployedFighterLosses = await ethers.getContractAt("FighterLosses", fighterLosses.address, signer);
       
         const fightersMarketplace1 = await deploy("FightersMarketplace1", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedFightersMarketplace1 = await ethers.getContractAt("FightersMarketplace1", fightersMarketplace1.address, signer0);
+        const deployedFightersMarketplace1 = await ethers.getContractAt("FightersMarketplace1", fightersMarketplace1.address, signer);
       
         const fightersMarketplace2 = await deploy("FightersMarketplace2", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedFightersMarketplace2 = await ethers.getContractAt("FightersMarketplace2", fightersMarketplace2.address, signer0);
+        const deployedFightersMarketplace2 = await ethers.getContractAt("FightersMarketplace2", fightersMarketplace2.address, signer);
       
         const forcesContract = await deploy("ForcesContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedForcesContract = await ethers.getContractAt("ForcesContract", forcesContract.address, signer0);
+        const deployedForcesContract = await ethers.getContractAt("ForcesContract", forcesContract.address, signer);
       
         const spyContract = await deploy("SpyContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedSpyContract = await ethers.getContractAt("SpyContract", spyContract.address, signer0);
+        const deployedSpyContract = await ethers.getContractAt("SpyContract", spyContract.address, signer);
       
         const missilesContract = await deploy("MissilesContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedMissilesContract = await ethers.getContractAt("MissilesContract", missilesContract.address, signer0);
+        const deployedMissilesContract = await ethers.getContractAt("MissilesContract", missilesContract.address, signer);
       
         const groundBattleContract = await deploy("GroundBattleContract", {
           from: deployer,
           args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
-        const deployedGroundBattleContract = await ethers.getContractAt("GroundBattleContract", groundBattleContract.address, signer0);
+        const deployedGroundBattleContract = await ethers.getContractAt("GroundBattleContract", groundBattleContract.address, signer);
       
         const improvementsContract1 = await deploy("ImprovementsContract1", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedImprovementsContract1 = await ethers.getContractAt("ImprovementsContract1", improvementsContract1.address, signer0);
+        const deployedImprovementsContract1 = await ethers.getContractAt("ImprovementsContract1", improvementsContract1.address, signer);
       
         const improvementsContract2 = await deploy("ImprovementsContract2", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedImprovementsContract2 = await ethers.getContractAt("ImprovementsContract2", improvementsContract2.address, signer0);
+        const deployedImprovementsContract2 = await ethers.getContractAt("ImprovementsContract2", improvementsContract2.address, signer);
       
         const improvementsContract3 = await deploy("ImprovementsContract3", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedImprovementsContract3 = await ethers.getContractAt("ImprovementsContract3", improvementsContract3.address, signer0);
+        const deployedImprovementsContract3 = await ethers.getContractAt("ImprovementsContract3", improvementsContract3.address, signer);
       
         const improvementsContract4 = await deploy("ImprovementsContract4", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedImprovementsContract4 = await ethers.getContractAt("ImprovementsContract4", improvementsContract4.address, signer0);
+        const deployedImprovementsContract4 = await ethers.getContractAt("ImprovementsContract4", improvementsContract4.address, signer);
       
         const infrastructureContract = await deploy("InfrastructureContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedInfrastructureContract = await ethers.getContractAt("InfrastructureContract", infrastructureContract.address, signer0);
+        const deployedInfrastructureContract = await ethers.getContractAt("InfrastructureContract", infrastructureContract.address, signer);
       
         const infrastructureMarketContract = await deploy("InfrastructureMarketContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedInfrastructureMarketContract = await ethers.getContractAt("InfrastructureMarketContract", infrastructureMarketContract.address, signer0);
+        const deployedInfrastructureMarketContract = await ethers.getContractAt("InfrastructureMarketContract", infrastructureMarketContract.address, signer);
       
         const keeperContract = await deploy("KeeperContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedKeeperContract = await ethers.getContractAt("KeeperContract", keeperContract.address, signer0);
+        const deployedKeeperContract = await ethers.getContractAt("KeeperContract", keeperContract.address, signer);
       
         const landMarketContract = await deploy("LandMarketContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedLandMarketContract = await ethers.getContractAt("LandMarketContract", landMarketContract.address, signer0);
+        const deployedLandMarketContract = await ethers.getContractAt("LandMarketContract", landMarketContract.address, signer);
       
         const militaryContract = await deploy("MilitaryContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedMilitaryContract = await ethers.getContractAt("MilitaryContract", militaryContract.address, signer0);
+        const deployedMilitaryContract = await ethers.getContractAt("MilitaryContract", militaryContract.address, signer);
       
         const nationStrengthContract = await deploy("NationStrengthContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedNationStrengthContract = await ethers.getContractAt("NationStrengthContract", nationStrengthContract.address, signer0);
+        const deployedNationStrengthContract = await ethers.getContractAt("NationStrengthContract", nationStrengthContract.address, signer);
       
         const navyContract = await deploy("NavyContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedNavyContract = await ethers.getContractAt("NavyContract", navyContract.address, signer0);
+        const deployedNavyContract = await ethers.getContractAt("NavyContract", navyContract.address, signer);
       
         const navyContract2 = await deploy("NavyContract2", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedNavyContract2 = await ethers.getContractAt("NavyContract2", navyContract2.address, signer0);
+        const deployedNavyContract2 = await ethers.getContractAt("NavyContract2", navyContract2.address, signer);
       
         const additionalNavyContract = await deploy("AdditionalNavyContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedAdditionalNavyContract = await ethers.getContractAt("AdditionalNavyContract", additionalNavyContract.address, signer0);
+        const deployedAdditionalNavyContract = await ethers.getContractAt("AdditionalNavyContract", additionalNavyContract.address, signer);
       
         const navalActionsContract = await deploy("NavalActionsContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedNavalActionsContract = await ethers.getContractAt("NavalActionsContract", navalActionsContract.address, signer0);
+        const deployedNavalActionsContract = await ethers.getContractAt("NavalActionsContract", navalActionsContract.address, signer);
       
         const navalBlockadeContract = await deploy("NavalBlockadeContract", {
           from: deployer,
           args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
-        const deployedNavalBlockadeContract = await ethers.getContractAt("NavalBlockadeContract", navalBlockadeContract.address, signer0);
+        const deployedNavalBlockadeContract = await ethers.getContractAt("NavalBlockadeContract", navalBlockadeContract.address, signer);
       
         const breakBlocadeContract = await deploy("BreakBlocadeContract", {
           from: deployer,
           args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
-        const deployedBreakBlocadeContract = await ethers.getContractAt("BreakBlocadeContract", breakBlocadeContract.address, signer0);
+        const deployedBreakBlocadeContract = await ethers.getContractAt("BreakBlocadeContract", breakBlocadeContract.address, signer);
       
         const navalAttackContract = await deploy("NavalAttackContract", {
           from: deployer,
           args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
-        const deployedNavalAttackContract = await ethers.getContractAt("NavalAttackContract", navalAttackContract.address, signer0);
+        const deployedNavalAttackContract = await ethers.getContractAt("NavalAttackContract", navalAttackContract.address, signer);
       
         const nukeContract = await deploy("NukeContract", {
           from: deployer,
           args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
-        const deployedNukeContract = await ethers.getContractAt("NukeContract", nukeContract.address, signer0);
+        const deployedNukeContract = await ethers.getContractAt("NukeContract", nukeContract.address, signer);
       
         const resourcesContract = await deploy("ResourcesContract", {
           from: deployer,
           args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
-        const deployedResourcesContract = await ethers.getContractAt("ResourcesContract", resourcesContract.address, signer0);
+        const deployedResourcesContract = await ethers.getContractAt("ResourcesContract", resourcesContract.address, signer);
       
         const bonusResourcesContract = await deploy("BonusResourcesContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedBonusResourcesContract = await ethers.getContractAt("BonusResourcesContract", bonusResourcesContract.address, signer0);
+        const deployedBonusResourcesContract = await ethers.getContractAt("BonusResourcesContract", bonusResourcesContract.address, signer);
       
         const senateContract = await deploy("SenateContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedSenateContract = await ethers.getContractAt("SenateContract", senateContract.address, signer0);
+        const deployedSenateContract = await ethers.getContractAt("SenateContract", senateContract.address, signer);
       
         const spyOperationsContract = await deploy("SpyOperationsContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedSpyOperationsContract = await ethers.getContractAt("SpyOperationsContract", spyOperationsContract.address, signer0);  
+        const deployedSpyOperationsContract = await ethers.getContractAt("SpyOperationsContract", spyOperationsContract.address, signer);  
       
         const taxesContract = await deploy("TaxesContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedTaxesContract = await ethers.getContractAt("TaxesContract", taxesContract.address, signer0);
+        const deployedTaxesContract = await ethers.getContractAt("TaxesContract", taxesContract.address, signer);
       
         const additionalTaxesContract = await deploy("AdditionalTaxesContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedAdditionalTaxesContract = await ethers.getContractAt("AdditionalTaxesContract", additionalTaxesContract.address, signer0);
+        const deployedAdditionalTaxesContract = await ethers.getContractAt("AdditionalTaxesContract", additionalTaxesContract.address, signer);
       
         const technologyMarketContract = await deploy("TechnologyMarketContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedTechnologyMarketContract = await ethers.getContractAt("TechnologyMarketContract", technologyMarketContract.address, signer0);
+        const deployedTechnologyMarketContract = await ethers.getContractAt("TechnologyMarketContract", technologyMarketContract.address, signer);
       
         const treasuryContract = await deploy("TreasuryContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedTreasuryContract = await ethers.getContractAt("TreasuryContract", treasuryContract.address, signer0);
+        const deployedTreasuryContract = await ethers.getContractAt("TreasuryContract", treasuryContract.address, signer);
       
         const warContract = await deploy("WarContract", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedWarContract = await ethers.getContractAt("WarContract", warContract.address, signer0);
+        const deployedWarContract = await ethers.getContractAt("WarContract", warContract.address, signer);
       
         const wondersContract1 = await deploy("WondersContract1", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedWondersContract1 = await ethers.getContractAt("WondersContract1", wondersContract1.address, signer0);
+        const deployedWondersContract1 = await ethers.getContractAt("WondersContract1", wondersContract1.address, signer);
       
         const wondersContract2 = await deploy("WondersContract2", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedWondersContract2 = await ethers.getContractAt("WondersContract2", wondersContract2.address, signer0);
+        const deployedWondersContract2 = await ethers.getContractAt("WondersContract2", wondersContract2.address, signer);
       
         const wondersContract3 = await deploy("WondersContract3", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedWondersContract3 = await ethers.getContractAt("WondersContract3", wondersContract3.address, signer0);
+        const deployedWondersContract3 = await ethers.getContractAt("WondersContract3", wondersContract3.address, signer);
       
         const wondersContract4 = await deploy("WondersContract4", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedWondersContract4 = await ethers.getContractAt("WondersContract4", wondersContract4.address, signer0);
+        const deployedWondersContract4 = await ethers.getContractAt("WondersContract4", wondersContract4.address, signer);
       
         const messenger = await deploy("Messenger", {
           from: deployer,
           args: [],
           log: true,
         });
-        const deployedMessenger = await ethers.getContractAt("Messenger", messenger.address, signer0);
-
-        await vrfCoordinatorV2Mock.addConsumer(subscriptionId, countryParametersContract.address);
-        await vrfCoordinatorV2Mock.addConsumer(subscriptionId, resourcesContract.address);
+        const deployedMessenger = await ethers.getContractAt("Messenger", messenger.address, signer);
 
         await deployedWarBucks.settings(
             treasuryContract.address,
