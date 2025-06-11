@@ -37,7 +37,7 @@ const networkConfig: any = {
   },
   84532: {
       name: "base_sepolia",
-      subscriptionId: "588",
+      subscriptionId: "145757",
       gasLane: "0x9e1344a1247c8a1785d0a4681a27152bffdb43666ae5bf7d14d24a5efd44bf71", // 30 gwei
       keepersUpdateInterval: "30",
       callbackGasLimit: "2500000", // 5,000,000 gas

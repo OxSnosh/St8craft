@@ -89,6 +89,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         gasLane = networkConfig[chainId]["gasLane"]
         callbackGasLimit = networkConfig[chainId]["callbackGasLimit"]
 
+        signer = await ethers.getSigner(deployer) as HardhatEthersSigner;
+
         provider = new JsonRpcProvider("https://sepolia.base.org");
 
         console.log("base_sepolia")
@@ -97,6 +99,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     const INITIAL_SUPPLY_ST8CRAFT = ethers.parseEther("200000000"); 
     const INITIAL_SUPPLY_WARBUCKS = ethers.parseEther("200000000000"); 
+
+    console.log("Deploying contracts with the account:", deployer);
 
         const warBucks = await deploy("WarBucks", {
           from: deployer,
