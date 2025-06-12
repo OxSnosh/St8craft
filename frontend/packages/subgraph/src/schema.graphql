@@ -65,9 +65,9 @@ type AirBattle @entity {
   battleId: BigInt!
   attackerId: BigInt!
   defenderId: BigInt!
-  attackerFighterLosses: Bytes!
-  attackerBomberLosses: Bytes!
-  defenderFighterLosses: Bytes!
+  attackerFighterLosses: [BigInt!]
+  attackerBomberLosses: [BigInt!]
+  defenderFighterLosses: [BigInt!]
   infrastructureDamage: BigInt!
   tankDamage: BigInt!
   cruiseMissileDamage: BigInt!

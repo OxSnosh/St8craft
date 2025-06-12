@@ -1,8 +1,8 @@
 import { BigInt, Address } from "@graphprotocol/graph-ts";
-import { AirAssaultCasualties } from "../generated/AdditionalAirBattle/AdditionalAirBattle";
+import { AirBattleFulfilled } from "../generated/AdditionalAirBattle/AdditionalAirBattle";
 import { AirBattle } from "../generated/schema";
 
-export function handleAirBattle(event: AirAssaultCasualties): void {
+export function handleAirBattle(event: AirBattleFulfilled): void {
 
     let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString();
     
