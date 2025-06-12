@@ -28,22 +28,40 @@ const FILTER_OPTIONS = [
   { label: 'Nation ID', value: 'nationId' },
 ];
 
-export function NationSearchBar() {
+type Nation = {
+  id: string;
+  name: string;
+  nationId: string;
+  ruler: string;
+  owner: string;
+};
+
+export function NationSearchBar({
+  onSelect,
+  placeholder = 'Search...',
+}: {
+  onSelect?: (nation: Nation) => void;
+  placeholder?: string;
+}) {
   const [filterBy, setFilterBy] = useState<'name' | 'ruler' | 'nationId'>('name');
   const [searchTerm, setSearchTerm] = useState('');
+  const [results, setResults] = useState<Nation[]>([]);
+  const [searchNations, { loading }] = useLazyQuery(SEARCH_NATIONS, {
+    onCompleted: (data) => setResults(data.nations),
+  });
+
   const router = useRouter();
 
-  const [searchNations, { data, loading }] = useLazyQuery(SEARCH_NATIONS);
-
   const handleSearch = debounce((value: string) => {
-    if (!value.trim()) return;
-
-    let whereClause;
-    if (filterBy === 'nationId') {
-      whereClause = { nationId: value }; // exact match
-    } else {
-      whereClause = { [`${filterBy}_contains_nocase`]: value }; // partial match
+    if (!value.trim()) {
+      setResults([]);
+      return;
     }
+
+    const whereClause =
+      filterBy === 'nationId'
+        ? { nationId: value }
+        : { [`${filterBy}_contains_nocase`]: value };
 
     searchNations({ variables: { where: whereClause } });
   }, 300);
@@ -54,15 +72,21 @@ export function NationSearchBar() {
     handleSearch(value);
   };
 
-  const handleSelect = (nation: {
-    id: string;
-    name: string;
-    nationId: string;
-    ruler: string;
-    owner: string;
-  }) => {
-    localStorage.setItem('selectedMenuItem', `Nation ${nation.nationId}`);
-    router.push(`/nations?id=${nation.nationId}`);
+  const handleSelect = (nation: Nation) => {
+    if (onSelect) {
+      onSelect(nation);
+    } else {
+      localStorage.setItem('selectedMenuItem', `Nation ${nation.nationId}`);
+      router.push(`/nations?id=${nation.nationId}`);
+    }
+
+    // Clear input & results
+    setSearchTerm('');
+    setResults([]);
+    setTimeout(() => {
+      const input = document.querySelector<HTMLInputElement>('input[type="text"]');
+      input?.blur();
+    }, 100);
   };
 
   return (
@@ -82,30 +106,22 @@ export function NationSearchBar() {
 
         <input
           type="text"
-          placeholder={`Search by ${filterBy}...`}
+          placeholder={placeholder}
           className="input input-bordered w-full dark:bg-gray-800 dark:text-white"
           value={searchTerm}
           onChange={handleChange}
         />
       </div>
 
-      {/* Loading */}
       {loading && (
         <div className="absolute z-50 bg-white dark:bg-gray-900 text-black dark:text-white border dark:border-gray-600 w-full mt-1 rounded shadow px-4 py-2">
           Loading...
         </div>
       )}
 
-      {/* Results */}
-      {(data?.nations ?? []).length > 0 && (
+      {results.length > 0 && (
         <ul className="absolute z-50 bg-white dark:bg-gray-900 text-black dark:text-white border dark:border-gray-600 w-full mt-1 rounded shadow">
-          {(data.nations as {
-            id: string;
-            name: string;
-            nationId: string;
-            ruler: string;
-            owner: string;
-          }[]).map((nation) => (
+          {results.map((nation) => (
             <li
               key={nation.id}
               className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
@@ -117,8 +133,7 @@ export function NationSearchBar() {
         </ul>
       )}
 
-      {/* No results */}
-      {searchTerm && !(data?.nations.length) && !loading && (
+      {searchTerm && !results.length && !loading && (
         <div className="absolute z-50 bg-white dark:bg-gray-900 text-black dark:text-white border dark:border-gray-600 w-full mt-1 rounded shadow px-4 py-2">
           No results found
         </div>

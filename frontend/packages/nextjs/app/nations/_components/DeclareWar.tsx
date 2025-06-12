@@ -49,7 +49,7 @@ import { returnWarDetails } from "~~/utils/wars";
 import { isWarActive, offerPeace, deployForcesToWar } from "~~/utils/wars";
 import { groundAttack, blockade } from "~~/utils/attacks"
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-// import { relaySpyOperation } from "../../../../../../backend/scripts/spy_attack_relayer";
+import { NationSearchBar } from "../../../components/NationSearch"
 
 
 interface Nation {
@@ -435,16 +435,12 @@ const DeclareWar = () => {
                 {/* Defending Nation */}
                 <div className="p-4 bg-base-200 rounded-lg shadow-md">
                     <h3 className="text-lg font-semibold text-primary">Target Nation</h3>
-                    <select 
-                        onChange={(e) => handleDefendingNationChange(e.target.value)} 
-                        value={defendingNation} 
-                        className="select select-bordered w-full bg-base-100 text-base-content mt-2"
-                    >
-                        <option value="">Select Target Nation</option>
-                        {mintedNations.map((nation) => (
-                            <option key={nation.id} value={nation.id}>{nation.name}</option>
-                        ))}
-                    </select>
+                    <div className="mt-2">
+                        <NationSearchBar
+                        placeholder="Search and select a target nation"
+                        onSelect={(nation) => handleDefendingNationChange(nation?.nationId || "")}
+                        />
+                    </div>
                 </div>
             </div>
     
