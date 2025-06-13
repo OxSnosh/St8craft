@@ -128,7 +128,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         // Deploy AirBattleContract
         const airBattleContract = await deploy("AirBattleContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
           log: true,
         });
         const deployedAirBattleContract = await ethers.getContractAt("AirBattleContract", airBattleContract.address, signer);
@@ -177,7 +177,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       
         const countryParametersContract = await deploy("CountryParametersContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
           log: true,
         });
         const deployedCountryParametersContract = await ethers.getContractAt("CountryParametersContract", countryParametersContract.address, signer);
@@ -198,7 +198,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       
         const cruiseMissileContract = await deploy("CruiseMissileContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
           log: true,
         });
         const deployedCruiseMissileContract = await ethers.getContractAt("CruiseMissileContract", cruiseMissileContract.address, signer);
@@ -261,7 +261,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       
         const groundBattleContract = await deploy("GroundBattleContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
           log: true,
         });
         const deployedGroundBattleContract = await ethers.getContractAt("GroundBattleContract", groundBattleContract.address, signer);
@@ -366,35 +366,35 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       
         const navalBlockadeContract = await deploy("NavalBlockadeContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
           log: true,
         });
         const deployedNavalBlockadeContract = await ethers.getContractAt("NavalBlockadeContract", navalBlockadeContract.address, signer);
       
         const breakBlocadeContract = await deploy("BreakBlocadeContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
           log: true,
         });
         const deployedBreakBlocadeContract = await ethers.getContractAt("BreakBlocadeContract", breakBlocadeContract.address, signer);
       
         const navalAttackContract = await deploy("NavalAttackContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
           log: true,
         });
         const deployedNavalAttackContract = await ethers.getContractAt("NavalAttackContract", navalAttackContract.address, signer);
       
         const nukeContract = await deploy("NukeContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
           log: true,
         });
         const deployedNukeContract = await ethers.getContractAt("NukeContract", nukeContract.address, signer);
       
         const resourcesContract = await deploy("ResourcesContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
           log: true,
         });
         const deployedResourcesContract = await ethers.getContractAt("ResourcesContract", resourcesContract.address, signer);

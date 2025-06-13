@@ -32,9 +32,9 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
 
     //Chainlik Variables
     VRFCoordinatorV2Interface public i_vrfCoordinator;
-    uint64 private immutable i_subscriptionId;
-    bytes32 private immutable i_gasLane;
-    uint32 private immutable i_callbackGasLimit;
+    uint64 public i_subscriptionId;
+    bytes32 public i_gasLane;
+    uint32 public i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
     uint32 private constant NUM_WORDS = 2;
 
@@ -183,7 +183,7 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     constructor(
         address vrfCoordinatorV2,
         uint64 subscriptionId,
-        bytes32 gasLane, // keyHash
+        bytes32 gasLane,
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
@@ -298,17 +298,17 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
         setResources(requestNumber);
     }
 
-    ///@dev this is a function that is callable only from the owner of the contract
-    ///@dev this function was used in testing of the smart contract and should be deleted before deployment
-    function mockResourcesForTesting(
-        uint256 countryId,
-        uint256 resource1,
-        uint256 resource2
-    ) public onlyOwner {
-        uint256[2] memory playerResources = [resource1, resource2];
-        idToPlayerResources[countryId] = playerResources;
-        setResources(countryId);
-    }
+    // ///@dev this is a function that is callable only from the owner of the contract
+    // ///@dev this function was used in testing of the smart contract and should be deleted before deployment
+    // function mockResourcesForTesting(
+    //     uint256 countryId,
+    //     uint256 resource1,
+    //     uint256 resource2
+    // ) public onlyOwner {
+    //     uint256[2] memory playerResources = [resource1, resource2];
+    //     idToPlayerResources[countryId] = playerResources;
+    //     setResources(countryId);
+    // }
 
     ///@dev this function is an internal function that will be called when a nation is minted or adds or removes a trading partner
     ///@dev this will set the nations assigned resources to true and call the next funtion that will set all the resources of its trading partners to true
