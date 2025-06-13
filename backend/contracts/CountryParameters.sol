@@ -6,17 +6,15 @@ import "./Senate.sol";
 import "./KeeperFile.sol";
 import "./Wonders.sol";
 import "./Treasury.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title CountryParametersContract
 ///@author OxSnosh
 ///@dev this contract will inferit from Chainlink VRF and OpenZeppelin Ownable
 contract CountryParametersContract is
-    VRFConsumerBaseV2,
-    Ownable,
+    VRFConsumerBaseV2Plus,
     ReentrancyGuard
 {
     address public spyAddress;
@@ -30,8 +28,8 @@ contract CountryParametersContract is
     address public treasury;
 
     //chainlink variables
-    VRFCoordinatorV2Interface public i_vrfCoordinator;
-    uint64 private immutable i_subscriptionId;
+    VRFConsumerBaseV2Plus public i_vrfCoordinator;
+    uint256 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
@@ -118,11 +116,11 @@ contract CountryParametersContract is
     ///@dev the consructor will inherit parameters required to initialize the chainlinh VRF functionality
     constructor(
         address vrfCoordinatorV2,
-        uint64 subscriptionId,
+        uint256 subscriptionId,
         bytes32 gasLane,
         uint32 callbackGasLimit
-    ) VRFConsumerBaseV2(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+    ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -131,7 +129,7 @@ contract CountryParametersContract is
     function updateVRFCoordinator(
         address vrfCoordinatorV2
     ) public onlyOwner {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
     }
 
     ///@dev this function is only callable by the contract owner
@@ -221,23 +219,15 @@ contract CountryParametersContract is
     ///@dev this is an internal function that will initalize the call for randomness from the chainlink VRF contract
     ///@param id is the nation ID of the nation being minted
     function fulfillRequest(uint256 id) internal {
-        console.log("fulfillRequest called");
-        console.log(!pendingRequests[id], "pendingRequests[id] is false");
         require(!pendingRequests[id], "Randomness already requested");
-
-        console.log("requesting random words for id: ", id);
-        console.log(
-            "i_vrfCoordinator: ",
-            address(i_vrfCoordinator)
-        );
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            NUM_WORDS,
+            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
         );
-        console.log("requestId: ", requestId);
         s_requestIdToRequestIndex[requestId] = id;
         pendingRequests[id] = true;
         pendingRequestTimestamp[id] = block.timestamp;
@@ -260,7 +250,8 @@ contract CountryParametersContract is
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            NUM_WORDS,
+            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
         );
 
         s_requestIdToRequestIndex[requestId] = countryId;
@@ -274,7 +265,7 @@ contract CountryParametersContract is
     ///@param randomWords this array will contain 2 random numbers that will be used to determine a nations desired religion and government upon minting
     function fulfillRandomWords(
         uint256 requestId,
-        uint256[] memory randomWords
+        uint256[] calldata randomWords
     ) internal override {
         uint256 requestNumber = s_requestIdToRequestIndex[requestId];
 

@@ -9,7 +9,7 @@
     "deploy": "yarn hardhat run scripts/deploy.ts"
   },
   "devDependencies": {
-    "@chainlink/contracts": "^0.4.1",
+    "@chainlink/contracts": "^1.4.0",
     "@gelatonetwork/web3-functions-sdk": "^2.4.4",
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@nomicfoundation/hardhat-ledger": "^1.1.0",

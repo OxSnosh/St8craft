@@ -12,16 +12,15 @@ import "./KeeperFile.sol";
 import "./CountryParameters.sol";
 import "./Missiles.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-import "hardhat/console.sol";
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 ///@title NukeContract
 ///@author OxSnosh
 ///@dev this contract inherits from chainlink VRF
 ///@dev this contract inherits from openzeppelin ownable
 ///@notice this contract will allow a nation to launch a nuclear missile at anoter nation
-contract NukeContract is Ownable, VRFConsumerBaseV2 {
+contract NukeContract is VRFConsumerBaseV2Plus {
     uint256 nukeAttackId;
     address countryMinter;
     address warAddress;
@@ -39,8 +38,8 @@ contract NukeContract is Ownable, VRFConsumerBaseV2 {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    VRFCoordinatorV2Interface public i_vrfCoordinator;
-    uint64 private immutable i_subscriptionId;
+    VRFConsumerBaseV2Plus public i_vrfCoordinator;
+    uint256 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
@@ -95,8 +94,8 @@ contract NukeContract is Ownable, VRFConsumerBaseV2 {
         uint64 subscriptionId,
         bytes32 gasLane, // keyHash
         uint32 callbackGasLimit
-    ) VRFConsumerBaseV2(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+    ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -105,7 +104,7 @@ contract NukeContract is Ownable, VRFConsumerBaseV2 {
     function updateVRFCoordinator(
         address vrfCoordinatorV2
     ) public onlyOwner {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
     }
 
     ///@dev this function is only callable by the contract owner
@@ -242,7 +241,8 @@ contract NukeContract is Ownable, VRFConsumerBaseV2 {
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            NUM_WORDS,
+            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
         );
         s_requestIdToRequestIndex[requestId] = id;
     }
@@ -257,23 +257,16 @@ contract NukeContract is Ownable, VRFConsumerBaseV2 {
     ///@param randomWords is the randomly generate number for the calculation of a successful nuke strike
     function fulfillRandomWords(
         uint256 requestId,
-        uint256[] memory randomWords
+        uint256[] calldata randomWords
     ) internal override {
-        console.log("request ID from fullfill", requestId);
         uint256 requestNumber = s_requestIdToRequestIndex[requestId];
-        console.log("requestNumber", requestNumber);
         s_requestIndexToRandomWords[requestNumber] = randomWords;
         s_randomWords = randomWords;
         uint256 attackerId = nukeAttackIdToNukeAttack[requestNumber].attackerId;
         uint256 defenderId = nukeAttackIdToNukeAttack[requestNumber].defenderId;
-        console.log("attackerId", attackerId);
-        console.log("defenderId", defenderId);
         uint256 thwartOdds = getThwartOdds(attackerId, defenderId);
-        console.log("thwartOdds", thwartOdds);
         uint256 randomNukeSuccessNumber = ((s_randomWords[0] % 100) + 1);
-        console.log("randomNukeSuccessNumber", randomNukeSuccessNumber);
         if (randomNukeSuccessNumber > thwartOdds) {
-            console.log("Nuke attaq success");
             inflictNukeDamage(requestNumber);
             mis.decreaseNukeCountFromNukeContract(attackerId);
             param.inflictAnarchy(defenderId);
@@ -288,10 +281,7 @@ contract NukeContract is Ownable, VRFConsumerBaseV2 {
             );
             uint256 day = keep.getGameDay();
             nationIdToDayToNukeLanded[defenderId][day] = true;
-            console.log("did this run?", nationIdToDayToNukeLanded[defenderId][day]);
-            console.log(defenderId, day);
         } else {
-            console.log("Nuke attaq thwarted");
             mis.decreaseNukeCountFromNukeContract(attackerId);
             emit NukeAttackEvent(
                 requestNumber,

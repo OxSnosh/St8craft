@@ -8,15 +8,15 @@ import "./Infrastructure.sol";
 import "./Wonders.sol";
 import "./Missiles.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+// import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import "hardhat/console.sol";
 
 ///@title CruiseMissileContract
 ///@author OxSnosh
 ///@notice this contract will allow a nation owner to launch a cruise missile attack against another nation
 ///@dev this contract inherits from OpenZeppelin ownable and Chainlink VRF
-contract CruiseMissileContract is Ownable, VRFConsumerBaseV2 {
+contract CruiseMissileContract is Ownable, VRFConsumerBaseV2Plus {
     uint256 public cruiseMissileAttackId;
     address public forces;
     address public countryMinter;

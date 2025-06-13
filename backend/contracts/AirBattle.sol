@@ -11,14 +11,14 @@ import "./CountryMinter.sol";
 import "./Forces.sol";
 import "./Missiles.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title AirBattleContract
 ///@author OxSnosh
 ///@dev this contract allows you to launch a bombing campaign against another nation
-contract AirBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
+contract AirBattleContract is Ownable, VRFConsumerBaseV2Plus, ReentrancyGuard {
     uint256 airBattleId;
     address warAddress;
     address fighterAddress;
@@ -63,12 +63,12 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
     AdditionalAirBattle addAirBattle;
 
     uint256[] private s_randomWords;
-    VRFCoordinatorV2Interface public i_vrfCoordinator;
-    uint64 private immutable i_subscriptionId;
-    bytes32 private immutable i_gasLane;
-    uint32 private immutable i_callbackGasLimit;
-    uint16 private constant REQUEST_CONFIRMATIONS = 3;
-    uint32 private constant NUM_WORDS = 6;
+    address public i_vrfCoordinator;
+    uint256 public i_subscriptionId;
+    bytes32 public i_gasLane;
+    uint32 public i_callbackGasLimit;
+    uint16 public constant REQUEST_CONFIRMATIONS = 3;
+    uint32 public constant NUM_WORDS = 6;
 
     struct AirBattle {
         uint256 warId;
@@ -101,14 +101,20 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
     ///@dev this is the constructor funtion for the contact
     constructor(
         address vrfCoordinatorV2,
-        uint64 subscriptionId,
+        uint256 subscriptionId,
         bytes32 gasLane,
         uint32 callbackGasLimit
-    ) VRFConsumerBaseV2(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+    ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
+    }
+
+    function updateVRFCoordinator(
+        address vrfCoordinatorV2
+    ) public onlyOwner {
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
     }
 
     ///@dev this function is only callable by the owner
@@ -407,7 +413,8 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            NUM_WORDS,
+            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
         );
         s_requestIdToRequestIndex[requestId] = battleId;
         pendingRequests[battleId] = true;

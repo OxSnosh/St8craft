@@ -14,7 +14,7 @@ import "./tasks/set_religion_and_govt";
 import "./tasks/set_resources";
 import "@gelatonetwork/web3-functions-sdk/hardhat-plugin";
 import "@nomicfoundation/hardhat-ethers";
-import "@nomicfoundation/hardhat-verify"
+import "@nomicfoundation/hardhat-verify";
 
 
 /**
@@ -65,6 +65,9 @@ const config = {
       {
         version: "0.4.11"
       },
+      {
+        version: "0.8.19"
+      }        
     ],
   },
   w3f: {

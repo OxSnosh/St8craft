@@ -1,9 +1,4 @@
 //St8kraft © 2022 by OxSnosh is licensed under Attribution-NonCommercial-NoDerivatives 4.0 International
-// import { network, artifacts } from "hardhat"
-// import { HardhatRuntimeEnvironment } from "hardhat/types";
-// import { DeployFunction } from "hardhat-deploy/types";
-// import { ContractFactory, JsonRpcProvider, parseEther } from "ethers";
-// import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 import { network } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -11,48 +6,39 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { networkConfig } from "../helper-hardhat-config";
 import { VRFCoordinatorV2Mock } from "../typechain-types";
-import { JsonRpcProvider, Wallet } from "ethers";
+import { JsonRpcProvider, Wallet, parseEther, BigNumberish } from 'ethers';
 
 const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployments, getNamedAccounts, ethers } = hre as any;
+
+    console.log("ETHERS", ethers.version);
+
     const { deploy } = deployments;
     let { deployer } = await getNamedAccounts();
     
     let chainId = network.config.chainId
 
-    let subscriptionId    
-    let vrfCoordinatorV2Mock
-    let vrfCoordinatorV2Address 
-    let gasLane
-    let callbackGasLimit   
+    let subscriptionId: BigNumberish | undefined = undefined;
+    let vrfCoordinatorV2Mock;
+    let vrfCoordinatorV2Address;
+    let gasLane;
+    let callbackGasLimit;
 
-    const FUND_AMOUNT = ethers.parseEther("1")
-
+    
     let provider
-
+    
     let signer
-
+    
     if (chainId == 31337) {
-
+      
       const signers = await ethers.getSigners();
-
+      
       const signer1 = signers[1] as unknown as HardhatEthersSigner;
-
+      
       console.log("Signer1 address:", signer1.address);
 
-      // const provider = new JsonRpcProvider("http://127.0.0.1:8545");
-      // deployer = new Wallet(process.env.PRIVATE_KEY!, provider);
-
-      // console.log("Deployer address NOW:", deployer.address);
-
-        // const tx = await deployer.sendTransaction({
-        //   to: deployer,
-        //   value: ethers.parseEther("5.0"), // 5 ETH
-        // });
-    
-        // await tx.wait();
-        // console.log(`✅ Sent 5 ETH from deployer to  (${deployer.address}) on localhost`);
-
+      const FUND_AMOUNT = ethers.parseEther("1")
+        
         const BASE_FEE = "250000000000000000" // 0.25 is this the premium in LINK?
         const GAS_PRICE_LINK = 1e9 // link per gas, is this the gas lane? // 0.000000001 LINK per gas
         // create VRFV2 Subscription
@@ -96,11 +82,11 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         console.log("base_sepolia")
 
     }
+    console.log("Deploying contracts with the account:", deployer);
 
     const INITIAL_SUPPLY_ST8CRAFT = ethers.parseEther("200000000"); 
     const INITIAL_SUPPLY_WARBUCKS = ethers.parseEther("200000000000"); 
 
-    console.log("Deploying contracts with the account:", deployer);
 
         const warBucks = await deploy("WarBucks", {
           from: deployer,
@@ -126,9 +112,13 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         const deployedAidContract = await ethers.getContractAt("AidContract", aidContract.address, signer);
 
         // Deploy AirBattleContract
+        if (subscriptionId === undefined) {
+          throw new Error("subscriptionId is undefined. Please check your network configuration.");
+        }
+        
         const airBattleContract = await deploy("AirBattleContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
         const deployedAirBattleContract = await ethers.getContractAt("AirBattleContract", airBattleContract.address, signer);
@@ -177,7 +167,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       
         const countryParametersContract = await deploy("CountryParametersContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
         const deployedCountryParametersContract = await ethers.getContractAt("CountryParametersContract", countryParametersContract.address, signer);
@@ -198,7 +188,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       
         const cruiseMissileContract = await deploy("CruiseMissileContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
         const deployedCruiseMissileContract = await ethers.getContractAt("CruiseMissileContract", cruiseMissileContract.address, signer);
@@ -261,7 +251,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       
         const groundBattleContract = await deploy("GroundBattleContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
         const deployedGroundBattleContract = await ethers.getContractAt("GroundBattleContract", groundBattleContract.address, signer);
@@ -366,35 +356,35 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       
         const navalBlockadeContract = await deploy("NavalBlockadeContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
         const deployedNavalBlockadeContract = await ethers.getContractAt("NavalBlockadeContract", navalBlockadeContract.address, signer);
       
         const breakBlocadeContract = await deploy("BreakBlocadeContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
         const deployedBreakBlocadeContract = await ethers.getContractAt("BreakBlocadeContract", breakBlocadeContract.address, signer);
       
         const navalAttackContract = await deploy("NavalAttackContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
         const deployedNavalAttackContract = await ethers.getContractAt("NavalAttackContract", navalAttackContract.address, signer);
       
         const nukeContract = await deploy("NukeContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
         const deployedNukeContract = await ethers.getContractAt("NukeContract", nukeContract.address, signer);
       
         const resourcesContract = await deploy("ResourcesContract", {
           from: deployer,
-          args: [vrfCoordinatorV2Address, BigInt(subscriptionId), gasLane, callbackGasLimit],
+          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
         const deployedResourcesContract = await ethers.getContractAt("ResourcesContract", resourcesContract.address, signer);

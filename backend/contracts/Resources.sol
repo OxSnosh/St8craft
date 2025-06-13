@@ -8,8 +8,8 @@ import "./CountryParameters.sol";
 import "./Senate.sol";
 import "./Crime.sol";
 import "hardhat/console.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 ///@title ResourcesContract
@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 ///@notice this contract will keep track of a nations resources and trades
 ///@dev this contract inherits from chainlink VRF
 ///@dev this contract inherits from oepnzeppelin ownable
-contract ResourcesContract is VRFConsumerBaseV2, Ownable {
+contract ResourcesContract is VRFConsumerBaseV2Plus {
     uint256[] private s_randomWords;
     address public infrastructure;
     address public improvements2;
@@ -31,8 +31,8 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     SenateContract sen;
 
     //Chainlik Variables
-    VRFCoordinatorV2Interface public i_vrfCoordinator;
-    uint64 public i_subscriptionId;
+    VRFConsumerBaseV2Plus public i_vrfCoordinator;
+    uint256 public i_subscriptionId;
     bytes32 public i_gasLane;
     uint32 public i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
@@ -182,11 +182,11 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     ///@dev constructor function will accept variables for chainlink randomness
     constructor(
         address vrfCoordinatorV2,
-        uint64 subscriptionId,
+        uint256 subscriptionId,
         bytes32 gasLane,
         uint32 callbackGasLimit
-    ) VRFConsumerBaseV2(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+    ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -195,7 +195,7 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     function updateVRFCoordinator(
         address vrfCoordinatorV2
     ) public onlyOwner {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
     }
 
     ///@dev this function is only callable by the contract owner
@@ -265,11 +265,15 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     ///@dev this is an internal function that can only be called from within this contract
     function fulfillRequest(uint256 id) internal {
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_gasLane,
-            i_subscriptionId,
-            REQUEST_CONFIRMATIONS,
-            i_callbackGasLimit,
-            NUM_WORDS
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: i_keyHash,
+                subId: i_subscriptionId,
+                requestConfirmations: requestConfirmations,
+                callbackGasLimit: callbackGasLimit,
+                numWords: numWords,
+                // Set nativePayment to true to pay for VRF requests with Sepolia ETH instead of LINK
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
+            })
         );
         s_requestIdToRequestIndex[requestId] = id;
     }
@@ -280,7 +284,7 @@ contract ResourcesContract is VRFConsumerBaseV2, Ownable {
     ///@dev this function will assign a nation 2 random resources and assure that they are 2 different resources
     function fulfillRandomWords(
         uint256 requestId,
-        uint256[] memory randomWords
+        uint256[] calldata randomWords
     ) internal override {
         uint256 requestNumber = s_requestIdToRequestIndex[requestId];
         s_requestIndexToRandomWords[requestNumber] = randomWords;

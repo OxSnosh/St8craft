@@ -6,16 +6,15 @@ import "./Navy.sol";
 import "./War.sol";
 import "./Improvements.sol";
 import "./KeeperFile.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title NavalBlocadeContract
 ///@author OxSnosh
 ///@dev this contract inherits from the openzeppelin ownable contract
 ///@dev this contract inherits from the chainlink VRF contract
-contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
+contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     uint256 public blockadeId;
     address public navy;
     address public additionalNavy;
@@ -28,8 +27,8 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    VRFCoordinatorV2Interface public i_vrfCoordinator;
-    uint64 private immutable i_subscriptionId;
+    VRFConsumerBaseV2Plus public i_vrfCoordinator;
+    uint256 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
@@ -65,11 +64,11 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 
     constructor(
         address vrfCoordinatorV2,
-        uint64 subscriptionId,
-        bytes32 gasLane, // keyHash
+        uint256 subscriptionId,
+        bytes32 gasLane,
         uint32 callbackGasLimit
-    ) VRFConsumerBaseV2(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+    ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -78,7 +77,7 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
     function updateVRFCoordinator(
         address vrfCoordinatorV2
     ) public onlyOwner {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
     }
 
     function settings(
@@ -230,7 +229,8 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            NUM_WORDS,
+            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
         );
 
         s_requestIdToRequestIndex[requestId] = battleId;
@@ -247,7 +247,8 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            NUM_WORDS,
+            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
         );
         s_requestIdToRequestIndex[requestId] = battleId;
         pendingRequests[battleId] = true;
@@ -257,7 +258,7 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 
     function fulfillRandomWords(
         uint256 requestId,
-        uint256[] memory randomWords
+        uint256[] calldata randomWords
     ) internal override {
         require(
             pendingRequests[s_requestIdToRequestIndex[requestId]],
@@ -420,7 +421,7 @@ contract NavalBlockadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 ///@author OxSnosh
 ///@dev this contract inherits from the openzeppelin ownable contract
 ///@dev this contract inherits from the chainlink VRF contract
-contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
+contract BreakBlocadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     uint256 public breakBlockadeId;
     address public countryMinter;
     address public navalBlockade;
@@ -444,8 +445,8 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    VRFCoordinatorV2Interface public i_vrfCoordinator;
-    uint64 private immutable i_subscriptionId;
+    VRFConsumerBaseV2Plus public i_vrfCoordinator;
+    uint256 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
@@ -498,8 +499,8 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
         uint64 subscriptionId,
         bytes32 gasLane, // keyHash
         uint32 callbackGasLimit
-    ) VRFConsumerBaseV2(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+    ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -508,7 +509,7 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
     function updateVRFCoordinator(
         address vrfCoordinatorV2
     ) public onlyOwner {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
     }
 
     function settings(
@@ -789,7 +790,8 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            NUM_WORDS,
+            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
         );
 
         s_requestIdToRequestIndex[requestId] = battleId;
@@ -806,7 +808,8 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            NUM_WORDS,
+            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
         );
         s_requestIdToRequestIndex[requestId] = battleId;
         pendingRequests[battleId] = true;
@@ -826,7 +829,7 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 
     function fulfillRandomWords(
         uint256 requestId,
-        uint256[] memory randomWords
+        uint256[] calldata randomWords
     ) internal override {
         require(
             pendingRequests[s_requestIdToRequestIndex[requestId]],
@@ -939,7 +942,7 @@ contract BreakBlocadeContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 ///@author OxSnosh
 ///@dev this contract inherits from the openzeppelin ownable contract
 ///@dev this contract inherits from the chainlink VRF contract
-contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
+contract NavalAttackContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     address public navy;
     uint256 public navyBattleId;
     address public navyBlockade;
@@ -969,8 +972,8 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 
     //Chainlik Variables
     // uint256[] private s_randomWords;
-    VRFCoordinatorV2Interface public i_vrfCoordinator;
-    uint64 private immutable i_subscriptionId;
+    VRFConsumerBaseV2Plus public i_vrfCoordinator;
+    uint256 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
@@ -1014,11 +1017,11 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 
     constructor(
         address vrfCoordinatorV2,
-        uint64 subscriptionId,
+        uint256 subscriptionId,
         bytes32 gasLane, // keyHash
         uint32 callbackGasLimit
-    ) VRFConsumerBaseV2(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+    ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -1027,7 +1030,7 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
     function updateVRFCoordinator(
         address vrfCoordinatorV2
     ) public onlyOwner {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
     }
 
     function settings(
@@ -1399,7 +1402,8 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            NUM_WORDS,
+            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
         );
 
         s_requestIdToRequestIndex[requestId] = battleId;
@@ -1416,7 +1420,8 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
-            NUM_WORDS
+            NUM_WORDS,
+            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
         );
         s_requestIdToRequestIndex[requestId] = battleId;
         pendingRequests[battleId] = true;
@@ -1437,7 +1442,7 @@ contract NavalAttackContract is Ownable, VRFConsumerBaseV2, ReentrancyGuard {
 
     function fulfillRandomWords(
         uint256 requestId,
-        uint256[] memory randomWords
+        uint256[] calldata randomWords
     ) internal override {
         require(
             pendingRequests[s_requestIdToRequestIndex[requestId]],
