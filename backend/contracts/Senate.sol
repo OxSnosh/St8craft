@@ -218,19 +218,19 @@ contract SenateContract is Ownable {
     function checkUpkeep() external view returns (bool upkeepNeeded) {
         uint256 gameDay = keep.getGameDay();
         upkeepNeeded = (gameDay - dayOfLastElection) > interval;
-        return (upkeepNeeded);
+        return upkeepNeeded;
     }
 
     function performUpkeep() external {
-        require(this.checkUpkeep(), "Upkeep not needed");
         uint256 gameDay = keep.getGameDay();
-        if ((gameDay - dayOfLastElection) > interval) {
-            for (uint256 i = 0; i <= 8; i++) {
-                runElections(i, epoch);
-            }
-            epoch++;
-            dayOfLastElection = gameDay;
+        require((gameDay - dayOfLastElection) > interval, "Upkeep not needed");
+
+        for (uint256 i = 0; i <= 8; i++) {
+            runElections(i, epoch);
         }
+
+        epoch++;
+        dayOfLastElection = gameDay;
     }
 
     uint256 orderId;

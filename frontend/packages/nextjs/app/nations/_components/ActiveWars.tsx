@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { usePublicClient, useAccount, useWriteContract } from 'wagmi';
 import { ethers } from "ethers";
+import { Web3Provider } from "@ethersproject/providers";
 import { AbiCoder } from "ethers/lib/utils";
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
 import { nationActiveWars, returnWarDetails, offerPeace, deployForcesToWar, recallTroopsFromDeactivatedWars } from "~~/utils/wars";
@@ -219,7 +220,6 @@ const ActiveWars = () => {
                 return;
             }
 
-            try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 const signer = provider.getSigner();

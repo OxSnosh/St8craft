@@ -15,7 +15,7 @@ contract KeeperContract is Ownable {
     event GameDayIncremented(uint256 indexed gameDay);
 
     constructor() {
-        interval = 12 hours;
+        interval = 30 seconds;
         lastTimeStamp = block.timestamp;
         gameDay = 0;
     }
@@ -26,7 +26,7 @@ contract KeeperContract is Ownable {
     }
 
     function performUpkeep() external {
-        require(this.checkUpkeep(), "Upkeep not needed");
+        require((block.timestamp - lastTimeStamp) >= interval, "Upkeep not needed");
         lastTimeStamp = lastTimeStamp + interval;
         gameDay++;
         emit GameDayIncremented(gameDay);

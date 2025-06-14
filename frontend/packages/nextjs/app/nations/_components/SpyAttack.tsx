@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { usePublicClient, useAccount, useWriteContract } from 'wagmi';
-import { ethers } from "ethers";
+import { ethers, hashMessage } from "ethers";
+import { Web3Provider } from "@ethersproject/providers";
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
 import { relaySpyOperation } from "~~/utils/spy_attack_relayer"; // <- You need to make sure you have a spyAttacks.ts helper calling your relaySpyOperation function properly.
 import { CountryMinter } from '../../../../../../backend/typechain-types/contracts/CountryMinter';
@@ -43,13 +44,13 @@ const SpyAttackCard = () => {
         }
     
         try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const provider = new Web3Provider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             const signer = provider.getSigner();
     
             const message = "Spy Operation Authorization";
             const signature = await signer.signMessage(message);
-            const messageHash = ethers.utils.hashMessage(message);
+            const messageHash = hashMessage(message);
     
             const payload = {
                 signature,
