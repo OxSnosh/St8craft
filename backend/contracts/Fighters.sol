@@ -91,7 +91,7 @@ contract FightersContract is Ownable {
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         improvements1 = _improvements1;
         imp1 = ImprovementsContract1(_improvements1);
         fightersMarket1 = _fightersMarket1;
@@ -712,7 +712,7 @@ contract FightersMarketplace1 is Ownable, ReentrancyGuard {
         bombers = _bombers;
         bomb = BombersContract(_bombers);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         improvements1 = _improvements1;
         imp1 = ImprovementsContract1(_improvements1);
         wonders1 = _wonders1;
@@ -1131,7 +1131,7 @@ contract FightersMarketplace2 is Ownable, ReentrancyGuard {
         bombers = _bombers;
         bomb = BombersContract(_bombers);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         improvements1 = _improvements1;
         imp1 = ImprovementsContract1(_improvements1);
         treasury = _treasury;

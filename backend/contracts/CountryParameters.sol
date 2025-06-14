@@ -538,6 +538,9 @@ contract CountryParametersContract is
         uint256 daysSinceReligionChange = gameDay - dayReligionChanged;
         return (daysSinceGovChange, daysSinceReligionChange);
     }
+
+    // Allows the contract to accept plain ETH transfers
+    receive() external payable {}
 }
 
 /// @title AllianceManager

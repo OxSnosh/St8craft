@@ -294,7 +294,7 @@ contract NavyContract is Ownable, ReentrancyGuard {
         improvements4 = _improvements4;
         imp4 = ImprovementsContract4(_improvements4);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         military = _military;
         mil = MilitaryContract(_military);
         nukes = _nukes;
@@ -863,7 +863,7 @@ contract NavyContract2 is Ownable, ReentrancyGuard {
         improvements4 = _improvements4;
         imp4 = ImprovementsContract4(_improvements4);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         military = _military;
         mil = MilitaryContract(_military);
         nukes = _nukes;

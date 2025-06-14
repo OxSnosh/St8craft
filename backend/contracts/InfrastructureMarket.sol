@@ -60,9 +60,9 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
         address _bonusResources
     ) public onlyOwner {
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         parameters = _parameters;
-        param = CountryParametersContract(_parameters);
+        param = CountryParametersContract(payable(_parameters));
         improvements1 = _improvements1;
         imp1 = ImprovementsContract1(_improvements1);
         countryMinter = _countryMinter;

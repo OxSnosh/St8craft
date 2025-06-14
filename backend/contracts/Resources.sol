@@ -20,11 +20,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 ///@dev this contract inherits from oepnzeppelin ownable
 contract ResourcesContract is VRFConsumerBaseV2Plus {
     uint256[] private s_randomWords;
-    address public infrastructure;
-    address public improvements2;
-    address public countryMinter;
-    address public senate;
-    address public techMkt;
+    address private infrastructure;
+    address private improvements2;
+    address private countryMinter;
+    address private senate;
+    address private techMkt;
 
     CountryMinter mint;
     BonusResourcesContract bonus;
@@ -33,9 +33,9 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
 
     //Chainlik Variables
     // VRFConsumerBaseV2Plus public i_vrfCoordinator;
-    uint256 public i_subscriptionId;
-    bytes32 public i_gasLane;
-    uint32 public i_callbackGasLimit;
+    uint256 private immutable i_subscriptionId;
+    bytes32 private immutable i_gasLane;
+    uint32 private immutable i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
     uint32 private constant NUM_WORDS = 2;
 
@@ -212,7 +212,7 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
         senate = _senate;
         sen = SenateContract(_senate);
         techMkt = _technologyMarket;
-        params = CountryParametersContract(_parameters);
+        params = CountryParametersContract(payable(_parameters));
     }
 
     ///@dev this is a public function that is only callable from the country minter contract when a nation is minted
@@ -296,17 +296,17 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
         setResources(requestNumber);
     }
 
-    ///@dev this is a function that is callable only from the owner of the contract
-    ///@dev this function was used in testing of the smart contract and should be deleted before deployment
-    function mockResourcesForTesting(
-        uint256 countryId,
-        uint256 resource1,
-        uint256 resource2
-    ) public onlyOwner {
-        uint256[2] memory playerResources = [resource1, resource2];
-        idToPlayerResources[countryId] = playerResources;
-        setResources(countryId);
-    }
+    // ///@dev this is a function that is callable only from the owner of the contract
+    // ///@dev this function was used in testing of the smart contract and should be deleted before deployment
+    // function mockResourcesForTesting(
+    //     uint256 countryId,
+    //     uint256 resource1,
+    //     uint256 resource2
+    // ) public onlyOwner {
+    //     uint256[2] memory playerResources = [resource1, resource2];
+    //     idToPlayerResources[countryId] = playerResources;
+    //     setResources(countryId);
+    // }
 
     ///@dev this function is an internal function that will be called when a nation is minted or adds or removes a trading partner
     ///@dev this will set the nations assigned resources to true and call the next funtion that will set all the resources of its trading partners to true
@@ -889,6 +889,10 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
     function triggerForResources(uint256 id) external onlyTechMarket {
         setResources(id);
     }
+
+    // Allows the contract to accept plain ETH transfers
+    receive() external payable {}
+
 }
 
 ///@title BonusResourcesContract
@@ -990,7 +994,7 @@ contract BonusResourcesContract is Ownable {
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         crime = _crime;
         crim = CrimeContract(_crime);
     }

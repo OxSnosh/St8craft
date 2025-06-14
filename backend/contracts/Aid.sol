@@ -56,7 +56,7 @@ contract AidContract is Ownable, ReentrancyGuard {
         senate = _senate;
         sen = SenateContract(_senate);
         countryParameters = _countryParameters;
-        param = CountryParametersContract(_countryParameters);
+        param = CountryParametersContract(payable(_countryParameters));
     }
 
     struct Proposal {

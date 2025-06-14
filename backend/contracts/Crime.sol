@@ -50,7 +50,7 @@ contract CrimeContract is Ownable {
         parameters = _parameters;
         improvements4 = _improvements4;
         imp4 = ImprovementsContract4(_improvements4);
-        cp = CountryParametersContract(_parameters);
+        cp = CountryParametersContract(payable(_parameters));
         wonders2 = _wonders2;
         won2 = WondersContract2(_wonders2);
     }

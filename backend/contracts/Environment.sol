@@ -65,7 +65,7 @@ contract EnvironmentContract is Ownable {
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         infrastructure = _infrastructure;
         inf = InfrastructureContract(_infrastructure);
         wonders3 = _wonders3;
@@ -75,7 +75,7 @@ contract EnvironmentContract is Ownable {
         forces = _forces;
         force = ForcesContract(_forces);
         parameters = _parameters;
-        param = CountryParametersContract(_parameters);
+        param = CountryParametersContract(payable(_parameters));
         additionalTaxes = _additionalTaxes;
         addTax = AdditionalTaxesContract(_additionalTaxes);
         missiles = _missiles;

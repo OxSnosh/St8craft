@@ -158,7 +158,7 @@ contract CountryMinter is ERC721, Ownable, ReentrancyGuard {
         ownerCountryCount[msg.sender]++;
         ownerCountryIds[msg.sender].push(countryId);
         BombersContract(bombers).generateBombers(countryId);
-        CountryParametersContract(countryParameters).generateCountryParameters(
+        CountryParametersContract(payable(countryParameters)).generateCountryParameters(
             countryId,
             ruler,
             nationName,
@@ -179,7 +179,7 @@ contract CountryMinter is ERC721, Ownable, ReentrancyGuard {
         NavalActionsContract(navalActions).generateNavalActions(countryId);
         NavyContract(navy).generateNavy(countryId);
         NavyContract2(navy2).generateNavy2(countryId);
-        ResourcesContract(resources).generateResources(countryId);
+        ResourcesContract(payable(resources)).generateResources(countryId);
         BonusResourcesContract(bonusResources).generateBonusResources(
             countryId
         );

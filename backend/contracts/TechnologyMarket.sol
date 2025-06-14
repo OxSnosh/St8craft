@@ -61,7 +61,7 @@ contract TechnologyMarketContract is Ownable, ReentrancyGuard {
         address _crime
     ) public onlyOwner {
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         improvements3 = _improvements3;
         imp3 = ImprovementsContract3(_improvements3);
         infrastructure = _infrastructure;

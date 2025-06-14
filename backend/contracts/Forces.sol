@@ -129,7 +129,7 @@ contract ForcesContract is Ownable, ReentrancyGuard {
         infrastructure = _infrastructure;
         inf = InfrastructureContract(_infrastructure);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         wonders1 = _wonders1;
         won1 = WondersContract1(_wonders1);
         improvements1 = _improvements1;
@@ -140,7 +140,7 @@ contract ForcesContract is Ownable, ReentrancyGuard {
         mint = CountryMinter(_countryMinter);
         keeper = _keeper;
         parameters = _parameters;
-        params = CountryParametersContract(_parameters);
+        params = CountryParametersContract(payable(_parameters));
     }
 
     mapping(uint256 => Forces) public idToForces;

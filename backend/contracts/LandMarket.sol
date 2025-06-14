@@ -40,7 +40,7 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
         address _treasury
     ) public onlyOwner {
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
         infrastructure = _infrastructure;

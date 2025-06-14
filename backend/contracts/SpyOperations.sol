@@ -87,7 +87,7 @@ contract SpyOperationsContract is Ownable {
         treasury = _treasury;
         tsy = TreasuryContract(_treasury);
         parameters = _parameters;
-        params = CountryParametersContract(_parameters);
+        params = CountryParametersContract(payable(_parameters));
         missiles = _missiles;
         mis = MissilesContract(_missiles);
         countryMinter = _countryMinter;

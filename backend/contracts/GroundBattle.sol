@@ -152,7 +152,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         additionalTaxes = _additionalTaxes;
         addTax = AdditionalTaxesContract(_additionalTaxes);
         parameters = _parameters;
-        param = CountryParametersContract(_parameters);
+        param = CountryParametersContract(payable(_parameters));
     }
 
     function updateWarContract(address newAddress) public onlyOwner {

@@ -777,7 +777,7 @@ contract WondersContract2 is Ownable, ReentrancyGuard {
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
     }
 
     modifier onlyCountryMinter() {
@@ -1341,7 +1341,7 @@ contract WondersContract3 is Ownable, ReentrancyGuard {
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
     }
 
     modifier onlyCountryMinter() {

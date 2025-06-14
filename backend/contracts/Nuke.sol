@@ -148,7 +148,7 @@ contract NukeContract is VRFConsumerBaseV2Plus {
 
     function settings2(address _parameters) public onlyOwner {
         parameters = _parameters;
-        param = CountryParametersContract(_parameters);
+        param = CountryParametersContract(payable(_parameters));
     }
 
     ///@dev this is a public function callable only by the attacking nation owner

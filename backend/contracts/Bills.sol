@@ -96,7 +96,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
         navy = _navy;
         nav = NavyContract(_navy);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
     }
 
     ///@dev this function is only callable from the contact owner
@@ -127,7 +127,7 @@ contract BillsContract is Ownable, ReentrancyGuard {
         navy2 = _navy2;
         nav2 = NavyContract2(_navy2);
         parameters = _parameters;
-        param = CountryParametersContract(_parameters);
+        param = CountryParametersContract(payable(_parameters));
         blockade = _blockade;
         bloc = NavalBlockadeContract(_blockade);
     }

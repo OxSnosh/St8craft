@@ -107,7 +107,7 @@ contract MissilesContract is Ownable, ReentrancyGuard {
         address _keeper
     ) public onlyOwner {
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         wonders1 = _wonders1;
         won1 = WondersContract1(_wonders1);
         wonders4 = _wonders4;

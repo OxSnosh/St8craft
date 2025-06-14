@@ -123,7 +123,7 @@ contract TaxesContract is Ownable, ReentrancyGuard {
         address _blockade
     ) public onlyOwner {
         parameters = _parameters;
-        params = CountryParametersContract(_parameters);
+        params = CountryParametersContract(payable(_parameters));
         wonders1 = _wonders1;
         won1 = WondersContract1(_wonders1);
         wonders2 = _wonders2;
@@ -133,7 +133,7 @@ contract TaxesContract is Ownable, ReentrancyGuard {
         wonders4 = _wonders4;
         won4 = WondersContract4(_wonders4);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         forces = _forces;
         frc = ForcesContract(_forces);
         military = _military;
@@ -682,7 +682,7 @@ contract AdditionalTaxesContract is Ownable {
         address _bonusResources
     ) public onlyOwner {
         parameters = _parameters;
-        params = CountryParametersContract(_parameters);
+        params = CountryParametersContract(payable(_parameters));
         wonders1 = _wonders1;
         won1 = WondersContract1(_wonders1);
         wonders2 = _wonders2;
@@ -692,7 +692,7 @@ contract AdditionalTaxesContract is Ownable {
         wonders4 = _wonders4;
         won4 = WondersContract4(_wonders4);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
         military = _military;
         mil = MilitaryContract(_military);
         infrastructure = _infrastructure;

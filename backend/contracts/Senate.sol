@@ -89,7 +89,7 @@ contract SenateContract is Ownable {
         keeper = _keeper;
         keep = KeeperContract(_keeper);
         resources = _resources;
-        res = ResourcesContract(_resources);
+        res = ResourcesContract(payable(_resources));
     }
 
     modifier onlyCountryMinter() {
@@ -117,7 +117,7 @@ contract SenateContract is Ownable {
         address newAddress
     ) public onlyOwner {
         parameters = newAddress;
-        params = CountryParametersContract(newAddress);
+        params = CountryParametersContract(payable(newAddress));
     }
 
     ///@dev this function is only callable by the country minter contract when a nation is minted
