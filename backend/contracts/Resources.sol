@@ -781,10 +781,6 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
         marble = idToResources1[id].marble;
     }
 
-    //(bool aluminium, bool cattle, bool coal, bool fish, bool furs, bool gems, bool gold, bool iron, bool lead, bool lumber, bool marble) = res.getResources1(id);
-
-    //(bool oil, bool pigs, bool rubber, bool silver, bool spices, bool sugar, bool uranium, bool water, bool wheat, bool wine) = res.getResources2(id);
-
     function getResources2(uint256 id) public view returns (
         bool oil,
         bool pigs,
@@ -809,194 +805,6 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
         wine = idToResources2[id].wine;
     }
 
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the aluminium resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the aluminium resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the aluminium resource
-    // function viewAluminium(uint256 id) public view returns (bool) {
-    //     bool isAluminium = idToResources1[id].aluminium;
-    //     return isAluminium;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the cattle resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the cattle resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the cattle resource
-    // function viewCattle(uint256 id) public view returns (bool) {
-    //     bool isCattle = idToResources1[id].cattle;
-    //     return isCattle;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the coal resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the coal resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the coal resource
-    // function viewCoal(uint256 id) public view returns (bool) {
-    //     bool isCoal = idToResources1[id].coal;
-    //     return isCoal;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the fish resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the fish resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the fish resource
-    // function viewFish(uint256 id) public view returns (bool) {
-    //     bool isFish = idToResources1[id].fish;
-    //     return isFish;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the furs resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the furs resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the furs resource
-    // function viewFurs(uint256 id) public view returns (bool) {
-    //     bool isFurs = idToResources1[id].furs;
-    //     return isFurs;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the gems resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the gems resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the gems resource
-    // function viewGems(uint256 id) public view returns (bool) {
-    //     bool isGems = idToResources1[id].gems;
-    //     return isGems;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the gold resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the gold resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the gold resource
-    // function viewGold(uint256 id) public view returns (bool) {
-    //     bool isGold = idToResources1[id].gold;
-    //     return isGold;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the iron resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the iron resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the iron resource
-    // function viewIron(uint256 id) public view returns (bool) {
-    //     bool isIron = idToResources1[id].iron;
-    //     return isIron;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the lead resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the lead resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the lead resource
-    // function viewLead(uint256 id) public view returns (bool) {
-    //     bool isLead = idToResources1[id].lead;
-    //     return isLead;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the lumber resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the lumber resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the lumber resource
-    // function viewLumber(uint256 id) public view returns (bool) {
-    //     bool isLumber = idToResources1[id].lumber;
-    //     return isLumber;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the marble resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the marble resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the marble resource
-    // function viewMarble(uint256 id) public view returns (bool) {
-    //     bool isMarble = idToResources1[id].marble;
-    //     return isMarble;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the oil resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the oil resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the oil resource
-    // function viewOil(uint256 id) public view returns (bool) {
-    //     bool isOil = idToResources2[id].oil;
-    //     return isOil;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the pigs resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the pigs resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the pigs resource
-    // function viewPigs(uint256 id) public view returns (bool) {
-    //     bool isPigs = idToResources2[id].pigs;
-    //     return isPigs;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the rubber resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the rubber resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the rubber resource
-    // function viewRubber(uint256 id) public view returns (bool) {
-    //     bool isRubber = idToResources2[id].rubber;
-    //     return isRubber;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the silver resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the silver resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the silver resource
-    // function viewSilver(uint256 id) public view returns (bool) {
-    //     bool isSilver = idToResources2[id].silver;
-    //     return isSilver;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the spices resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the spices resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the spices resource
-    // function viewSpices(uint256 id) public view returns (bool) {
-    //     bool isSpices = idToResources2[id].spices;
-    //     return isSpices;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the sugar resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the sugar resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the sugar resource
-    // function viewSugar(uint256 id) public view returns (bool) {
-    //     bool isSugar = idToResources2[id].sugar;
-    //     return isSugar;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the uranium resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the uranium resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the uranium resource
-    // function viewUranium(uint256 id) public view returns (bool) {
-    //     bool isUranium = idToResources2[id].uranium;
-    //     return isUranium;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the water resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the water resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the water resource
-    // function viewWater(uint256 id) public view returns (bool) {
-    //     bool isWater = idToResources2[id].water;
-    //     return isWater;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the wheat resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the wheat resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the wheat resource
-    // function viewWheat(uint256 id) public view returns (bool) {
-    //     bool isWheat = idToResources2[id].wheat;
-    //     return isWheat;
-    // }
-
-    // ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the wine resource
-    // ///@notice this function will return a boolean value of true if a nation has access to the wine resource
-    // ///@param id is the nation id of the nation being queried
-    // ///@return bool this value will be true if the nation has the wine resource
-    // function viewWine(uint256 id) public view returns (bool) {
-    //     bool isWine = idToResources2[id].wine;
-    //     return isWine;
-    // }
 
     ///@dev this is a public view function that will return an array of a natons 2 resources
     ///@notice this function will return an array of a nations 2 selected resources
@@ -1284,7 +1092,6 @@ contract BonusResourcesContract is Ownable {
         if (techAmount >= 10 && microchips) {
             idToBonusResources[id].microchips = true;
         }
-        //radiation cleanup (Construction, Microchips, Steel and Technology > 15)
         bool radiationCleanup = checkRadiationCleanup(id);
         if (techAmount >= 10 && radiationCleanup) {
             idToBonusResources[id].radiationCleanup = true;
@@ -1294,10 +1101,6 @@ contract BonusResourcesContract is Ownable {
     function checkBeer(uint256 id) public view returns (bool) {
         (bool aluminium, , , , , , , , , bool lumber,) = res.getResources1(id);
         (, , , , , , , bool water, bool wheat, ) = res.getResources2(id);
-        // bool aluminium = res.viewAluminium(id);
-        // bool lumber = res.viewLumber(id);
-        // bool water = res.viewWater(id);
-        // bool wheat = res.viewWheat(id);
         if (aluminium && lumber && water && wheat) {
             return true;
         } else {
@@ -1307,8 +1110,6 @@ contract BonusResourcesContract is Ownable {
 
     function checkSteel(uint256 id) public view returns (bool) {
         (, , bool coal, , , , , bool iron, , , ) = res.getResources1(id);
-        // bool iron = res.viewIron(id);
-        // bool coal = res.viewCoal(id);
         if (iron && coal) {
             return true;
         } else {
@@ -1318,10 +1119,6 @@ contract BonusResourcesContract is Ownable {
 
     function checkConstruction(uint256 id) public view returns (bool) {
         (bool aluminium, , , , , , , bool iron, , bool lumber, bool marble) = res.getResources1(id);
-        // bool aluminium = res.viewAluminium(id);
-        // bool iron = res.viewIron(id);
-        // bool lumber = res.viewLumber(id);
-        // bool marble = res.viewMarble(id);
         if (aluminium && iron && lumber && marble) {
             return true;
         } else {
@@ -1332,10 +1129,6 @@ contract BonusResourcesContract is Ownable {
     function checkFastFood(uint256 id) public view returns (bool) {
         (, bool cattle, , , , , , , , , ) = res.getResources1(id);
         (, bool pigs, , , bool spices, bool sugar, , , , ) = res.getResources2(id);
-        // bool cattle = res.viewCattle(id);
-        // bool sugar = res.viewSugar(id);
-        // bool spices = res.viewSpices(id);
-        // bool pigs = res.viewPigs(id);
         if (cattle && sugar && spices && pigs) {
             return true;
         } else {
@@ -1346,10 +1139,6 @@ contract BonusResourcesContract is Ownable {
     function checkFineJewelry(uint256 id) public view returns (bool) {
         (, , bool coal, , , bool gems, bool gold, , , , ) = res.getResources1(id);
         (, , , bool silver, , , , , , ) = res.getResources2(id);
-        // bool gold = res.viewGold(id);
-        // bool silver = res.viewSilver(id);
-        // bool gems = res.viewGems(id);
-        // bool coal = res.viewCoal(id);
         if (gold && silver && gems && coal) {
             return true;
         } else {
@@ -1359,8 +1148,6 @@ contract BonusResourcesContract is Ownable {
 
     function checkScholars(uint256 id) public view returns (bool) {
         (, , , , , , , , bool lead, bool lumber,) = res.getResources1(id);
-        // bool lumber = res.viewLumber(id);
-        // bool lead = res.viewLead(id);
         uint256 literacyPercentage = crim.getLiteracy(id);
         if (lumber && lead && literacyPercentage >= 90) {
             return true;
@@ -1372,8 +1159,6 @@ contract BonusResourcesContract is Ownable {
     function checkAsphalt(uint256 id) public view returns (bool) {
         bool construction = idToBonusResources[id].construction;
         (bool oil, , bool rubber, , , , , , , ) = res.getResources2(id);
-        // bool oil = res.viewOil(id);
-        // bool rubber = res.viewRubber(id);
         if (construction && oil && rubber) {
             return true;
         } else {
@@ -1395,9 +1180,6 @@ contract BonusResourcesContract is Ownable {
         bool fineJewelry = idToBonusResources[id].fineJewelry;
         (, , , bool fish, bool furs, , , , , , ) = res.getResources1(id);
         (, , , , , , , , , bool wine) = res.getResources2(id);
-        // bool fish = res.viewFish(id);
-        // bool furs = res.viewFurs(id);
-        // bool wine = res.viewWine(id);
         if (fineJewelry && fish && furs && wine) {
             return true;
         } else {
@@ -1408,9 +1190,6 @@ contract BonusResourcesContract is Ownable {
     function checkMicrochips(uint256 id) public view returns (bool) {
         (, , , , , , bool gold, , bool lead, , ) = res.getResources1(id);
         (bool oil, , , , , , , , , ) = res.getResources2(id);
-        // bool gold = res.viewGold(id);
-        // bool lead = res.viewLead(id);
-        // bool oil = res.viewOil(id);
         if (gold && lead && oil) {
             return true;
         } else {

@@ -137,15 +137,12 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
         uint256 multiplier = 100;
         (, bool cattle, , bool fish, , , , , , , ) = res.getResources1(id);
         (, , bool rubber, , , , , , , ) = res.getResources2(id);
-        // bool cattle = res.viewCattle(id);
         if (cattle) {
             multiplier -= 10;
         }
-        // bool fish = res.viewFish(id);
         if (fish) {
             multiplier -= 5;
         }
-        // bool rubber = res.viewRubber(id);
         if (rubber) {
             multiplier -= 10;
         }

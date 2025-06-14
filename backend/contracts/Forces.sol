@@ -248,12 +248,9 @@ contract ForcesContract is Ownable, ReentrancyGuard {
         uint256 soldierCost = 12;
         (, , , , , , , bool iron, , , ) = res.getResources1(id);
         (bool oil, , , , , , , , , ) = res.getResources2(id);
-
-        // bool iron = res.viewIron(id);
         if (iron) {
             soldierCost -= 3;
         }
-        // bool oil = res.viewOil(id);
         if (oil) {
             soldierCost -= 3;
         }
@@ -432,19 +429,15 @@ contract ForcesContract is Ownable, ReentrancyGuard {
         uint256 efficiencyModifier = 100;
         (bool aluminium, , bool coal, , , , , , , , ) = res.getResources1(id);
         (bool oil, bool pigs, , , , , , , , ) = res.getResources2(id);
-        // bool aluminum = res.viewAluminium(id);
         if (aluminium) {
             efficiencyModifier += 20;
         }
-        // bool coal = res.viewCoal(id);
         if (coal) {
             efficiencyModifier += 8;
         }
-        // bool oil = res.viewOil(id);
         if (oil) {
             efficiencyModifier += 10;
         }
-        // bool pigs = res.viewPigs(id);
         if (pigs) {
             efficiencyModifier += 15;
         }
@@ -480,19 +473,15 @@ contract ForcesContract is Ownable, ReentrancyGuard {
         uint256 efficiencyModifier = 100;
         (bool aluminium, , bool coal, , , , , , , , ) = res.getResources1(id);
         (bool oil, bool pigs, , , , , , , , ) = res.getResources2(id);
-        // bool aluminium = res.viewAluminium(id);
         if (aluminium) {
             efficiencyModifier += 20;
         }
-        // bool coal = res.viewCoal(id);
         if (coal) {
             efficiencyModifier += 8;
         }
-        // bool oil = res.viewOil(id);
         if (oil) {
             efficiencyModifier += 10;
         }
-        // bool pigs = res.viewPigs(id);
         if (pigs) {
             efficiencyModifier += 15;
         }
@@ -618,7 +607,6 @@ contract ForcesContract is Ownable, ReentrancyGuard {
             costModifier -= (factoryCount * 5);
         }
         (,,,,,,,, bool lead,,) = res.getResources1(id);
-        // bool lead = res.viewLead(id);
         if (lead) {
             costModifier -= 8;
         }

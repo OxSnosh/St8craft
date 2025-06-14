@@ -768,23 +768,18 @@ contract InfrastructureContract is Ownable, ReentrancyGuard {
         uint256 populationModifier = 100;
         (, bool cattle, , bool fish, , , , , , , ) = res.getResources1(id);
         (, bool pigs, , , , bool sugar, , , bool wheat, ) = res.getResources2(id);
-        // bool cattle = res.viewCattle(id);
         if (cattle) {
             populationModifier += 5;
         }
-        // bool fish = res.viewFish(id);
         if (fish) {
             populationModifier += 8;
         }
-        // bool pigs = res.viewPigs(id);
         if (pigs) {
             populationModifier += 4;
         }
-        // bool sugar = res.viewSugar(id);
         if (sugar) {
             populationModifier += 3;
         }
-        // bool wheat = res.viewWheat(id);
         if (wheat) {
             populationModifier += 8;
         }

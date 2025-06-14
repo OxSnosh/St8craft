@@ -192,7 +192,6 @@ contract MissilesContract is Ownable, ReentrancyGuard {
             costModifier -= (factoryCount * 5);
         }
         (,,,,,,,, bool lead,,) = res.getResources1(id);
-        // bool lead = res.viewLead(id);
         if (lead) {
             costModifier -= 20;
         }
@@ -281,7 +280,6 @@ contract MissilesContract is Ownable, ReentrancyGuard {
         uint256 infrastructureAmount = inf.getInfrastructureCount(id);
         require(infrastructureAmount >= 1000, "insufficient infrastructure");
         (,,,,,, bool isUranium,,,) = res.getResources2(id);
-        // bool isUranium = res.viewUranium(id);
         require(isUranium, "no uranium");
         uint256 nationStrength = stren.getNationStrength(id);
         bool manhattanProject = won2.getManhattanProject(id);
@@ -317,7 +315,6 @@ contract MissilesContract is Ownable, ReentrancyGuard {
         uint256 cost = (defaultNukeCost + (nukeCount * 50000));
         uint256 mod = 100;
         (,,,,,,,, bool lead,,) = res.getResources1(id);
-        // bool lead = res.viewLead(id);
         if (lead) {
             mod = 80;
         }

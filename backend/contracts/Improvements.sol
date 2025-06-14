@@ -1196,7 +1196,6 @@ contract ImprovementsContract2 is Ownable, ReentrancyGuard {
                 drydockCount == 0,
                 "Cannot delete a drydock if it supports a harbor"
             );
-            //need a requirement that it cannot be deleted if it supports a trade agreement
             uint256[] memory partners = res.getTradingPartners(countryId);
             require(
                 partners.length <= 4,
@@ -1721,7 +1720,6 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
             uint256 existingCount = idToImprovements4[countryId]
                 .missileDefenseCount;
             require((existingCount - amount) >= 0, "Cannot delete that many");
-            //cannot delete below 3 if strategic defense init
             bool strategicDefenseInitiative = won4
                 .getStrategicDefenseInitiative(countryId);
             if (strategicDefenseInitiative) {

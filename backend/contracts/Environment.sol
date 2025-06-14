@@ -195,11 +195,7 @@ contract EnvironmentContract is Ownable {
     {
         int256 pointsFromResources;
         (,, bool isCoal,,,,,,,,) = res.getResources1(id);
-        // bool isCoal = res.viewCoal(id);
         (bool isOil,,,,,, bool isUranium, bool isWater,,) = res.getResources2(id);
-        // bool isOil = res.viewOil(id);
-        // bool isUranium = res.viewUranium(id);
-        // bool isWater = res.viewWater(id);
         bool isRadiationCleanup = bonus.viewRadiationCleanup(id);
         bool nationalEnvironmentalOffice = won3.getNationalEnvironmentOffice(id);
         if (isCoal && !nationalEnvironmentalOffice) {
@@ -347,7 +343,6 @@ contract EnvironmentContract is Ownable {
             pointsFromNukes = (int256(nukeCount));
         }
         (,,,,,,,, bool isLead,,) = res.getResources1(id);
-        // bool isLead = res.viewLead(id);
         if (isLead) {
             pointsFromNukes = (pointsFromNukes / 2);
         }

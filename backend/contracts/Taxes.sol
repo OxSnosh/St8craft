@@ -720,19 +720,15 @@ contract AdditionalTaxesContract is Ownable {
         uint256 adjustments = 0;
         (,,,, bool furs, bool gems, bool gold,,,, ) = res.getResources1(id);
         (,,, bool silver,,,,,,) = res.getResources2(id);
-        // bool furs = res.viewFurs(id);
         if (furs) {
             adjustments += 4;
         }
-        // bool gems = res.viewGems(id);
         if (gems) {
             adjustments += 2;
         }
-        // bool gold = res.viewGold(id);
         if (gold) {
             adjustments += 3;
         }
-        // bool silver = res.viewSilver(id);
         if (silver) {
             adjustments += 2;
         }
@@ -764,19 +760,15 @@ contract AdditionalTaxesContract is Ownable {
         uint256 points = 0;
         (,, bool coal,,,,,, bool lead,,) = res.getResources1(id);
         (bool oil,,,,,, bool uranium,,,) = res.getResources2(id);
-        // bool coal = res.viewCoal(id);
         if (coal) {
             points += 1;
         }
-        // bool lead = res.viewLead(id);
         if (lead) {
             points += 1;
         }
-        // bool oil = res.viewOil(id);
         if (oil) {
             points += 1;
         }
-        // bool uranium = res.viewUranium(id);
         if (uranium) {
             points += 1;
         }
@@ -788,7 +780,6 @@ contract AdditionalTaxesContract is Ownable {
     ) public view returns (uint256) {
         bool nuclearPowerPlant = won3.getNuclearPowerPlant(id);
         (,,,,,, bool uranium,,,) = res.getResources2(id);
-        // bool uranium = res.viewUranium(id);
         uint256 techAmount = inf.getTechnologyCount(id);
         uint256 adjustment = 0;
         if (nuclearPowerPlant && uranium) {

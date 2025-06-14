@@ -248,15 +248,12 @@ contract BillsContract is Ownable, ReentrancyGuard {
         uint256 infrastructureUpkeepModifier = 100;
         (, , , , , , , bool iron, , bool lumber,) = res.getResources1(id);
         (, , , , , , bool uranium, , , ) = res.getResources2(id);
-        // bool iron = res.viewIron(id);
         if (iron) {
             infrastructureUpkeepModifier -= 10;
         }
-        // bool lumber = res.viewLumber(id);
         if (lumber) {
             infrastructureUpkeepModifier -= 8;
         }
-        // bool uranium = res.viewUranium(id);
         if (uranium) {
             infrastructureUpkeepModifier -= 3;
         }
@@ -320,11 +317,9 @@ contract BillsContract is Ownable, ReentrancyGuard {
         uint256 soldierUpkeepModifier = 100;
         (, , , , , , , , bool lead, , ) = res.getResources1(id);
         (, bool pigs, , , , , , , , ) = res.getResources2(id);
-        // bool lead = res.viewLead(id);
         if (lead) {
             soldierUpkeepModifier -= 15;
         }
-        // bool pigs = res.viewPigs(id);
         if (pigs) {
             soldierUpkeepModifier -= 10;
         }
@@ -350,15 +345,12 @@ contract BillsContract is Ownable, ReentrancyGuard {
         uint256 tankUpkeepModifier = 100;
         (, , , , , , , bool iron, bool lead, , ) = res.getResources1(id);
         (bool oil, , , , , , , , , ) = res.getResources2(id);
-        // bool iron = res.viewIron(id);
         if (iron) {
             tankUpkeepModifier -= 10;
         }
-        // bool oil = res.viewOil(id);
         if (oil) {
             tankUpkeepModifier -= 10;
         }
-        // bool lead = res.viewLead(id);
         if (lead) {
             tankUpkeepModifier -= 8;
         }
@@ -378,12 +370,10 @@ contract BillsContract is Ownable, ReentrancyGuard {
         uint256 nukeUpkeepModifier = 100;
         (, , , , , , , , bool lead, , ) = res.getResources1(id);
         (, , , , , , bool uranium, , , ) = res.getResources2(id);
-        // bool lead = res.viewLead(id);
         if (lead) {
             nukeUpkeepModifier -= 20;
         }
         uint256 adjustedNukeUpkeep = ((nukeUpkeep * nukeUpkeepModifier) / 100);
-        // bool uranium = res.viewUranium(id);
         if (!uranium) {
             adjustedNukeUpkeep = (adjustedNukeUpkeep * 2);
         }
@@ -398,7 +388,6 @@ contract BillsContract is Ownable, ReentrancyGuard {
         uint256 missileUpkeep = (cruiseMissileCount * 500);
         uint256 missileUpkeepModifier = 100;
         (, , , , , , , , bool lead, , ) = res.getResources1(id);
-        // bool lead = res.viewLead(id);
         if (lead) {
             missileUpkeepModifier -= 20;
         }
@@ -415,7 +404,6 @@ contract BillsContract is Ownable, ReentrancyGuard {
         uint256 aircraftUpkeep = (aircraftCount * 200);
         uint256 aircraftUpkeepModifier = 100;
         (, , , , , , , , bool lead, , ) = res.getResources1(id);
-        // bool lead = res.viewLead(id);
         if (lead) {
             aircraftUpkeepModifier -= 25;
         }
@@ -469,7 +457,6 @@ contract BillsContract is Ownable, ReentrancyGuard {
         uint256 aircraftCarrierCount = nav2.getAircraftCarrierCount(id);
         uint256 aircraftCarrierUpkeep = (aircraftCarrierCount * 30000);
         (, , , , , , bool uranium, , , ) = res.getResources2(id);
-        // bool uranium = res.viewUranium(id);
         if (uranium) {
             submarineUpkeep = ((submarineUpkeep * 95) / 100);
             aircraftCarrierUpkeep = ((aircraftCarrierUpkeep * 95) / 100);
@@ -492,11 +479,9 @@ contract BillsContract is Ownable, ReentrancyGuard {
         uint256 navyUpkeepModifier = 100;
         (, , , , , , , , bool lead, , ) = res.getResources1(id);
         (bool oil, , , , , , , , , ) = res.getResources2(id);
-        // bool lead = res.viewLead(id);
         if (lead) {
             navyUpkeepModifier -= 20;
         }
-        // bool oil = res.viewOil(id);
         if (oil) {
             navyUpkeepModifier -= 10;
         }
