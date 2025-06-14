@@ -498,8 +498,8 @@ contract BreakBlocadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
     constructor(
         address vrfCoordinatorV2,
-        uint64 subscriptionId,
-        bytes32 gasLane, // keyHash
+        uint256 subscriptionId,
+        bytes32 gasLane,
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);

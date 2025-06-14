@@ -91,7 +91,7 @@ contract NukeContract is VRFConsumerBaseV2Plus {
     ///@dev this function contains the variable necessary for chainlink randomness
     constructor(
         address vrfCoordinatorV2,
-        uint64 subscriptionId,
+        uint256 subscriptionId,
         bytes32 gasLane, // keyHash
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
