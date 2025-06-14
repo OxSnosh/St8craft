@@ -10,6 +10,7 @@ import "./Crime.sol";
 import "hardhat/console.sol";
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
+import {IVRFCoordinatorV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/interfaces/IVRFCoordinatorV2Plus.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 ///@title ResourcesContract
@@ -31,7 +32,7 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
     SenateContract sen;
 
     //Chainlik Variables
-    VRFConsumerBaseV2Plus public i_vrfCoordinator;
+    // VRFConsumerBaseV2Plus public i_vrfCoordinator;
     uint256 public i_subscriptionId;
     bytes32 public i_gasLane;
     uint32 public i_callbackGasLimit;
@@ -186,16 +187,10 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
         bytes32 gasLane,
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
+        s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
-    }
-
-    function updateVRFCoordinator(
-        address vrfCoordinatorV2
-    ) public onlyOwner {
-        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
     }
 
     ///@dev this function is only callable by the contract owner
@@ -264,15 +259,14 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
     ///@dev this is the function that will call the chainlink vrf contract to return random numbers
     ///@dev this is an internal function that can only be called from within this contract
     function fulfillRequest(uint256 id) internal {
-        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_keyHash,
+                keyHash: i_gasLane,
                 subId: i_subscriptionId,
-                requestConfirmations: requestConfirmations,
-                callbackGasLimit: callbackGasLimit,
-                numWords: numWords,
-                // Set nativePayment to true to pay for VRF requests with Sepolia ETH instead of LINK
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
+                requestConfirmations: REQUEST_CONFIRMATIONS,
+                callbackGasLimit: i_callbackGasLimit,
+                numWords: NUM_WORDS,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
             })
         );
         s_requestIdToRequestIndex[requestId] = id;
@@ -759,6 +753,56 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
         uint256 resource1 = partnerResources[0];
         uint256 resource2 = partnerResources[1];
         return (resource1, resource2);
+    }
+
+    function getResources1(uint256 id) public view returns (
+        bool aluminium,
+        bool cattle,
+        bool coal,
+        bool fish,
+        bool furs,
+        bool gems,
+        bool gold,
+        bool iron,
+        bool lead,
+        bool lumber,
+        bool marble
+    ) {
+        aluminium = idToResources1[id].aluminium;
+        cattle = idToResources1[id].cattle;
+        coal = idToResources1[id].coal;
+        fish = idToResources1[id].fish;
+        furs = idToResources1[id].furs;
+        gems = idToResources1[id].gems;
+        gold = idToResources1[id].gold;
+        iron = idToResources1[id].iron;
+        lead = idToResources1[id].lead;
+        lumber = idToResources1[id].lumber;
+        marble = idToResources1[id].marble;
+    }
+
+    function getResources2(uint256 id) public view returns (
+        bool oil,
+        bool pigs,
+        bool rubber,
+        bool silver,
+        bool spices,
+        bool sugar,
+        bool uranium,
+        bool water,
+        bool wheat,
+        bool wine
+    ) {
+        oil = idToResources2[id].oil;
+        pigs = idToResources2[id].pigs;
+        rubber = idToResources2[id].rubber;
+        silver = idToResources2[id].silver;
+        spices = idToResources2[id].spices;
+        sugar = idToResources2[id].sugar;
+        uranium = idToResources2[id].uranium;
+        water = idToResources2[id].water;
+        wheat = idToResources2[id].wheat;
+        wine = idToResources2[id].wine;
     }
 
     ///@dev this is a public view function that will retrun a boolean value of true if a nation has access to the aluminium resource

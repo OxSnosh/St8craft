@@ -10,15 +10,15 @@ import "./Wonders.sol";
 import "./CountryMinter.sol";
 import "./Forces.sol";
 import "./Missiles.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
+import {IVRFCoordinatorV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/interfaces/IVRFCoordinatorV2Plus.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title AirBattleContract
 ///@author OxSnosh
 ///@dev this contract allows you to launch a bombing campaign against another nation
-contract AirBattleContract is Ownable, VRFConsumerBaseV2Plus, ReentrancyGuard {
+contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     uint256 airBattleId;
     address warAddress;
     address fighterAddress;
@@ -63,7 +63,6 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2Plus, ReentrancyGuard {
     AdditionalAirBattle addAirBattle;
 
     uint256[] private s_randomWords;
-    address public i_vrfCoordinator;
     uint256 public i_subscriptionId;
     bytes32 public i_gasLane;
     uint32 public i_callbackGasLimit;
@@ -105,7 +104,7 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2Plus, ReentrancyGuard {
         bytes32 gasLane,
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
+        s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -114,7 +113,7 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2Plus, ReentrancyGuard {
     function updateVRFCoordinator(
         address vrfCoordinatorV2
     ) public onlyOwner {
-        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
+        s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
     }
 
     ///@dev this function is only callable by the owner
@@ -145,12 +144,6 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2Plus, ReentrancyGuard {
         mint = CountryMinter(_mint);
         addAirBattleAddress = _addAirBattle;
         addAirBattle = AdditionalAirBattle(_addAirBattle);
-    }
-
-    function updateVRFCoordinator(
-        address vrfCoordinatorV2
-    ) public onlyOwner {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
     }
 
     ///@dev this function is a public function
@@ -393,14 +386,16 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2Plus, ReentrancyGuard {
             "Retry not allowed yet"
         );
 
-        uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_gasLane,
-            i_subscriptionId,
-            REQUEST_CONFIRMATIONS,
-            i_callbackGasLimit,
-            NUM_WORDS
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: i_gasLane,
+                subId: i_subscriptionId,
+                requestConfirmations: REQUEST_CONFIRMATIONS,
+                callbackGasLimit: i_callbackGasLimit,
+                numWords: NUM_WORDS,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+            })
         );
-
         s_requestIdToRequestIndex[requestId] = battleId;
         pendingRequests[battleId] = true;
         pendingRequestTimestamp[battleId] = block.timestamp;
@@ -408,13 +403,15 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2Plus, ReentrancyGuard {
     }
 
     function fulfillRequest(uint256 battleId) internal {
-        uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_gasLane,
-            i_subscriptionId,
-            REQUEST_CONFIRMATIONS,
-            i_callbackGasLimit,
-            NUM_WORDS,
-            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: i_gasLane,
+                subId: i_subscriptionId,
+                requestConfirmations: REQUEST_CONFIRMATIONS,
+                callbackGasLimit: i_callbackGasLimit,
+                numWords: NUM_WORDS,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+            })
         );
         s_requestIdToRequestIndex[requestId] = battleId;
         pendingRequests[battleId] = true;
@@ -439,7 +436,7 @@ contract AirBattleContract is Ownable, VRFConsumerBaseV2Plus, ReentrancyGuard {
 
     function fulfillRandomWords(
         uint256 requestId,
-        uint256[] memory randomWords
+        uint256[] calldata randomWords
     ) internal override {
         require(
             pendingRequests[s_requestIdToRequestIndex[requestId]],

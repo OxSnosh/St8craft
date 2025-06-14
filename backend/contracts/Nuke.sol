@@ -14,6 +14,7 @@ import "./Missiles.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
+import {IVRFCoordinatorV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/interfaces/IVRFCoordinatorV2Plus.sol";
 
 ///@title NukeContract
 ///@author OxSnosh
@@ -38,7 +39,7 @@ contract NukeContract is VRFConsumerBaseV2Plus {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    VRFConsumerBaseV2Plus public i_vrfCoordinator;
+    // VRFConsumerBaseV2Plus public i_vrfCoordinator;
     uint256 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
@@ -95,7 +96,7 @@ contract NukeContract is VRFConsumerBaseV2Plus {
         bytes32 gasLane, // keyHash
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
+        s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -104,7 +105,7 @@ contract NukeContract is VRFConsumerBaseV2Plus {
     function updateVRFCoordinator(
         address vrfCoordinatorV2
     ) public onlyOwner {
-        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
+        s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
     }
 
     ///@dev this function is only callable by the contract owner
@@ -236,13 +237,16 @@ contract NukeContract is VRFConsumerBaseV2Plus {
     ///@dev this function will be called by the launchNuke() function
     ///@dev this function will send a randomness request to the chainlink VRF contract
     function fulfillRequest(uint256 id) internal {
-        uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_gasLane,
-            i_subscriptionId,
-            REQUEST_CONFIRMATIONS,
-            i_callbackGasLimit,
-            NUM_WORDS,
-            VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: i_gasLane,
+                subId: i_subscriptionId,
+                requestConfirmations: REQUEST_CONFIRMATIONS,
+                callbackGasLimit: i_callbackGasLimit,
+                numWords: NUM_WORDS,
+                // Set nativePayment to true to pay for VRF requests with Sepolia ETH instead of LINK
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
+            })
         );
         s_requestIdToRequestIndex[requestId] = id;
     }

@@ -8,15 +8,16 @@ import "./Infrastructure.sol";
 import "./Wonders.sol";
 import "./Missiles.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-// import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
+import {IVRFCoordinatorV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/interfaces/IVRFCoordinatorV2Plus.sol";
 import "hardhat/console.sol";
 
 ///@title CruiseMissileContract
 ///@author OxSnosh
 ///@notice this contract will allow a nation owner to launch a cruise missile attack against another nation
 ///@dev this contract inherits from OpenZeppelin ownable and Chainlink VRF
-contract CruiseMissileContract is Ownable, VRFConsumerBaseV2Plus {
+contract CruiseMissileContract is VRFConsumerBaseV2Plus {
     uint256 public cruiseMissileAttackId;
     address public forces;
     address public countryMinter;
@@ -30,8 +31,7 @@ contract CruiseMissileContract is Ownable, VRFConsumerBaseV2Plus {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    VRFCoordinatorV2Interface public i_vrfCoordinator;
-    uint64 private immutable i_subscriptionId;
+    uint256 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
@@ -79,11 +79,11 @@ contract CruiseMissileContract is Ownable, VRFConsumerBaseV2Plus {
     ///@dev this is the constructor that inherits chainlink variables to use chainlink VRF
     constructor(
         address vrfCoordinatorV2,
-        uint64 subscriptionId,
-        bytes32 gasLane, // keyHash
+        uint256 subscriptionId,
+        bytes32 gasLane,
         uint32 callbackGasLimit
-    ) VRFConsumerBaseV2(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+    ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
+        s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -92,7 +92,7 @@ contract CruiseMissileContract is Ownable, VRFConsumerBaseV2Plus {
     function updateVRFCoordinator(
         address vrfCoordinatorV2
     ) public onlyOwner {
-        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+        s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
     }
 
     ///@dev this function is only callable by the contract owner
@@ -181,12 +181,16 @@ contract CruiseMissileContract is Ownable, VRFConsumerBaseV2Plus {
     ///@dev this is an internal function that will call the VRFCoordinator from randomness from chainlink
     ///@param id this is the ID of the cruise missile attack
     function fulfillRequest(uint256 id) internal {
-        uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_gasLane,
-            i_subscriptionId,
-            REQUEST_CONFIRMATIONS,
-            i_callbackGasLimit,
-            NUM_WORDS
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: i_gasLane,
+                subId: i_subscriptionId,
+                requestConfirmations: REQUEST_CONFIRMATIONS,
+                callbackGasLimit: i_callbackGasLimit,
+                numWords: NUM_WORDS,
+                // Set nativePayment to true to pay for VRF requests with Sepolia ETH instead of LINK
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+            })
         );
         s_requestIdToRequestIndex[requestId] = id;
     }
@@ -201,7 +205,7 @@ contract CruiseMissileContract is Ownable, VRFConsumerBaseV2Plus {
     ///@param randomWords is the random numbers that the ChainlinkVRF contract responds with
     function fulfillRandomWords(
         uint256 requestId,
-        uint256[] memory randomWords
+        uint256[] calldata randomWords
     ) internal override {
         uint256 requestNumber = s_requestIdToRequestIndex[requestId];
         s_requestIndexToRandomWords[requestNumber] = randomWords;

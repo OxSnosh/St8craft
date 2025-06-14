@@ -14,6 +14,7 @@ import "./Military.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
+import {IVRFCoordinatorV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/interfaces/IVRFCoordinatorV2Plus.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title GroundBattleContract
@@ -72,8 +73,8 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    VRFConsumerBaseV2Plus public i_vrfCoordinator;
-    uint64 private immutable i_subscriptionId;
+    // VRFConsumerBaseV2Plus public i_vrfCoordinator;
+    uint256 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
@@ -99,7 +100,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         bytes32 gasLane, // keyHash
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
-        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
+        s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -108,7 +109,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     function updateVRFCoordinator(
         address vrfCoordinatorV2
     ) public onlyOwner {
-        i_vrfCoordinator = VRFConsumerBaseV2Plus(vrfCoordinatorV2);
+        s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
     }
 
     function settings(
@@ -479,15 +480,15 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     );
 
     function fulfillRequest(uint256 battleId) internal {
-        uint256 requestId = i_vrfCoordinator.requestRandomWords(
-            i_gasLane,
-            i_subscriptionId,
-            REQUEST_CONFIRMATIONS,
-            i_callbackGasLimit,
-            NUM_WORDS,
-            VRFV2PlusClient._argsToBytes(
-                VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
-            )
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: i_gasLane,
+                subId: i_subscriptionId,
+                requestConfirmations: REQUEST_CONFIRMATIONS,
+                callbackGasLimit: i_callbackGasLimit,
+                numWords: NUM_WORDS,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+            })
         );
         s_requestIdToRequestIndex[requestId] = battleId;
         emit RandomnessRequested(
