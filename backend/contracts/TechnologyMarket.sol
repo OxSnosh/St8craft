@@ -199,7 +199,8 @@ contract TechnologyMarketContract is Ownable, ReentrancyGuard {
     ///@dev this function will adjust a nations tech cost based on wonders improvements and resources
     function getTechCostMultiplier(uint256 id) public view returns (uint256) {
         uint256 numberToSubtract = 0;
-        bool isGold = res.viewGold(id);
+        (, , , , , , bool isGold, , , , ) = res.getResources1(id);
+        // bool isGold = res.viewGold(id);
         bool isMicrochips = bonus.viewMicrochips(id);
         uint256 universityCount = imp3.getUniversityCount(id);
         bool greatUniversity = won2.getGreatUniversity(id);

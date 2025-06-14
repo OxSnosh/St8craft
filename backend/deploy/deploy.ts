@@ -5,7 +5,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { networkConfig } from "../helper-hardhat-config";
-import { VRFCoordinatorV2Mock } from "../typechain-types";
+import { VRFCoordinatorV2_5Mock } from "../typechain-types";
 import { JsonRpcProvider, Wallet, parseEther, BigNumberish } from 'ethers';
 
 const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -54,7 +54,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           "VRFCoordinatorV2Mock",
           address,
           signer
-        ) as VRFCoordinatorV2Mock
+        ) as VRFCoordinatorV2_5Mock
         // console.log("VRFCoordinatorV2Mock contract:", vrfCoordinatorV2Mock);
         vrfCoordinatorV2Address = address;
         console.log("VRFCoordinatorV2Mock deployed at:", vrfCoordinatorV2Address);
@@ -115,7 +115,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         if (subscriptionId === undefined) {
           throw new Error("subscriptionId is undefined. Please check your network configuration.");
         }
-        
+
         const airBattleContract = await deploy("AirBattleContract", {
           from: deployer,
           args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],

@@ -321,7 +321,8 @@ contract TaxesContract is Ownable, ReentrancyGuard {
         uint256 densityPoints = 0;
         uint256 density = checkPopulationDensity(id);
         uint256 maxDensity = 70;
-        bool water = res.viewWater(id);
+        (,,,,,,, bool water,,) = res.getResources2(id);
+        // bool water = res.viewWater(id);
         if (water) {
             maxDensity = 120;
         }
@@ -333,31 +334,33 @@ contract TaxesContract is Ownable, ReentrancyGuard {
 
     function getPointsFromResources(uint256 id) public view returns (uint256) {
         uint256 pointsFromResources = 0;
-        bool gems = res.viewGems(id);
+        (,,,,, bool gems,,,,,) = res.getResources1(id);
+        (bool oil,,, bool silver, bool spices, bool sugar,, bool water,, bool wine) = res.getResources2(id);
+        // bool gems = res.viewGems(id);
         if (gems) {
             pointsFromResources += 3;
         }
-        bool oil = res.viewOil(id);
+        // bool oil = res.viewOil(id);
         if (oil) {
             pointsFromResources += 2;
         }
-        bool silver = res.viewSilver(id);
+        // bool silver = res.viewSilver(id);
         if (silver) {
             pointsFromResources += 2;
         }
-        bool spices = res.viewSpices(id);
+        // bool spices = res.viewSpices(id);
         if (spices) {
             pointsFromResources += 2;
         }
-        bool sugar = res.viewSugar(id);
+        // bool sugar = res.viewSugar(id);
         if (sugar) {
             pointsFromResources += 1;
         }
-        bool water = res.viewWater(id);
+        // bool water = res.viewWater(id);
         if (water) {
             pointsFromResources += 3;
         }
-        bool wine = res.viewWine(id);
+        // bool wine = res.viewWine(id);
         if (wine) {
             pointsFromResources += 3;
         }
@@ -715,19 +718,21 @@ contract AdditionalTaxesContract is Ownable {
 
     function getIncomeAdjustments(uint256 id) public view returns (uint256) {
         uint256 adjustments = 0;
-        bool furs = res.viewFurs(id);
+        (,,,, bool furs, bool gems, bool gold,,,, ) = res.getResources1(id);
+        (,,, bool silver,,,,,,) = res.getResources2(id);
+        // bool furs = res.viewFurs(id);
         if (furs) {
             adjustments += 4;
         }
-        bool gems = res.viewGems(id);
+        // bool gems = res.viewGems(id);
         if (gems) {
             adjustments += 2;
         }
-        bool gold = res.viewGold(id);
+        // bool gold = res.viewGold(id);
         if (gold) {
             adjustments += 3;
         }
-        bool silver = res.viewSilver(id);
+        // bool silver = res.viewSilver(id);
         if (silver) {
             adjustments += 2;
         }
@@ -757,19 +762,21 @@ contract AdditionalTaxesContract is Ownable {
         uint256 id
     ) public view returns (uint256) {
         uint256 points = 0;
-        bool coal = res.viewCoal(id);
+        (,, bool coal,,,,,, bool lead,,) = res.getResources1(id);
+        (bool oil,,,,,, bool uranium,,,) = res.getResources2(id);
+        // bool coal = res.viewCoal(id);
         if (coal) {
             points += 1;
         }
-        bool lead = res.viewLead(id);
+        // bool lead = res.viewLead(id);
         if (lead) {
             points += 1;
         }
-        bool oil = res.viewOil(id);
+        // bool oil = res.viewOil(id);
         if (oil) {
             points += 1;
         }
-        bool uranium = res.viewUranium(id);
+        // bool uranium = res.viewUranium(id);
         if (uranium) {
             points += 1;
         }
@@ -780,7 +787,8 @@ contract AdditionalTaxesContract is Ownable {
         uint256 id
     ) public view returns (uint256) {
         bool nuclearPowerPlant = won3.getNuclearPowerPlant(id);
-        bool uranium = res.viewUranium(id);
+        (,,,,,, bool uranium,,,) = res.getResources2(id);
+        // bool uranium = res.viewUranium(id);
         uint256 techAmount = inf.getTechnologyCount(id);
         uint256 adjustment = 0;
         if (nuclearPowerPlant && uranium) {

@@ -988,7 +988,8 @@ contract WondersContract2 is Ownable, ReentrancyGuard {
             uint256 techAmount = InfrastructureContract(infrastructureAddress)
                 .getTechnologyCount(countryId);
             require(techAmount >= 300, "Must have 300 Technology to purchase");
-            bool uranium = res.viewUranium(countryId);
+            (, , , , , , bool uranium, , , ) = res.getResources2(countryId);
+            // bool uranium = res.viewUranium(countryId);
             require(uranium == true, "Requires uranium to purchase");
             idToWonders2[countryId].manhattanProject = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);
@@ -1534,7 +1535,8 @@ contract WondersContract3 is Ownable, ReentrancyGuard {
                 infrastructureAmount >= 12000,
                 "Must have 12000 Infrastructure to purchase"
             );
-            bool uranium = res.viewUranium(countryId);
+            (, , , , , , bool uranium, , , ) = res.getResources2(countryId);
+            // bool uranium = res.viewUranium(countryId);
             require(uranium == true, "Requires uranium to purchase");
             idToWonders3[countryId].nuclearPowerPlant = true;
             WondersContract1(wonderContract1Address).addWonderCount(countryId);

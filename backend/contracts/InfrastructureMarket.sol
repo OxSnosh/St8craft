@@ -212,16 +212,17 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
         uint256 lumberMultiplier = 0;
         uint256 ironMultiplier = 0;
         uint256 marbleMultiplier = 0;
-        bool isLumber = res.viewLumber(id);
-        bool isIron = res.viewIron(id);
-        bool isMarble = res.viewMarble(id);
-        if (isLumber) {
+        (, , , , , , , bool iron, , bool lumber, bool marble) = res.getResources1(id);
+        // bool isLumber = res.viewLumber(id);
+        // bool isIron = res.viewIron(id);
+        // bool isMarble = res.viewMarble(id);
+        if (lumber) {
             lumberMultiplier = 6;
         }
-        if (isIron) {
+        if (iron) {
             ironMultiplier = 5;
         }
-        if (isMarble) {
+        if (marble) {
             marbleMultiplier = 10;
         }
         uint256 sumOfAdjustments = lumberMultiplier +
@@ -247,7 +248,8 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
         uint256 interstateSystemMultiplier = 0;
         uint256 accommodativeGovernmentMultiplier = 0;
         uint256 factoryMultiplier = 0;
-        bool isRubber = res.viewRubber(id);
+        (, , bool isRubber, , , , , , , ) = res.getResources2(id);
+        // bool isRubber = res.viewRubber(id);
         bool isConstruction = bonus.viewConstruction(id);
         bool isInterstateSystem = won2.getInterstateSystem(id);
         bool isAccommodativeGovernment = checkAccommodativeGovernment(id);
@@ -294,8 +296,9 @@ contract InfrastructureMarketContract is Ownable, ReentrancyGuard {
         uint256 id
     ) public view returns (uint256) {
         uint256 multiplier = 0;
-        bool isAluminium = res.viewAluminium(id);
-        bool isCoal = res.viewCoal(id);
+        (bool isAluminium, , bool isCoal, , , , , , , , ) = res.getResources1(id);
+        // bool isAluminium = res.viewAluminium(id);
+        // bool isCoal = res.viewCoal(id);
         bool isSteel = bonus.viewSteel(id);
         bool isAsphalt = bonus.viewAsphalt(id);
         if (isAluminium) {

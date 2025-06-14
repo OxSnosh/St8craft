@@ -391,15 +391,17 @@ contract InfrastructureContract is Ownable, ReentrancyGuard {
     function getAreaOfInfluence(uint256 id) public view returns (uint256) {
         uint256 currentLand = idToInfrastructure[id].landArea;
         uint256 landModifier = 100;
-        bool coal = res.viewCoal(id);
+        (, , bool coal, , , , , , , , ) = res.getResources1(id);
+        (, , bool rubber, , bool spices, , , , , ) = res.getResources2(id);
+        // bool coal = res.viewCoal(id);
         if (coal) {
             landModifier += 15;
         }
-        bool rubber = res.viewRubber(id);
+        // bool rubber = res.viewRubber(id);
         if (rubber) {
             landModifier += 20;
         }
-        bool spices = res.viewSpices(id);
+        // bool spices = res.viewSpices(id);
         if (spices) {
             landModifier += 8;
         }
@@ -764,23 +766,25 @@ contract InfrastructureContract is Ownable, ReentrancyGuard {
             populationBaseCount = (infra * 9);
         }
         uint256 populationModifier = 100;
-        bool cattle = res.viewCattle(id);
+        (, bool cattle, , bool fish, , , , , , , ) = res.getResources1(id);
+        (, bool pigs, , , , bool sugar, , , bool wheat, ) = res.getResources2(id);
+        // bool cattle = res.viewCattle(id);
         if (cattle) {
             populationModifier += 5;
         }
-        bool fish = res.viewFish(id);
+        // bool fish = res.viewFish(id);
         if (fish) {
             populationModifier += 8;
         }
-        bool pigs = res.viewPigs(id);
+        // bool pigs = res.viewPigs(id);
         if (pigs) {
             populationModifier += 4;
         }
-        bool sugar = res.viewSugar(id);
+        // bool sugar = res.viewSugar(id);
         if (sugar) {
             populationModifier += 3;
         }
-        bool wheat = res.viewWheat(id);
+        // bool wheat = res.viewWheat(id);
         if (wheat) {
             populationModifier += 8;
         }

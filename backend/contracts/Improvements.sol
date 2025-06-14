@@ -1603,8 +1603,9 @@ contract ImprovementsContract4 is Ownable, ReentrancyGuard {
                 factoryCount >= 3,
                 "Must own at least 3 factories to purchase"
             );
+            (,,,,,,,, bool lead,,) = res.getResources1(countryId);
             require(
-                res.viewLead(countryId) == true,
+                lead == true,
                 "Must possess lead to purchase"
             );
             idToImprovements4[countryId].munitionsFactoryCount += amount;

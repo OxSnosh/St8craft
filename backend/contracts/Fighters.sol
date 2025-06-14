@@ -1030,15 +1030,17 @@ contract FightersMarketplace1 is Ownable, ReentrancyGuard {
         uint256 id
     ) public view returns (uint256) {
         uint256 aircraftPurchaseModifier = 100;
-        bool aluminium = res.viewAluminium(id);
+        (bool aluminium, , , , , , , , , , ) = res.getResources1(id);
+        (bool oil, , bool rubber, , , , , , , ) = res.getResources2(id);
+        // bool aluminium = res.viewAluminium(id);
         if (aluminium) {
             aircraftPurchaseModifier -= 8;
         }
-        bool oil = res.viewOil(id);
+        // bool oil = res.viewOil(id);
         if (oil) {
             aircraftPurchaseModifier -= 4;
         }
-        bool rubber = res.viewRubber(id);
+        // bool rubber = res.viewRubber(id);
         if (rubber) {
             aircraftPurchaseModifier -= 4;
         }

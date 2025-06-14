@@ -135,15 +135,17 @@ contract LandMarketContract is Ownable, ReentrancyGuard {
     ///@return uint256 this will be the multiplier reductions from this formula
     function getLandPriceMultiplier(uint256 id) public view returns (uint256) {
         uint256 multiplier = 100;
-        bool cattle = res.viewCattle(id);
+        (, bool cattle, , bool fish, , , , , , , ) = res.getResources1(id);
+        (, , bool rubber, , , , , , , ) = res.getResources2(id);
+        // bool cattle = res.viewCattle(id);
         if (cattle) {
             multiplier -= 10;
         }
-        bool fish = res.viewFish(id);
+        // bool fish = res.viewFish(id);
         if (fish) {
             multiplier -= 5;
         }
-        bool rubber = res.viewRubber(id);
+        // bool rubber = res.viewRubber(id);
         if (rubber) {
             multiplier -= 10;
         }
