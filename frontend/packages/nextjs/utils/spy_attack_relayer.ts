@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import { GelatoRelay, SponsoredCallRequest } from "@gelatonetwork/relay-sdk";
-const relay = new GelatoRelay();
 import axios from "axios";
 import { CountryMinter, NationStrengthContract, SpyOperationsContract } from "../../../../backend/typechain-types";
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
@@ -23,21 +22,21 @@ export async function relaySpyOperation(data: Input, contractsData: any) {
     const NationStrengthContract = contractsData?.NationStrengthContract;
     const SpyOperationsContract = contractsData?.SpyOperationsContract;
     const TreasuryContract = contractsData?.TreasuryContract;
-  const recoveredAddress = await recoverAddress(data.messageHash, data.signature);
+  const recoveredAddress = await ethers.utils.recoverAddress(data.messageHash, data.signature);
 
   let mode = process.env.MODE || "localhost"; // dynamic mode based on env
 
-  let provider: JsonRpcProvider;
+  let provider
   if (mode === "localhost") {
-    provider = new JsonRpcProvider("http://127.0.0.1:8545/");
+    provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545/");
   } else {
-    provider = new JsonRpcProvider("https://sepolia.base.org");
+    provider = new ethers.providers.JsonRpcProvider("https://sepolia.base.org");
   }
   // --- Ownership check ---
   if (mode === "production") {
     const minter = new ethers.Contract(
       CountryMinter.address,
-      CountryMinter.abi as ethers.InterfaceAbi,
+      CountryMinter.abi,
       provider
     ) as unknown as CountryMinter;
     const owner = await minter.checkOwnership(data.callerNationId, recoveredAddress);
@@ -49,7 +48,7 @@ export async function relaySpyOperation(data: Input, contractsData: any) {
   // --- Calculate Spy Attack Parameters ---
   const spyoperations = new ethers.Contract(
     SpyOperationsContract.address,
-    SpyOperationsContract.abi as ethers.InterfaceAbi,
+    SpyOperationsContract.abi as ethers.ContractInterface,
     provider
   ) as unknown as SpyOperationsContract;
 
@@ -72,7 +71,7 @@ export async function relaySpyOperation(data: Input, contractsData: any) {
 
   const nationStrengthContract = new ethers.Contract(
     NationStrengthContract.address,
-    NationStrengthContract.abi as ethers.InterfaceAbi,
+    NationStrengthContract.abi as ethers.ContractInterface,
     provider
   ) as unknown as NationStrengthContract;
 
@@ -83,12 +82,12 @@ export async function relaySpyOperation(data: Input, contractsData: any) {
 
   const treasury = new ethers.Contract(
     TreasuryContract.address,
-    TreasuryContract.abi as ethers.InterfaceAbi,
+    TreasuryContract.abi as ethers.ContractInterface,
     provider
   ) as unknown as TreasuryContract;
 
   const attackerBalance = await treasury.checkBalance(data.callerNationId);
-  const normalizedBalance = formatEther(attackerBalance);
+  const normalizedBalance = ethers.utils.formatEther(attackerBalance);
 
     if (parseFloat(normalizedBalance) < cost) {
         throw new Error("Not enough funds to conduct spy operation");
@@ -122,7 +121,7 @@ if (Number(network.chainId) === 31337) {
 
   const spyoperationsWithSigner = new ethers.Contract(
     SpyOperationsContract.address,
-    SpyOperationsContract.abi as ethers.InterfaceAbi,
+    SpyOperationsContract.abi as ethers.ContractInterface,
     signer0
   ) as unknown as SpyOperationsContract;
 
@@ -170,7 +169,7 @@ if (Number(network.chainId) === 31337) {
       // Use ethers.Contract instance to encode function data
       const spyoperationsEthers = new ethers.Contract(
         SpyOperationsContract.address,
-        SpyOperationsContract.abi as ethers.InterfaceAbi,
+        SpyOperationsContract.abi as ethers.ContractInterface,
         provider
       );
 
