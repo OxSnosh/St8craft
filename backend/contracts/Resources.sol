@@ -296,17 +296,17 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
         setResources(requestNumber);
     }
 
-    // ///@dev this is a function that is callable only from the owner of the contract
-    // ///@dev this function was used in testing of the smart contract and should be deleted before deployment
-    // function mockResourcesForTesting(
-    //     uint256 countryId,
-    //     uint256 resource1,
-    //     uint256 resource2
-    // ) public onlyOwner {
-    //     uint256[2] memory playerResources = [resource1, resource2];
-    //     idToPlayerResources[countryId] = playerResources;
-    //     setResources(countryId);
-    // }
+    ///@dev this is a function that is callable only from the owner of the contract
+    ///@dev this function was used in testing of the smart contract and should be deleted before deployment
+    function mockResourcesForTesting(
+        uint256 countryId,
+        uint256 resource1,
+        uint256 resource2
+    ) public onlyOwner {
+        uint256[2] memory playerResources = [resource1, resource2];
+        idToPlayerResources[countryId] = playerResources;
+        setResources(countryId);
+    }
 
     ///@dev this function is an internal function that will be called when a nation is minted or adds or removes a trading partner
     ///@dev this will set the nations assigned resources to true and call the next funtion that will set all the resources of its trading partners to true

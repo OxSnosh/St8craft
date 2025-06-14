@@ -73,7 +73,6 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    // VRFConsumerBaseV2Plus public i_vrfCoordinator;
     uint256 private immutable i_subscriptionId;
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;

@@ -110,12 +110,6 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         i_callbackGasLimit = callbackGasLimit;
     }
 
-    function updateVRFCoordinator(
-        address vrfCoordinatorV2
-    ) public onlyOwner {
-        s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
-    }
-
     ///@dev this function is only callable by the owner
     ///@dev this function will be called right after deployment in order to set up contract pointers
     function settings(
@@ -373,12 +367,6 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     mapping(uint256 => uint256) public pendingRequestTimestamp;
     uint256 public constant RETRY_TIMEOUT = 5 minutes;
 
-    event RandomnessRequested(
-        uint256 requestId,
-        uint256 battleId,
-        uint256 timestamp
-    );
-
     function retryFulfillRequest(uint256 battleId) public {
         require(pendingRequests[battleId], "No pending request");
         require(
@@ -399,7 +387,6 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         s_requestIdToRequestIndex[requestId] = battleId;
         pendingRequests[battleId] = true;
         pendingRequestTimestamp[battleId] = block.timestamp;
-        emit RandomnessRequested(requestId, battleId, block.timestamp);
     }
 
     function fulfillRequest(uint256 battleId) internal {
@@ -416,7 +403,6 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         s_requestIdToRequestIndex[requestId] = battleId;
         pendingRequests[battleId] = true;
         pendingRequestTimestamp[battleId] = block.timestamp;
-        emit RandomnessRequested(requestId, battleId, block.timestamp);
     }
 
     bytes32 jobId;
