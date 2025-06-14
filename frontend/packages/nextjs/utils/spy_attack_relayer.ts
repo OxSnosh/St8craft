@@ -1,4 +1,4 @@
-import { ethers, JsonRpcProvider, recoverAddress, formatEther } from "ethers";
+import { ethers } from "ethers";
 import { GelatoRelay, SponsoredCallRequest } from "@gelatonetwork/relay-sdk";
 const relay = new GelatoRelay();
 import axios from "axios";

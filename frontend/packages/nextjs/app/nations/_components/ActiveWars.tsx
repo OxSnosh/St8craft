@@ -193,91 +193,86 @@ const ActiveWars = () => {
     }, [selectedWar, selectedNation, contractsData, warDetails]);
     
     // Peace Offer Card UI
-    const PeaceOfferCard = () => {
-        let peaceMessage = "";
-        let buttonText = "";
-        let showButton = true;
-    
-        if (!attackerPeaceOffered && !defenderPeaceOffered) {
-            peaceMessage = "Be the first to offer peace.";
-            buttonText = "Offer Peace";
-        } else if (attackerPeaceOffered && !defenderPeaceOffered) {
-            peaceMessage = "Awaiting opponent to accept peace offer.";
-            showButton = false;
-        } else if (!attackerPeaceOffered && defenderPeaceOffered) {
-            peaceMessage = "Opponent has offered peace. Do you want to declare peace?";
-            buttonText = "Declare Peace";
+const PeaceOfferCard = () => {
+    let peaceMessage = "";
+    let buttonText = "";
+    let showButton = true;
+
+    if (!attackerPeaceOffered && !defenderPeaceOffered) {
+        peaceMessage = "Be the first to offer peace.";
+        buttonText = "Offer Peace";
+    } else if (attackerPeaceOffered && !defenderPeaceOffered) {
+        peaceMessage = "Awaiting opponent to accept peace offer.";
+        showButton = false;
+    } else if (!attackerPeaceOffered && defenderPeaceOffered) {
+        peaceMessage = "Opponent has offered peace. Do you want to declare peace?";
+        buttonText = "Declare Peace";
+    }
+
+    const handleOfferPeace = async () => {
+        if (!selectedWar || !selectedNation || !defendingNationId) return;
+
+        const contractData = contractsData.WarContract;
+        const abi = contractData.abi;
+
+        if (!contractData.address || !abi) {
+            console.error("Contract address or ABI is missing");
+            return;
         }
 
-        const handleOfferPeace = async () => {
-            if (!selectedWar || !selectedNation || !defendingNationId) return;
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            const signer = provider.getSigner();
+            const userAddress = await signer.getAddress();
 
-            const contractData = contractsData.WarContract;
-            const abi = contractData.abi;
+            const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
 
-            if (!contractData.address || !abi) {
-                console.error("Contract address or ABI is missing");
+            const data = contract.interface.encodeFunctionData("offerPeace", [
+                selectedNation,
+                selectedWar
+            ]);
+
+            const result = await provider.call({
+                to: contract.address,
+                data: data,
+                from: userAddress,
+            });
+
+            console.log("Transaction Simulation Result:", result);
+
+            if (result.startsWith("0x08c379a0")) {
+                const errorMessage = parseRevertReason({ data: result });
+                alert(`Transaction failed: ${errorMessage}`);
                 return;
             }
 
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const userAddress = await signer.getAddress();
+            const tx = await offerPeace(selectedNation, selectedWar, contractsData.WarContract, writeContractAsync);
 
-                const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-                const data = contract.interface.encodeFunctionData("offerPeace", [
-                    selectedNation,
-                    selectedWar
-                ]);
-
-                try {
-                    const result = await provider.call({
-                        to: contract.address,
-                        data: data,
-                        from: userAddress,
-                    });
-        
-                    console.log("Transaction Simulation Result:", result);
-        
-                    if (result.startsWith("0x08c379a0")) {
-                        const errorMessage = parseRevertReason({ data: result });
-                        alert(`Transaction failed: ${errorMessage}`);
-                        return;
-                    }
-                } catch (error: any) {
-                    const errorMessage = parseRevertReason(error);
-                    console.error("Transaction simulation failed:", errorMessage);
-                    alert(`Transaction failed: ${errorMessage}`);
-                    return;            
-                }
-        
-                const tx = await offerPeace(selectedNation, selectedWar, contractsData.WarContract, writeContractAsync);
-
-            } catch (error: any) {
-                const errorMessage = parseRevertReason(error);
-                console.error("Transaction failed:", errorMessage);
-                alert(`Transaction failed: ${errorMessage}`);
-            }
+        } catch (error: any) {
+            const errorMessage = parseRevertReason(error);
+            console.error("Transaction failed:", errorMessage);
+            alert(`Transaction failed: ${errorMessage}`);
         }
-    
-        if (!selectedWar || !selectedNation || !defendingNationId) return null;
-        return (
-            <div className="border border-blue-300 p-4 rounded-lg shadow-md mt-4">
-                <h2 className="text-lg font-bold">Peace Negotiation</h2>
-                <p>{peaceMessage}</p>
-                {showButton && (
-                    <button
-                        onClick={() => handleOfferPeace()}
-                        className="bg-blue-500 text-white p-2 rounded mt-2"
-                    >
-                        {buttonText}
-                    </button>
-                )}
-            </div>
-        );
     };
+
+    if (!selectedWar || !selectedNation || !defendingNationId) return null;
+
+    return (
+        <div className="border border-blue-300 p-4 rounded-lg shadow-md mt-4">
+            <h2 className="text-lg font-bold">Peace Negotiation</h2>
+            <p>{peaceMessage}</p>
+            {showButton && (
+                <button
+                    onClick={handleOfferPeace}
+                    className="bg-blue-500 text-white p-2 rounded mt-2"
+                >
+                    {buttonText}
+                </button>
+            )}
+        </div>
+    );
+};
 
     function parseRevertReason(error: any): string {
         if (error?.data) {
