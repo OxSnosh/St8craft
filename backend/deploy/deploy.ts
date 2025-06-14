@@ -485,454 +485,454 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         });
         const deployedMessenger = await ethers.getContractAt("Messenger", messenger.address, signer);
 
-        // await deployedWarBucks.settings(
-        //     treasuryContract.address,
-        //     countryMinter.address,
-        // )
+        await deployedWarBucks.settings(
+            treasuryContract.address,
+            countryMinter.address,
+        )
 
-        // console.log("warbucks settings");
+        console.log("warbucks settings");
 
-        // await deployedAidContract.settings(
-        //     countryMinter.address,
-        //     treasuryContract.address,
-        //     forcesContract.address,
-        //     infrastructureContract.address,
-        //     keeperContract.address,
-        //     wondersContract1.address,
-        //     senateContract.address,
-        //     countryParametersContract.address
-        //   );                  
+        await deployedAidContract.settings(
+            countryMinter.address,
+            treasuryContract.address,
+            forcesContract.address,
+            infrastructureContract.address,
+            keeperContract.address,
+            wondersContract1.address,
+            senateContract.address,
+            countryParametersContract.address
+          );                  
        
-        // console.log("aid contract settings");
+        console.log("aid contract settings");
 
-        // await deployedAirBattleContract.settings(
-        //     warContract.address,
-        //     fightersContract.address,
-        //     bombersContract.address,
-        //     infrastructureContract.address,
-        //     forcesContract.address,
-        //     fighterLosses.address,
-        //     countryMinter.address,
-        //     additionalAirBattle.address
-        //   );          
+        await deployedAirBattleContract.settings(
+            warContract.address,
+            fightersContract.address,
+            bombersContract.address,
+            infrastructureContract.address,
+            forcesContract.address,
+            fighterLosses.address,
+            countryMinter.address,
+            additionalAirBattle.address
+          );          
 
-        // console.log("air battle contract settings");
+        console.log("air battle contract settings");
 
-        // await deployedAdditionalAirBattle.settings(
-        //     warContract.address,
-        //     fightersContract.address,
-        //     bombersContract.address,
-        //     infrastructureContract.address,
-        //     forcesContract.address,
-        //     fighterLosses.address,
-        //     countryMinter.address,
-        //     airBattleContract.address
-        //   );
+        await deployedAdditionalAirBattle.settings(
+            warContract.address,
+            fightersContract.address,
+            bombersContract.address,
+            infrastructureContract.address,
+            forcesContract.address,
+            fighterLosses.address,
+            countryMinter.address,
+            airBattleContract.address
+          );
 
-        // console.log("additional air battle contract settings");
+        console.log("additional air battle contract settings");
 
-        // await deployedBillsContract.settings(
-        //     countryMinter.address,
-        //     treasuryContract.address,
-        //     wondersContract1.address,
-        //     wondersContract2.address,
-        //     wondersContract3.address,
-        //     wondersContract4.address,
-        //     forcesContract.address,
-        //     fightersContract.address,
-        //     navyContract.address,
-        //     resourcesContract.address
-        //   );
+        await deployedBillsContract.settings(
+            countryMinter.address,
+            treasuryContract.address,
+            wondersContract1.address,
+            wondersContract2.address,
+            wondersContract3.address,
+            wondersContract4.address,
+            forcesContract.address,
+            fightersContract.address,
+            navyContract.address,
+            resourcesContract.address
+          );
           
-        //   await deployedBillsContract.settings2(
-        //     improvementsContract1.address,
-        //     improvementsContract2.address,
-        //     missilesContract.address,
-        //     wondersContract4.address,
-        //     infrastructureContract.address,
-        //     bonusResourcesContract.address,
-        //     navyContract2.address,
-        //     countryParametersContract.address,
-        //     navalBlockadeContract.address
-        //   );
+          await deployedBillsContract.settings2(
+            improvementsContract1.address,
+            improvementsContract2.address,
+            missilesContract.address,
+            wondersContract4.address,
+            infrastructureContract.address,
+            bonusResourcesContract.address,
+            navyContract2.address,
+            countryParametersContract.address,
+            navalBlockadeContract.address
+          );
           
 
-        // console.log("bills contract settings");
+        console.log("bills contract settings");
         
-        // await deployedBombersContract.settings(
-        //     countryMinter.address,
-        //     bombersMarketplace1.address,
-        //     bombersMarketplace2.address,
-        //     airBattleContract.address,
-        //     treasuryContract.address,
-        //     fightersContract.address,
-        //     infrastructureContract.address,
-        //     warContract.address
-        //   );
+        await deployedBombersContract.settings(
+            countryMinter.address,
+            bombersMarketplace1.address,
+            bombersMarketplace2.address,
+            airBattleContract.address,
+            treasuryContract.address,
+            fightersContract.address,
+            infrastructureContract.address,
+            warContract.address
+          );
 
-        // console.log("bombers contract settings");
+        console.log("bombers contract settings");
 
-        // await deployedBombersMarketplace1.settings(
-        //     countryMinter.address,
-        //     bombersContract.address,
-        //     fightersContract.address,
-        //     fightersMarketplace1.address,
-        //     infrastructureContract.address,
-        //     treasuryContract.address
-        //   );
+        await deployedBombersMarketplace1.settings(
+            countryMinter.address,
+            bombersContract.address,
+            fightersContract.address,
+            fightersMarketplace1.address,
+            infrastructureContract.address,
+            treasuryContract.address
+          );
 
-        // console.log("bombers marketplace 1 settings");
+        console.log("bombers marketplace 1 settings");
 
-        // await deployedBombersMarketplace2.settings(
-        //     countryMinter.address,
-        //     bombersContract.address,
-        //     fightersContract.address,
-        //     fightersMarketplace1.address,
-        //     infrastructureContract.address,
-        //     treasuryContract.address
-        //   );
+        await deployedBombersMarketplace2.settings(
+            countryMinter.address,
+            bombersContract.address,
+            fightersContract.address,
+            fightersMarketplace1.address,
+            infrastructureContract.address,
+            treasuryContract.address
+          );
         
-        // console.log("bombers marketplace 2 settings");
+        console.log("bombers marketplace 2 settings");
         
-        // await deployedCountryMinter.settings(
-        //     countryParametersContract.address,
-        //     treasuryContract.address,
-        //     infrastructureContract.address,
-        //     resourcesContract.address,
-        //     missilesContract.address,
-        //     senateContract.address,
-        //     warBucks.address,
-        //     bonusResourcesContract.address
-        //   );
+        await deployedCountryMinter.settings(
+            countryParametersContract.address,
+            treasuryContract.address,
+            infrastructureContract.address,
+            resourcesContract.address,
+            missilesContract.address,
+            senateContract.address,
+            warBucks.address,
+            bonusResourcesContract.address
+          );
           
-        //   await deployedCountryMinter.settings2(
-        //     improvementsContract1.address,
-        //     improvementsContract2.address,
-        //     improvementsContract3.address,
-        //     improvementsContract4.address,
-        //     wondersContract1.address,
-        //     wondersContract2.address,
-        //     wondersContract3.address,
-        //     wondersContract4.address
-        //   );
+          await deployedCountryMinter.settings2(
+            improvementsContract1.address,
+            improvementsContract2.address,
+            improvementsContract3.address,
+            improvementsContract4.address,
+            wondersContract1.address,
+            wondersContract2.address,
+            wondersContract3.address,
+            wondersContract4.address
+          );
           
-        //   await deployedCountryMinter.settings3(
-        //     militaryContract.address,
-        //     forcesContract.address,
-        //     navyContract.address,
-        //     navyContract2.address,
-        //     navalActionsContract.address,
-        //     fightersContract.address,
-        //     bombersContract.address
-        //   );
+          await deployedCountryMinter.settings3(
+            militaryContract.address,
+            forcesContract.address,
+            navyContract.address,
+            navyContract2.address,
+            navalActionsContract.address,
+            fightersContract.address,
+            bombersContract.address
+          );
         
-        // console.log("country minter settings");
+        console.log("country minter settings");
         
-        // await deployedCountryParametersContract.settings(
-        //     spyOperationsContract.address,
-        //     countryMinter.address,
-        //     senateContract.address,
-        //     keeperContract.address,
-        //     nukeContract.address,
-        //     groundBattleContract.address,
-        //     wondersContract1.address,
-        //     treasuryContract.address
-        //   );
+        await deployedCountryParametersContract.settings(
+            spyOperationsContract.address,
+            countryMinter.address,
+            senateContract.address,
+            keeperContract.address,
+            nukeContract.address,
+            groundBattleContract.address,
+            wondersContract1.address,
+            treasuryContract.address
+          );
 
-        // console.log("country parameters contract settings");
+        console.log("country parameters contract settings");
 
-        // await deployedAllianceManager.settings(
-        //     countryMinter.address
-        //   );
+        await deployedAllianceManager.settings(
+            countryMinter.address
+          );
 
-        // console.log("alliance manager settings");
+        console.log("alliance manager settings");
 
-        // await deployedCrimeContract.settings(
-        //     infrastructureContract.address,
-        //     improvementsContract1.address,
-        //     improvementsContract2.address,
-        //     improvementsContract3.address,
-        //     improvementsContract4.address,
-        //     countryParametersContract.address,
-        //     wondersContract2.address
-        //   );
+        await deployedCrimeContract.settings(
+            infrastructureContract.address,
+            improvementsContract1.address,
+            improvementsContract2.address,
+            improvementsContract3.address,
+            improvementsContract4.address,
+            countryParametersContract.address,
+            wondersContract2.address
+          );
         
-        // console.log("crime contract settings");
+        console.log("crime contract settings");
         
-        // await deployedCruiseMissileContract.settings(
-        //     forcesContract.address,
-        //     countryMinter.address,
-        //     warContract.address,
-        //     infrastructureContract.address,
-        //     missilesContract.address
-        //   );
+        await deployedCruiseMissileContract.settings(
+            forcesContract.address,
+            countryMinter.address,
+            warContract.address,
+            infrastructureContract.address,
+            missilesContract.address
+          );
           
-        //   await deployedCruiseMissileContract.settings2(
-        //     improvementsContract1.address,
-        //     improvementsContract3.address,
-        //     improvementsContract4.address,
-        //     wondersContract2.address
-        //   );
+          await deployedCruiseMissileContract.settings2(
+            improvementsContract1.address,
+            improvementsContract3.address,
+            improvementsContract4.address,
+            wondersContract2.address
+          );
         
-        // console.log("cruise missile contract settings");
+        console.log("cruise missile contract settings");
 
-        // await deployedEnvironmentContract.settings(
-        //     countryMinter.address,
-        //     resourcesContract.address,
-        //     infrastructureContract.address,
-        //     wondersContract3.address,
-        //     wondersContract4.address,
-        //     forcesContract.address,
-        //     countryParametersContract.address,
-        //     additionalTaxesContract.address,
-        //     missilesContract.address,
-        //     nukeContract.address
-        //   );
+        await deployedEnvironmentContract.settings(
+            countryMinter.address,
+            resourcesContract.address,
+            infrastructureContract.address,
+            wondersContract3.address,
+            wondersContract4.address,
+            forcesContract.address,
+            countryParametersContract.address,
+            additionalTaxesContract.address,
+            missilesContract.address,
+            nukeContract.address
+          );
           
-        //   await deployedEnvironmentContract.settings2(
-        //     improvementsContract1.address,
-        //     improvementsContract3.address,
-        //     improvementsContract4.address,
-        //     bonusResourcesContract.address
-        //   );
+          await deployedEnvironmentContract.settings2(
+            improvementsContract1.address,
+            improvementsContract3.address,
+            improvementsContract4.address,
+            bonusResourcesContract.address
+          );
 
-        // console.log("environment contract settings");
+        console.log("environment contract settings");
         
-        // await deployedFightersContract.settings(
-        //     countryMinter.address,
-        //     fightersMarketplace1.address,
-        //     fightersMarketplace2.address,
-        //     treasuryContract.address,
-        //     warContract.address,
-        //     infrastructureContract.address,
-        //     resourcesContract.address,
-        //     improvementsContract1.address,
-        //     airBattleContract.address,
-        //     wondersContract1.address,
-        //     fighterLosses.address
-        //   );
+        await deployedFightersContract.settings(
+            countryMinter.address,
+            fightersMarketplace1.address,
+            fightersMarketplace2.address,
+            treasuryContract.address,
+            warContract.address,
+            infrastructureContract.address,
+            resourcesContract.address,
+            improvementsContract1.address,
+            airBattleContract.address,
+            wondersContract1.address,
+            fighterLosses.address
+          );
           
-        //   await deployedFightersContract.settings2(
-        //     navyContract.address,
-        //     bombersContract.address
-        //   );
+          await deployedFightersContract.settings2(
+            navyContract.address,
+            bombersContract.address
+          );
         
-        // console.log("fighters contract settings");
+        console.log("fighters contract settings");
         
-        // await deployedFighterLosses.settings(
-        //     fightersContract.address,
-        //     airBattleContract.address
-        //   );
+        await deployedFighterLosses.settings(
+            fightersContract.address,
+            airBattleContract.address
+          );
 
-        // console.log("fighter losses settings");
+        console.log("fighter losses settings");
 
-        // await deployedFightersMarketplace1.settings(
-        //     countryMinter.address,
-        //     bombersContract.address,
-        //     fightersContract.address,
-        //     treasuryContract.address,
-        //     infrastructureContract.address,
-        //     resourcesContract.address,
-        //     improvementsContract1.address,
-        //     wondersContract1.address,
-        //     wondersContract4.address,
-        //     navyContract.address
-        //   );
+        await deployedFightersMarketplace1.settings(
+            countryMinter.address,
+            bombersContract.address,
+            fightersContract.address,
+            treasuryContract.address,
+            infrastructureContract.address,
+            resourcesContract.address,
+            improvementsContract1.address,
+            wondersContract1.address,
+            wondersContract4.address,
+            navyContract.address
+          );
           
-        //   await deployedFightersMarketplace1.settings2(
-        //     bonusResourcesContract.address,
-        //     navyContract2.address
-        //   );
+          await deployedFightersMarketplace1.settings2(
+            bonusResourcesContract.address,
+            navyContract2.address
+          );
 
-        // console.log("fighters marketplace 1 settings");
+        console.log("fighters marketplace 1 settings");
         
-        // await deployedFightersMarketplace2.settings(
-        //     countryMinter.address,
-        //     bombersContract.address,
-        //     fightersContract.address,
-        //     fightersMarketplace1.address,
-        //     treasuryContract.address,
-        //     infrastructureContract.address,
-        //     resourcesContract.address,
-        //     improvementsContract1.address
-        //   );
+        await deployedFightersMarketplace2.settings(
+            countryMinter.address,
+            bombersContract.address,
+            fightersContract.address,
+            fightersMarketplace1.address,
+            treasuryContract.address,
+            infrastructureContract.address,
+            resourcesContract.address,
+            improvementsContract1.address
+          );
         
-        // console.log("fighters marketplace 2 settings");
+        console.log("fighters marketplace 2 settings");
         
-        // await deployedForcesContract.settings(
-        //     treasuryContract.address,
-        //     aidContract.address,
-        //     spyOperationsContract.address,
-        //     cruiseMissileContract.address,
-        //     nukeContract.address,
-        //     airBattleContract.address,
-        //     groundBattleContract.address,
-        //     warContract.address
-        //   );
+        await deployedForcesContract.settings(
+            treasuryContract.address,
+            aidContract.address,
+            spyOperationsContract.address,
+            cruiseMissileContract.address,
+            nukeContract.address,
+            airBattleContract.address,
+            groundBattleContract.address,
+            warContract.address
+          );
           
-        //   await deployedForcesContract.settings2(
-        //     infrastructureContract.address,
-        //     resourcesContract.address,
-        //     improvementsContract1.address,
-        //     improvementsContract2.address,
-        //     wondersContract1.address,
-        //     countryMinter.address,
-        //     keeperContract.address,
-        //     countryParametersContract.address
-        //   );
+          await deployedForcesContract.settings2(
+            infrastructureContract.address,
+            resourcesContract.address,
+            improvementsContract1.address,
+            improvementsContract2.address,
+            wondersContract1.address,
+            countryMinter.address,
+            keeperContract.address,
+            countryParametersContract.address
+          );
         
-        // console.log("forces contract settings");
+        console.log("forces contract settings");
         
-        // await deployedMissilesContract.settings(
-        //     treasuryContract.address,
-        //     spyOperationsContract.address,
-        //     nukeContract.address,
-        //     airBattleContract.address,
-        //     wondersContract2.address,
-        //     nationStrengthContract.address,
-        //     infrastructureContract.address
-        //   );
+        await deployedMissilesContract.settings(
+            treasuryContract.address,
+            spyOperationsContract.address,
+            nukeContract.address,
+            airBattleContract.address,
+            wondersContract2.address,
+            nationStrengthContract.address,
+            infrastructureContract.address
+          );
           
-        //   await deployedMissilesContract.settings2(
-        //     resourcesContract.address,
-        //     improvementsContract1.address,
-        //     wondersContract1.address,
-        //     wondersContract4.address,
-        //     countryMinter.address,
-        //     keeperContract.address
-        //   );
+          await deployedMissilesContract.settings2(
+            resourcesContract.address,
+            improvementsContract1.address,
+            wondersContract1.address,
+            wondersContract4.address,
+            countryMinter.address,
+            keeperContract.address
+          );
         
-        // console.log("missiles contract settings");
+        console.log("missiles contract settings");
             
-        // await deployedGroundBattleContract.settings(
-        //     warContract.address,
-        //     infrastructureContract.address,
-        //     forcesContract.address,
-        //     treasuryContract.address,
-        //     countryMinter.address,
-        //     militaryContract.address
-        //   );
+        await deployedGroundBattleContract.settings(
+            warContract.address,
+            infrastructureContract.address,
+            forcesContract.address,
+            treasuryContract.address,
+            countryMinter.address,
+            militaryContract.address
+          );
           
-        //   await deployedGroundBattleContract.settings2(
-        //     improvementsContract2.address,
-        //     improvementsContract4.address,
-        //     wondersContract3.address,
-        //     wondersContract4.address,
-        //     additionalTaxesContract.address,
-        //     countryParametersContract.address
-        //   );
+          await deployedGroundBattleContract.settings2(
+            improvementsContract2.address,
+            improvementsContract4.address,
+            wondersContract3.address,
+            wondersContract4.address,
+            additionalTaxesContract.address,
+            countryParametersContract.address
+          );
         
-        // console.log("ground battle contract settings");
+        console.log("ground battle contract settings");
         
-        // await deployedImprovementsContract1.settings(
-        //     treasuryContract.address,
-        //     improvementsContract2.address,
-        //     improvementsContract3.address,
-        //     improvementsContract4.address,
-        //     navyContract.address,
-        //     additionalNavyContract.address,
-        //     countryMinter.address,
-        //     wondersContract1.address,
-        //     infrastructureContract.address
-        //   );
+        await deployedImprovementsContract1.settings(
+            treasuryContract.address,
+            improvementsContract2.address,
+            improvementsContract3.address,
+            improvementsContract4.address,
+            navyContract.address,
+            additionalNavyContract.address,
+            countryMinter.address,
+            wondersContract1.address,
+            infrastructureContract.address
+          );
         
-        // console.log("improvements contract 1 settings");
+        console.log("improvements contract 1 settings");
 
-        // await deployedImprovementsContract2.settings(
-        //     treasuryContract.address,
-        //     forcesContract.address,
-        //     wondersContract1.address,
-        //     countryMinter.address,
-        //     improvementsContract1.address,
-        //     resourcesContract.address,
-        //     spyContract.address
-        //   );
+        await deployedImprovementsContract2.settings(
+            treasuryContract.address,
+            forcesContract.address,
+            wondersContract1.address,
+            countryMinter.address,
+            improvementsContract1.address,
+            resourcesContract.address,
+            spyContract.address
+          );
 
-        // console.log("improvements contract 2 settings");
+        console.log("improvements contract 2 settings");
         
-        // await deployedImprovementsContract3.settings(
-        //     treasuryContract.address,
-        //     additionalNavyContract.address,
-        //     improvementsContract1.address,
-        //     improvementsContract2.address,
-        //     countryMinter.address,
-        //     bonusResourcesContract.address,
-        //     wondersContract4.address
-        // );
+        await deployedImprovementsContract3.settings(
+            treasuryContract.address,
+            additionalNavyContract.address,
+            improvementsContract1.address,
+            improvementsContract2.address,
+            countryMinter.address,
+            bonusResourcesContract.address,
+            wondersContract4.address
+        );
 
-        // console.log("improvements contract 3 settings");
+        console.log("improvements contract 3 settings");
         
-        // await deployedImprovementsContract4.settings(
-        //     treasuryContract.address,
-        //     forcesContract.address,
-        //     improvementsContract1.address,
-        //     improvementsContract2.address,
-        //     countryMinter.address,
-        //     wondersContract4.address,
-        //     resourcesContract.address
-        //   );
+        await deployedImprovementsContract4.settings(
+            treasuryContract.address,
+            forcesContract.address,
+            improvementsContract1.address,
+            improvementsContract2.address,
+            countryMinter.address,
+            wondersContract4.address,
+            resourcesContract.address
+          );
 
-        // console.log("improvements contract 4 settings");
+        console.log("improvements contract 4 settings");
         
-        // await deployedInfrastructureContract.settings1(
-        //     resourcesContract.address,
-        //     improvementsContract1.address,
-        //     improvementsContract2.address,
-        //     improvementsContract3.address,
-        //     improvementsContract4.address,
-        //     infrastructureMarketContract.address,
-        //     technologyMarketContract.address,
-        //     landMarketContract.address,
-        //     bonusResourcesContract.address
-        // );
+        await deployedInfrastructureContract.settings1(
+            resourcesContract.address,
+            improvementsContract1.address,
+            improvementsContract2.address,
+            improvementsContract3.address,
+            improvementsContract4.address,
+            infrastructureMarketContract.address,
+            technologyMarketContract.address,
+            landMarketContract.address,
+            bonusResourcesContract.address
+        );
 
-        // await deployedInfrastructureContract.settings2(
-        //     wondersContract1.address,
-        //     wondersContract2.address,
-        //     wondersContract3.address,
-        //     wondersContract4.address,
-        //     treasuryContract.address,
-        //     countryParametersContract.address,
-        //     forcesContract.address,
-        //     aidContract.address
-        // );
+        await deployedInfrastructureContract.settings2(
+            wondersContract1.address,
+            wondersContract2.address,
+            wondersContract3.address,
+            wondersContract4.address,
+            treasuryContract.address,
+            countryParametersContract.address,
+            forcesContract.address,
+            aidContract.address
+        );
 
-        // await deployedInfrastructureContract.settings3(
-        //     spyOperationsContract.address,
-        //     taxesContract.address,
-        //     cruiseMissileContract.address,
-        //     nukeContract.address,
-        //     airBattleContract.address,
-        //     groundBattleContract.address,
-        //     countryMinter.address,
-        //     crimeContract.address,
-        //     countryParametersContract.address
-        // );
+        await deployedInfrastructureContract.settings3(
+            spyOperationsContract.address,
+            taxesContract.address,
+            cruiseMissileContract.address,
+            nukeContract.address,
+            airBattleContract.address,
+            groundBattleContract.address,
+            countryMinter.address,
+            crimeContract.address,
+            countryParametersContract.address
+        );
 
-        // console.log("infrastructure contract settings");
+        console.log("infrastructure contract settings");
 
-        // await deployedInfrastructureMarketContract.settings(
-        //     resourcesContract.address,
-        //     countryParametersContract.address,
-        //     improvementsContract1.address,
-        //     countryMinter.address,
-        //     wondersContract2.address,
-        //     wondersContract3.address,
-        //     treasuryContract.address,
-        //     infrastructureContract.address,
-        //     bonusResourcesContract.address
-        //   );
+        await deployedInfrastructureMarketContract.settings(
+            resourcesContract.address,
+            countryParametersContract.address,
+            improvementsContract1.address,
+            countryMinter.address,
+            wondersContract2.address,
+            wondersContract3.address,
+            treasuryContract.address,
+            infrastructureContract.address,
+            bonusResourcesContract.address
+          );
 
-        // console.log("infrastructure marketplace settings");
+        console.log("infrastructure marketplace settings");
 
-        // await deployedLandMarketContract.settings(
-        //     resourcesContract.address,
-        //     countryMinter.address,
-        //     infrastructureContract.address,
-        //     treasuryContract.address
-        //   );
+        await deployedLandMarketContract.settings(
+            resourcesContract.address,
+            countryMinter.address,
+            infrastructureContract.address,
+            treasuryContract.address
+          );
 
-        // console.log("land market contract settings");
+        console.log("land market contract settings");
 
         await deployedMilitaryContract.settings(
             spyOperationsContract.address,

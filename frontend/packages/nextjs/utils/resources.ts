@@ -1,59 +1,78 @@
 
 export const getResources = async (
-    nationId: string,
-    resourcesContract: any,
-    publicClient: any
-  ) => {
-    const resources: string[] = [];
+  nationId: string,
+  resourcesContract: any,
+  publicClient: any
+): Promise<string[]> => {
+  const resources: string[] = [];
 
-    if (!publicClient || !resourcesContract || !nationId) {
-      console.error("Missing required data: publicClient, resourcesContract, or nationId.");
-      return [];
-    }
+  if (!publicClient || !resourcesContract || !nationId) {
+    console.error("Missing required data: publicClient, resourcesContract, or nationId.");
+    return [];
+  }
 
-    try {
-      const resourceNames = [
-        { key: "viewAluminium", name: "Aluminium", link: "icons/aluminium.svg" },
-        { key: "viewCattle", name: "Cattle", link: "icons/cattle.svg" },
-        { key: "viewCoal", name: "Coal", link: "icons/coal.svg" },
-        { key: "viewFish", name: "Fish", link: "icons/fish.svg" },
-        { key: "viewFurs", name: "Furs", link: "icons/furs.svg" },
-        { key: "viewGems", name: "Gems", link: "icons/gems.svg" },
-        { key: "viewGold", name: "Gold", link: "icons/gold.svg" },
-        { key: "viewIron", name: "Iron", link: "icons/iron.svg" },
-        { key: "viewLead", name: "Lead", link: "icons/lead.svg" },
-        { key: "viewLumber", name: "Lumber", link: "icons/lumber.svg" },
-        { key: "viewMarble", name: "Marble", link: "icons/marble.svg" },
-        { key: "viewOil", name: "Oil", link: "icons/oil.svg" },
-        { key: "viewPigs", name: "Pigs", link: "icons/pigs.svg" },
-        { key: "viewRubber", name: "Rubber", link: "icons/rubber.svg" },
-        { key: "viewSilver", name: "Silver", link: "icons/silver.svg" },
-        { key: "viewSpices", name: "Spices", link: "icons/spices.svg" },
-        { key: "viewSugar", name: "Sugar", link: "icons/sugar.svg" },
-        { key: "viewUranium", name: "Uranium", link: "icons/uranium.svg" },
-        { key: "viewWater", name: "Water", link: "icons/water.svg" },
-        { key: "viewWheat", name: "Wheat", link: "icons/wheat.svg" },
-        { key: "viewWine", name: "Wine", link: "icons/wine.svg" },
-      ];
-  
-      for (const { key, name } of resourceNames) {
-        const hasResource = await publicClient.readContract({
-          abi: resourcesContract.abi,
-          address: resourcesContract.address,
-          functionName: key,
-          args: [nationId],
-        });
-  
-        if (hasResource) {
-          resources.push(name);
-        }
+  const resourceMeta1 = [
+    { name: "Aluminium", link: "icons/aluminium.svg" },
+    { name: "Cattle", link: "icons/cattle.svg" },
+    { name: "Coal", link: "icons/coal.svg" },
+    { name: "Fish", link: "icons/fish.svg" },
+    { name: "Furs", link: "icons/furs.svg" },
+    { name: "Gems", link: "icons/gems.svg" },
+    { name: "Gold", link: "icons/gold.svg" },
+    { name: "Iron", link: "icons/iron.svg" },
+    { name: "Lead", link: "icons/lead.svg" },
+    { name: "Lumber", link: "icons/lumber.svg" },
+    { name: "Marble", link: "icons/marble.svg" },
+  ];
+
+  const resourceMeta2 = [
+    { name: "Oil", link: "icons/oil.svg" },
+    { name: "Pigs", link: "icons/pigs.svg" },
+    { name: "Rubber", link: "icons/rubber.svg" },
+    { name: "Silver", link: "icons/silver.svg" },
+    { name: "Spices", link: "icons/spices.svg" },
+    { name: "Sugar", link: "icons/sugar.svg" },
+    { name: "Uranium", link: "icons/uranium.svg" },
+    { name: "Water", link: "icons/water.svg" },
+    { name: "Wheat", link: "icons/wheat.svg" },
+    { name: "Wine", link: "icons/wine.svg" },
+  ];
+
+  try {
+    const [result1, result2]: [boolean[], boolean[]] = await Promise.all([
+      publicClient.readContract({
+        abi: resourcesContract.abi,
+        address: resourcesContract.address,
+        functionName: "getResources1",
+        args: [nationId],
+      }),
+      publicClient.readContract({
+        abi: resourcesContract.abi,
+        address: resourcesContract.address,
+        functionName: "getResources2",
+        args: [nationId],
+      }),
+    ]);
+
+    result1.forEach((hasResource, index) => {
+      if (hasResource) {
+        resources.push(resourceMeta1[index].name);
       }
-      return resources;
-    } catch (error) {
-      console.error("Error fetching resources:", error);
-      return [];
-    }
-  };
+    });
+
+    result2.forEach((hasResource, index) => {
+      if (hasResource) {
+        resources.push(resourceMeta2[index].name);
+      }
+    });
+
+    return resources;
+  } catch (error) {
+    console.error("Error fetching resources:", error);
+    return [];
+  }
+};
+
 
 export const getBonusResources = async ( 
     nationId : string,

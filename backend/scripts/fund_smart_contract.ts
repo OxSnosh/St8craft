@@ -16,7 +16,7 @@ const provider = new ethers.JsonRpcProvider("https://sepolia.base.org");
 const signer = new ethers.Wallet(privateKey, provider);
 
 // 4. Define the target contract address
-const contractAddress = "0xCAa525E997bBc30DDb7393F098f5A8519c721c79"; // ← change this
+const contractAddress = "0x5a30B2A0ba355A02160eB254b6cce085511A707b"; // ← change this
 
 // 5. Send ETH (e.g., 0.01 ETH)
 async function sendEthToContract() {
