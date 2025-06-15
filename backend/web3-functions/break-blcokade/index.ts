@@ -1,34 +1,48 @@
 import { Web3Function, Web3FunctionContext } from "@gelatonetwork/web3-functions-sdk";
-import { Contract, ethers } from "ethers";
+import { Contract, Interface, id } from "ethers";
 
 const ORACLE_ABI = [
-  "function completeBattleSequence(uint256[], uint256[], uint256)",
+  "function completeBreakBlockade(uint256 battleId, uint256[] attackerChances, uint256[] attackerTypes, uint256[] defenderChances, uint256[] defenderTypes, uint256[] randomNumbers) external"
 ];
 
 Web3Function.onRun(async (context: Web3FunctionContext) => {
-  const { userArgs, gelatoArgs, multiChainProvider } = context;
+  const { gelatoArgs, multiChainProvider } = context;
   const provider = multiChainProvider.default();
 
-  const breakBlockadeAddress = "0x71b9b0f6c999cbbb0fef9c92b80d54e4973214da"; //update
-  const breakBlockade = new Contract(breakBlockadeAddress, ORACLE_ABI, provider);
+    const breakBlockadeAddress = "0x35d40644c2522d0A905d47c9Fab85cbA7B2b6474"; // update if needed
+    const breakBlockade = new Contract(breakBlockadeAddress, ORACLE_ABI);
 
-  let battleId = userArgs.battleId;
-  let attackerChances = Array.isArray(userArgs.attackerChances) && userArgs.attackerChances.every(item => typeof item === "number")
-    ? userArgs.attackerChances as number[]
-    : [];
-  let defenderChances = Array.isArray(userArgs.defenderChances) && userArgs.defenderChances.every(item => typeof item === "number")
-    ? userArgs.defenderChances as number[]
-    : [];
-  let attackerTypes = Array.isArray(userArgs.attackerTypes) && userArgs.attackerTypes.every(item => typeof item === "number")
-    ? userArgs.attackerTypes as number[]
-    : [];
-  let defenderTypes = Array.isArray(userArgs.defenderTypes) && userArgs.defenderTypes.every(item => typeof item === "number")
-    ? userArgs.defenderTypes as number[]
-    : [];
+    const EVENT_ABI = [
+        "event BreakBlockadeRequested(uint256 requestId, uint256 battleId, uint256[] randomWords, uint256[] attackerChances, uint256[] attackerTypes, uint256[] defenderChances, uint256[] defenderTypes)"
+    ];
+    const iface = new Interface(EVENT_ABI);
+    const eventTopic = id("BreakBlockadeRequested(uint256,uint256,uint256[],uint256[],uint256[],uint256[],uint256[])");
 
-  let randomNumbers = Array.isArray(userArgs.randomNumbers) && userArgs.randomNumbers.every(num => typeof num === "number")
-    ? userArgs.randomNumbers.map(num => BigInt(num))
-    : [];
+    const latestBlock = await provider.getBlockNumber();
+    const logs = await provider.getLogs({
+        address: breakBlockadeAddress,
+        topics: [eventTopic],
+        fromBlock: latestBlock - 15,
+        toBlock: "latest"
+    });
+
+    if (logs.length === 0) {
+        return { canExec: false, message: "No BreakBlockadeRequested events found" };
+    }
+
+    const latestLog = logs[logs.length - 1];
+    const parsed = iface.parseLog(latestLog);
+
+    if (!parsed) {
+        return { canExec: false, message: "Failed to parse the latest event log." };
+    }
+
+    const battleId = Number(parsed.args.requestNumber);
+    const randomNumbers = parsed.args.randomWords.map((n: bigint) => BigInt(n));
+    const attackerChances = parsed.args.attackerChances.map((n: bigint) => Number(n));
+    const attackerTypes = parsed.args.attackerTypes.map((n: bigint) => Number(n));
+    const defenderChances = parsed.args.defenderChances.map((n: bigint) => Number(n));
+    const defenderTypes = parsed.args.defenderTypes.map((n: bigint) => Number(n));
 
   function createChunks(numbers: bigint[]) {
     let chunks: string[] = []; // Declare chunks outside the loop to store all results

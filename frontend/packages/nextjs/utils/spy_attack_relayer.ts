@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { GelatoRelay, SponsoredCallRequest } from "@gelatonetwork/relay-sdk";
+// import { GelatoRelay, SponsoredCallRequest } from "@gelatonetwork/relay-sdk";
 import axios from "axios";
 import { CountryMinter, NationStrengthContract, SpyOperationsContract } from "../../../../backend/typechain-types";
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
@@ -24,7 +24,7 @@ export async function relaySpyOperation(data: Input, contractsData: any) {
     const TreasuryContract = contractsData?.TreasuryContract;
   const recoveredAddress = await ethers.utils.recoverAddress(data.messageHash, data.signature);
 
-  let mode = process.env.MODE || "localhost"; // dynamic mode based on env
+  let mode = process.env.MODE || "localhost";
 
   let provider
   if (mode === "localhost") {
@@ -32,6 +32,7 @@ export async function relaySpyOperation(data: Input, contractsData: any) {
   } else {
     provider = new ethers.providers.JsonRpcProvider("https://sepolia.base.org");
   }
+  
   // --- Ownership check ---
   if (mode === "production") {
     const minter = new ethers.Contract(
@@ -216,6 +217,8 @@ if (Number(network.chainId) === 31337) {
       return response.data;
     }
 }
+
+
 export function calculateSpyOperationCost(attackType: number, defenderStrength: number): number {
     switch (attackType) {
       case 1:

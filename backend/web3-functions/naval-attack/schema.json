@@ -4,13 +4,5 @@
     "memory": 128,
     "timeout": 30,
     "userArgs": {
-      "requestId": "number",
-      "battleId": "number",
-      "randomWords": "number[]",
-      "attackerChances": "number[]",
-      "attackerTypes": "number[]",
-      "defenderChances": "number[]",
-      "defenderTypes": "number[]",
-      "losses": "number"
     }
   }

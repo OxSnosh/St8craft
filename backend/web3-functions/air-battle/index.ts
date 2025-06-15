@@ -1,5 +1,5 @@
 import { Web3Function, Web3FunctionContext } from "@gelatonetwork/web3-functions-sdk";
-import { Contract, ethers } from "ethers";
+import { Contract, ethers, Interface, Log, id } from "ethers";
 
 const ORACLE_ABI = [
   "function completeAirBattle(uint256[], uint256[], uint256[], uint256, uint256, uint256, uint256, uint256, uint256)",
@@ -7,28 +7,48 @@ const ORACLE_ABI = [
 
 Web3Function.onRun(async (context: Web3FunctionContext) => {
   const { userArgs, gelatoArgs, multiChainProvider } = context;
-  const provider = multiChainProvider.default();
+  const provider = multiChainProvider.default()
 
-  const airBattleAddress = "0x71b9b0f6c999cbbb0fef9c92b80d54e4973214da"; //update
-  const airBattle = new Contract(airBattleAddress, ORACLE_ABI, provider);
+  const airBattleAddress = "0x9666Bb2cDb359D5b7A0F49Ec2026cB5B62823010"; //update
+  const airBattle = new Contract(airBattleAddress, ORACLE_ABI);
 
-  let battleId = userArgs.battleId;
-  const attackerId = userArgs.attackerId;
-  const defenderId = userArgs.defenderId;
+  const AIR_BATTLE_ABI = [
+    "event AirBattleRequested(uint256 battleId, uint256 attackerId, uint256 defenderId, uint256[] randomWords, uint256[] attackerFighters, uint256[] attackerBombers, uint256[] defenderFighters, uint256 timestamp)"
+  ];
 
-  let randomNumbers = Array.isArray(userArgs.randomNumbers) && userArgs.randomNumbers.every(num => typeof num === "number")
-    ? userArgs.randomNumbers.map(num => BigInt(num))
-    : [];
+  const eventSignature = "AirBattleRequested(uint256,uint256,uint256,uint256[],uint256[],uint256[],uint256[],uint256)";
+  const eventTopic = id(eventSignature);
+  // const eventTopic = ethers.utils.id(eventSignature);
 
-  let defenderFightersArr = Array.isArray(userArgs.defenderFighters) && userArgs.defenderFighters.every(num => typeof num === "number")
-    ? userArgs.defenderFighters
-    : [];
-  let attackerFightersArr = Array.isArray(userArgs.attackerFighters) && userArgs.attackerFighters.every(num => typeof num === "number")
-    ? userArgs.attackerFighters
-    : [];
-  let attackerBombersArr = Array.isArray(userArgs.attackerBombers) && userArgs.attackerBombers.every(num => typeof num === "number")
-    ? userArgs.attackerBombers
-    : [];
+  const iface = new Interface(AIR_BATTLE_ABI);
+  const latestBlock = await provider.getBlockNumber();
+
+  // Fetch logs
+  const logs = await provider.getLogs({
+    address: airBattleAddress,
+    topics: [eventTopic],
+    fromBlock: latestBlock - 15,
+    toBlock: "latest",
+  });
+
+  // 3. Sort and decode the most recent event
+  if (logs.length === 0) throw new Error("No AirBattleRequested events found");
+
+  const latestLog = logs[logs.length - 1];
+  const event = iface.parseLog(latestLog);
+
+  if (!event) {
+    throw new Error("Failed to parse AirBattleRequested event log");
+  }
+
+  // 4. Extract arguments from the event
+  const battleId = Number(event.args.battleId);
+  const attackerId = Number(event.args.attackerId);
+  const defenderId = Number(event.args.defenderId);
+  const randomNumbers = event.args.randomWords.map((n: bigint) => BigInt(n));
+  const attackerFightersArr = event.args.attackerFighters.map((n: bigint) => Number(n));
+  const attackerBombersArr = event.args.attackerBombers.map((n: bigint) => Number(n));
+  const defenderFightersArr = event.args.defenderFighters.map((n: bigint) => Number(n));
 
   let defenderBattleArray: number[] = []
   let i = 0
@@ -164,7 +184,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         console.log("attacker wins")
         //an attacker victory will result in a defender plane being lost and bomber damage inflicted (if bombers are present)
         var randomIndex = Math.floor(Math.random() * defenderFightersInvolved)
-        if (defenderFightersInvolved = 0) {
+        if (defenderFightersInvolved === 0) {
           console.log("bombing")
         } else if (defenderFightersInvolved >= 1) {
           console.log(randomIndex, "randomIndex")

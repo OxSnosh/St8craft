@@ -4,13 +4,5 @@
     "memory": 128,
     "timeout": 30,
     "userArgs": {
-      "battleId": "number",
-      "attakcerId": "number",
-      "defenderId": "number",
-      "randomWords": "number[]",
-      "attackerFighters": "number[]",
-      "attackerBombers": "number[]",
-      "defenderFighters": "number[]",
-      "timestamp": "number[]"
     }
   }
