@@ -11,6 +11,7 @@
         "local-remove": "graph remove --node http://localhost:8020/ scaffold-eth/your-contract",
         "local-deploy": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 scaffold-eth/your-contract",
         "local-ship": "yarn abi-copy && yarn codegen && yarn build --network localhost && yarn local-deploy",
+        "local-ship-base-sepolia": "yarn abi-copy && yarn codegen && yarn build --network base_sepolia && yarn local-deploy",
         "test": "graph test",
         "run-node": "cd graph-node && docker-compose up",
         "stop-node": "cd graph-node && docker-compose down",

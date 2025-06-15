@@ -17,6 +17,7 @@ const NationsTable = () => {
       }
       try {
         const { data: result } = await execute(GetNationsDocument, {});
+        console.log("Fetched nations data:", result);
         setNationsData(result);
       } catch (err) {
         setError(err);

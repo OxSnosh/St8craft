@@ -6,10 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: CountryMinter
-    network: localhost
+    network: base_sepolia
     source:
       abi: CountryMinter
       address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
+      startBlock: 27000000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -18,17 +19,18 @@ dataSources:
         - Nation
       abis:
         - name: CountryMinter
-          file: ./abis/localhost_CountryMinter.json
+          file: ./abis/base_sepolia_CountryMinter.json
       eventHandlers:
         - event: NationCreated(string,string,indexed uint256,address)
           handler: handleNationCreated
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: WarContract
-    network: localhost
+    network: base_sepolia
     source:
       abi: WarContract
       address: "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575"
+      startBlock: 27000000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -37,17 +39,18 @@ dataSources:
         - War
       abis:
         - name: WarContract
-          file: ./abis/localhost_WarContract.json
+          file: ./abis/base_sepolia_WarContract.json
       eventHandlers:
         - event: WarDeclared(indexed uint256,indexed uint256,indexed uint256)
           handler: handleWarDeclared
       file: ./src/warMapping.ts
   - kind: ethereum/contract
     name: CruiseMissileContract
-    network: localhost
+    network: base_sepolia
     source:
       abi: CruiseMissileContract
       address: "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1"
+      startBlock: 27000000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -56,7 +59,7 @@ dataSources:
         - CruiseMissileAttack
       abis:
         - name: CruiseMissileContract
-          file: ./abis/localhost_CruiseMissileContract.json
+          file: ./abis/base_sepolia_CruiseMissileContract.json
       eventHandlers:
         - event: CruiseMissileAttackResults(indexed uint256,indexed uint256,indexed
             uint256,bool,uint256,uint256)
@@ -64,10 +67,11 @@ dataSources:
       file: ./src/cruiseMissileMapping.ts
   - kind: ethereum/contract
     name: NukeContract
-    network: localhost
+    network: base_sepolia
     source:
       abi: NukeContract
       address: "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF"
+      startBlock: 27000000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -76,7 +80,7 @@ dataSources:
         - NukeAttack
       abis:
         - name: NukeContract
-          file: ./abis/localhost_NukeContract.json
+          file: ./abis/base_sepolia_NukeContract.json
       eventHandlers:
         - event: NukeAttackEvent(indexed uint256,indexed uint256,indexed
             uint256,uint256,bool)
@@ -84,10 +88,11 @@ dataSources:
       file: ./src/nukeMapping.ts
   - kind: ethereum/contract
     name: SpyOperationsContract
-    network: localhost
+    network: base_sepolia
     source:
       abi: SpyOperationsContract
       address: "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570"
+      startBlock: 27000000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -96,7 +101,7 @@ dataSources:
         - SpyOperation
       abis:
         - name: SpyOperationsContract
-          file: ./abis/localhost_SpyOperationsContract.json
+          file: ./abis/base_sepolia_SpyOperationsContract.json
       eventHandlers:
         - event: SpyAttackResults(indexed uint256,indexed uint256,indexed
             uint256,bool,uint256)
@@ -104,10 +109,11 @@ dataSources:
       file: ./src/spyOperationMapping.ts
   - kind: ethereum/contract
     name: AdditionalAirBattle
-    network: localhost
+    network: base_sepolia
     source:
       abi: AdditionalAirBattle
       address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853"
+      startBlock: 27000000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -116,7 +122,7 @@ dataSources:
         - SpyOperation
       abis:
         - name: AdditionalAirBattle
-          file: ./abis/localhost_AdditionalAirBattle.json
+          file: ./abis/base_sepolia_AdditionalAirBattle.json
       eventHandlers:
         - event: AirBattleFulfilled(indexed uint256,indexed uint256,indexed
             uint256,uint256[],uint256[],uint256[],uint256,uint256,uint256)
@@ -124,10 +130,11 @@ dataSources:
       file: ./src/airBattleMapping.ts
   - kind: ethereum/contract
     name: NavalAttackContract
-    network: localhost
+    network: base_sepolia
     source:
       abi: NavalAttackContract
       address: "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf"
+      startBlock: 27000000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -136,17 +143,18 @@ dataSources:
         - NavyAttack
       abis:
         - name: NavalAttackContract
-          file: ./abis/localhost_NavalAttackContract.json
+          file: ./abis/base_sepolia_NavalAttackContract.json
       eventHandlers:
         - event: NavalAttackComplete(uint256[],uint256[],uint256)
           handler: handleNavyAttack
       file: ./src/navyAttackMapping.ts
   - kind: ethereum/contract
     name: BreakBlocadeContract
-    network: localhost
+    network: base_sepolia
     source:
       abi: BreakBlocadeContract
       address: "0x4826533B4897376654Bb4d4AD88B7faFD0C98528"
+      startBlock: 27000000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -155,17 +163,18 @@ dataSources:
         - BreakBlockade
       abis:
         - name: BreakBlocadeContract
-          file: ./abis/localhost_BreakBlocadeContract.json
+          file: ./abis/base_sepolia_BreakBlocadeContract.json
       eventHandlers:
         - event: BreakBlockadeComlpete(uint256[],uint256,uint256[],uint256,uint256)
           handler: handleBreakBlockade
       file: ./src/breakBlockadeMapping.ts
   - kind: ethereum/contract
     name: NavalBlockadeContract
-    network: localhost
+    network: base_sepolia
     source:
       abi: NavalBlockadeContract
       address: "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49"
+      startBlock: 27000000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -174,17 +183,18 @@ dataSources:
         - BreakBlockade
       abis:
         - name: NavalBlockadeContract
-          file: ./abis/localhost_NavalBlockadeContract.json
+          file: ./abis/base_sepolia_NavalBlockadeContract.json
       eventHandlers:
         - event: BlockadeCompleted(uint256[],uint256[],uint256)
           handler: handleBlockade
       file: ./src/blockadeMapping.ts
   - kind: ethereum/contract
     name: Messenger
-    network: localhost
+    network: base_sepolia
     source:
       abi: Messenger
       address: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
+      startBlock: 27000000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -194,7 +204,7 @@ dataSources:
         - Post
       abis:
         - name: Messenger
-          file: ./abis/localhost_Messenger.json
+          file: ./abis/base_sepolia_Messenger.json
       eventHandlers:
         - event: MessageSent(indexed uint256,indexed uint256,string,uint256)
           handler: handleMessage
