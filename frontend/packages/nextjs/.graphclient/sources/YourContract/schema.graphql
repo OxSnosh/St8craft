@@ -21,9 +21,9 @@ type AirBattle {
   battleId: BigInt!
   attackerId: BigInt!
   defenderId: BigInt!
-  attackerFighterLosses: Bytes!
-  attackerBomberLosses: Bytes!
-  defenderFighterLosses: Bytes!
+  attackerFighterLosses: [BigInt!]
+  attackerBomberLosses: [BigInt!]
+  defenderFighterLosses: [BigInt!]
   infrastructureDamage: BigInt!
   tankDamage: BigInt!
   cruiseMissileDamage: BigInt!
@@ -63,36 +63,24 @@ input AirBattle_filter {
   defenderId_lte: BigInt
   defenderId_in: [BigInt!]
   defenderId_not_in: [BigInt!]
-  attackerFighterLosses: Bytes
-  attackerFighterLosses_not: Bytes
-  attackerFighterLosses_gt: Bytes
-  attackerFighterLosses_lt: Bytes
-  attackerFighterLosses_gte: Bytes
-  attackerFighterLosses_lte: Bytes
-  attackerFighterLosses_in: [Bytes!]
-  attackerFighterLosses_not_in: [Bytes!]
-  attackerFighterLosses_contains: Bytes
-  attackerFighterLosses_not_contains: Bytes
-  attackerBomberLosses: Bytes
-  attackerBomberLosses_not: Bytes
-  attackerBomberLosses_gt: Bytes
-  attackerBomberLosses_lt: Bytes
-  attackerBomberLosses_gte: Bytes
-  attackerBomberLosses_lte: Bytes
-  attackerBomberLosses_in: [Bytes!]
-  attackerBomberLosses_not_in: [Bytes!]
-  attackerBomberLosses_contains: Bytes
-  attackerBomberLosses_not_contains: Bytes
-  defenderFighterLosses: Bytes
-  defenderFighterLosses_not: Bytes
-  defenderFighterLosses_gt: Bytes
-  defenderFighterLosses_lt: Bytes
-  defenderFighterLosses_gte: Bytes
-  defenderFighterLosses_lte: Bytes
-  defenderFighterLosses_in: [Bytes!]
-  defenderFighterLosses_not_in: [Bytes!]
-  defenderFighterLosses_contains: Bytes
-  defenderFighterLosses_not_contains: Bytes
+  attackerFighterLosses: [BigInt!]
+  attackerFighterLosses_not: [BigInt!]
+  attackerFighterLosses_contains: [BigInt!]
+  attackerFighterLosses_contains_nocase: [BigInt!]
+  attackerFighterLosses_not_contains: [BigInt!]
+  attackerFighterLosses_not_contains_nocase: [BigInt!]
+  attackerBomberLosses: [BigInt!]
+  attackerBomberLosses_not: [BigInt!]
+  attackerBomberLosses_contains: [BigInt!]
+  attackerBomberLosses_contains_nocase: [BigInt!]
+  attackerBomberLosses_not_contains: [BigInt!]
+  attackerBomberLosses_not_contains_nocase: [BigInt!]
+  defenderFighterLosses: [BigInt!]
+  defenderFighterLosses_not: [BigInt!]
+  defenderFighterLosses_contains: [BigInt!]
+  defenderFighterLosses_contains_nocase: [BigInt!]
+  defenderFighterLosses_not_contains: [BigInt!]
+  defenderFighterLosses_not_contains_nocase: [BigInt!]
   infrastructureDamage: BigInt
   infrastructureDamage_not: BigInt
   infrastructureDamage_gt: BigInt

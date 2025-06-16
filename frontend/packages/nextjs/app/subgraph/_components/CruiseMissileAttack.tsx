@@ -50,8 +50,16 @@ const CruiseMissileAttackTable = () => {
                 <th>{cruiseMissileAttack.warId}</th>
                 <th>{cruiseMissileAttack.attackerId}</th>
                 <th>{cruiseMissileAttack.defenderId}</th>
-                <th>{cruiseMissileAttack.landed}</th>
-                <th>{cruiseMissileAttack.damageTypeNumber}</th>
+                <th>{cruiseMissileAttack.landed.toString()}</th>
+                <th>
+                  {cruiseMissileAttack.damageTypeNumber === "0"
+                    ? "tanks"
+                    : cruiseMissileAttack.damageTypeNumber === "1"
+                    ? "tech"
+                    : cruiseMissileAttack.damageTypeNumber === "2"
+                    ? "infrastructure"
+                    : "Unknown"}
+                </th>
               </tr>
             ))}
           </tbody>

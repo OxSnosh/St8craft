@@ -49,7 +49,7 @@ const NukeAttackTable = () => {
                 <th>{nukeAttack.warId}</th>
                 <th>{nukeAttack.attackerId}</th>
                 <th>{nukeAttack.defenderId}</th>
-                <th>{nukeAttack.landed}</th>
+                <th>{nukeAttack.landed.toString()}</th>
               </tr>
             ))}
           </tbody>

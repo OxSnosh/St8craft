@@ -9,8 +9,8 @@ dataSources:
     network: base_sepolia
     source:
       abi: CountryMinter
-      address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
-      startBlock: 27000000
+      address: "0x06883877571987A2d45092269186A4EBAFFBDB16"
+      startBlock: 27100000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -29,8 +29,8 @@ dataSources:
     network: base_sepolia
     source:
       abi: WarContract
-      address: "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575"
-      startBlock: 27000000
+      address: "0x3439Ce508acdB0627FBa615954b7a6A9C6f29e64"
+      startBlock: 27100000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -49,8 +49,8 @@ dataSources:
     network: base_sepolia
     source:
       abi: CruiseMissileContract
-      address: "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1"
-      startBlock: 27000000
+      address: "0x1cdCF1de59c9A0d19e093817c71Bee048Fbcb6BA"
+      startBlock: 27100000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -70,8 +70,8 @@ dataSources:
     network: base_sepolia
     source:
       abi: NukeContract
-      address: "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF"
-      startBlock: 27000000
+      address: "0xa0Dcb1fC1399AEfC97C21c43bB50Ee7D795A88Db"
+      startBlock: 27100000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -92,7 +92,7 @@ dataSources:
     source:
       abi: SpyOperationsContract
       address: "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570"
-      startBlock: 27000000
+      startBlock: 27100000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -113,7 +113,7 @@ dataSources:
     source:
       abi: AdditionalAirBattle
       address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853"
-      startBlock: 27000000
+      startBlock: 27100000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -134,7 +134,7 @@ dataSources:
     source:
       abi: NavalAttackContract
       address: "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf"
-      startBlock: 27000000
+      startBlock: 27100000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -154,7 +154,7 @@ dataSources:
     source:
       abi: BreakBlocadeContract
       address: "0x4826533B4897376654Bb4d4AD88B7faFD0C98528"
-      startBlock: 27000000
+      startBlock: 27100000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -174,7 +174,7 @@ dataSources:
     source:
       abi: NavalBlockadeContract
       address: "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49"
-      startBlock: 27000000
+      startBlock: 27100000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -194,7 +194,7 @@ dataSources:
     source:
       abi: Messenger
       address: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
-      startBlock: 27000000
+      startBlock: 27100000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

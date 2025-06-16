@@ -127,7 +127,7 @@ query GetPosts($sender: BigInt) {
 query GetReceivedMessages($receiver: BigInt!) {
   messages(where: { receiver: $receiver }) {
     id
-    nationId
+    sender
     receiver
     message
     createdAt
@@ -139,7 +139,7 @@ query GetReceivedMessages($receiver: BigInt!) {
 query GetSentMessages($sender: BigInt!) {
   messages(where: { sender: $sender }) {
     id
-    nationId
+    sender
     receiver
     message
     createdAt
