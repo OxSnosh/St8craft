@@ -690,12 +690,6 @@ contract NavyContract is Ownable, ReentrancyGuard {
         _;
     }
 
-    ///@dev this is a public function only callable from the nuke contract
-    ///@dev this function will decrease the amount of ships that are vulnerable to nuclear attacks when a nation is attacked by a nuke strike
-    ///@notice this function will decrease the amount of ships that are vulnerable to nuclear attacks when a nation is attacked by a nuke strike
-    ///@notice vessels available to nuke strikes are corvettes, landing ships, cruisers and frigates
-    ///@notice a nuke strike will reduce the number of these ships by 25% (12% with a fallout shelter system)
-    ///@param defenderId this is the nation id of the nation being attacked
     function decreaseNavyFromNukeContract(
         uint256 defenderId
     ) public onlyNukeContract {
@@ -706,29 +700,12 @@ contract NavyContract is Ownable, ReentrancyGuard {
 
         Navy storage navy = idToNavy[defenderId];
 
-        uint256 corvetteCountToReduce = (navy.corvetteCount * percentage) / 100;
-        uint256 landingShipCountToReduce = (navy.landingShipCount *
-            percentage) / 100;
-        uint256 cruiserCountToReduce = (navy.cruiserCount * percentage) / 100;
+        uint256 corvetteCountToReduce = min(navy.corvetteCount, (navy.corvetteCount * percentage) / 100);
+        uint256 landingShipCountToReduce = min(navy.landingShipCount, (navy.landingShipCount * percentage) / 100);
+        uint256 cruiserCountToReduce = min(navy.cruiserCount, (navy.cruiserCount * percentage) / 100);
+        
         uint256 currentFrigates = navy2.getFrigateCount(defenderId);
-        uint256 frigateCountToReduce = (currentFrigates * percentage) / 100;
-
-        require(
-            corvetteCountToReduce <= navy.corvetteCount,
-            "not enough corvettes"
-        );
-        require(
-            landingShipCountToReduce <= navy.landingShipCount,
-            "not enough landing ships"
-        );
-        require(
-            cruiserCountToReduce <= navy.cruiserCount,
-            "not enough cruisers"
-        );
-        require(
-            frigateCountToReduce <= navy2.getFrigateCount(defenderId),
-            "not enough frigates"
-        );
+        uint256 frigateCountToReduce = min(currentFrigates, (currentFrigates * percentage) / 100);
 
         navy.corvetteCount -= corvetteCountToReduce;
         navy.landingShipCount -= landingShipCountToReduce;
@@ -742,6 +719,10 @@ contract NavyContract is Ownable, ReentrancyGuard {
             cruiserCountToReduce,
             frigateCountToReduce
         );
+    }
+
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a < b ? a : b;
     }
 }
 

@@ -228,8 +228,8 @@ export const proposeTrade = async (
 };
 
 export const acceptTrade = async (
-  proposingNationId: string,
   proposedNationId: string,
+  proposingNationId: string,
   resourcesContract: any,
   writeContractAsync: any
 ) => {

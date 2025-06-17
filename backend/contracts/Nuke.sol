@@ -15,13 +15,14 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import {IVRFCoordinatorV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/interfaces/IVRFCoordinatorV2Plus.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 ///@title NukeContract
 ///@author OxSnosh
 ///@dev this contract inherits from chainlink VRF
 ///@dev this contract inherits from openzeppelin ownable
 ///@notice this contract will allow a nation to launch a nuclear missile at anoter nation
-contract NukeContract is VRFConsumerBaseV2Plus {
+contract NukeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     uint256 nukeAttackId;
     address countryMinter;
     address warAddress;
@@ -166,7 +167,7 @@ contract NukeContract is VRFConsumerBaseV2Plus {
         uint256 attackerId,
         uint256 defenderId,
         uint256 attackType
-    ) public {
+    ) public nonReentrant{
         bool isOwner = mint.checkOwnership(attackerId, msg.sender);
         require(isOwner, "!nation owner");
         bool isActive = war.isWarActive(warId);
@@ -274,6 +275,7 @@ contract NukeContract is VRFConsumerBaseV2Plus {
             param.inflictAnarchy(defenderId);
             uint256 gameDay = keep.getGameDay();
             gameDayToNukesLanded[gameDay]++;
+            nationIdToDayToNukeLanded[defenderId][gameDay] = true;
             emit NukeAttackEvent(
                 requestNumber,
                 attackerId,
@@ -281,8 +283,6 @@ contract NukeContract is VRFConsumerBaseV2Plus {
                 nukeAttackIdToNukeAttack[requestNumber].warId,
                 true
             );
-            uint256 day = keep.getGameDay();
-            nationIdToDayToNukeLanded[defenderId][day] = true;
         } else {
             mis.decreaseNukeCountFromNukeContract(attackerId);
             emit NukeAttackEvent(
@@ -316,6 +316,13 @@ contract NukeContract is VRFConsumerBaseV2Plus {
         if (attackerSattelites > 0) {
             thwartOdds -= (attackerSattelites * 5);
         }
+
+        if (thwartOdds > 100) {
+            thwartOdds = 100;
+        } else if (thwartOdds < 0) {
+            thwartOdds = 0;
+        }
+        
         return thwartOdds;
     }
 

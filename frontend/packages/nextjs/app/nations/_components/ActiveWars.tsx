@@ -72,7 +72,7 @@ const ActiveWars = () => {
         };
 
         fetchMintedNations();
-    }, [walletAddress, contractsData, publicClient]);
+    }, [walletAddress, publicClient]);
 
     useEffect(() => {
         const fetchActiveWars = async () => {
@@ -97,7 +97,7 @@ const ActiveWars = () => {
         };
 
         fetchActiveWars();
-    }, [selectedNation, contractsData, publicClient]);
+    }, [selectedNation, publicClient]);
 
     const handleNationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedNation(e.target.value);
@@ -162,7 +162,7 @@ const ActiveWars = () => {
         };
     
         fetchPeaceStatus();
-    }, [selectedWar, selectedNation, contractsData, warDetails]);
+    }, [selectedWar, selectedNation, warDetails]);
 
     useEffect(() => {
         if (!selectedWar || !contractsData?.WarContract || !warDetails[selectedWar]) return;3
@@ -329,7 +329,7 @@ const PeaceOfferCard = () => {
             if (deploySoldiers <= 0 && deployTanks <= 0) return;
             if(!selectedWar || !selectedNation) return;
 
-            const contractData = contractsData.WarContract;
+            const contractData = contractsData.ForcesContract;
             const abi = contractData.abi;
 
             if (!contractData.address || !abi) {
@@ -345,11 +345,11 @@ const PeaceOfferCard = () => {
 
                 const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
 
-                const data = contract.interface.encodeFunctionData("deployForcesToWar", [
-                    selectedNation,
-                    selectedWar,
+                const data = contract.interface.encodeFunctionData("deployForces", [
                     deploySoldiers,
-                    deployTanks
+                    deployTanks,
+                    selectedNation,
+                    selectedWar
                 ]);
 
                 try {
@@ -373,7 +373,7 @@ const PeaceOfferCard = () => {
                     return;            
                 }
         
-                const tx = await deployForcesToWar(selectedNation, selectedWar, deploySoldiers, deployTanks, contractsData.WarContract, writeContractAsync);
+                const tx = await deployForcesToWar(selectedNation, selectedWar, deploySoldiers, deployTanks, contractsData.ForcesContract, writeContractAsync);
                 
                 const deployedForces = await getDeployedGroundForces(selectedWar, selectedNation, contractsData.WarContract, publicClient);
                 setDeployedSoldiers(deployedForces[0]);
@@ -673,10 +673,11 @@ const PeaceOfferCard = () => {
         const [attackType, setAttackType] = useState<number>(1);
     
         useEffect(() => {
-            if (!selectedNation || !contractsData?.NukesContract) return;
-    
+            if (!selectedNation || !contractsData?.NukeContract) return;
+            
             const fetchNukeCount = async () => {
                 const count = await getNukeCount(selectedNation, publicClient, contractsData.MissilesContract);
+                console.log("Nuke Count:", count);
                 setNukeCount(count);
             };
     
@@ -749,7 +750,7 @@ const PeaceOfferCard = () => {
                     return;            
                 }
         
-                const tx = await launchNuke(selectedWar, selectedNation, defendingNationId, attackType.toString(), contractsData.NukesContract, writeContractAsync); //// update function call
+                const tx = await launchNuke(selectedWar, selectedNation, defendingNationId, attackType.toString(), contractsData.NukeContract, writeContractAsync); //// update function call
         
                 alert(`Nuclear missile launched at ${defendingNationId} with attack type ${attackType}!`);
     
@@ -770,7 +771,7 @@ const PeaceOfferCard = () => {
             <div className="border border-black p-4 rounded-lg shadow-md mt-4">
                 <h2 className="text-lg font-bold">Launch Nuclear Missile</h2>
     
-                <p><strong>Your Nukes:</strong> {nukeCount}</p>
+                <p><strong>Your Nukes:</strong> {nukeCount.toString()}</p>
     
                 {/* Attack Type Input */}
                 <div className="mt-2">

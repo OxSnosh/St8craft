@@ -184,22 +184,21 @@ export const deployForcesToWar = async (
     warId: string,
     soldiers: number,
     tanks: number,
-    warContract: any,
+    forcesContract: any,
     writeContractAsync: any
 ) => {
-    if (!warContract || !warId || !nationId) {
+    if (!forcesContract || !warId || !nationId) {
         console.error("Missing required data: warContract, warId, or nationId.");
         return;
     }
 
-    console.log("are we here")
     try {
 
         const tx = await writeContractAsync({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "deployForcesToWar",
-            args: [nationId, warId, soldiers, tanks],
+            abi: forcesContract.abi,
+            address: forcesContract.address,
+            functionName: "deployForces",
+            args: [soldiers, tanks, nationId, warId],
         });
 
         return tx

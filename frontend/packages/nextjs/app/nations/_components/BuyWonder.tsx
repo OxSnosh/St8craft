@@ -154,7 +154,7 @@ const BuyWonder = () => {
     },
     manhattanProject: {
       Cost: "100,000,000 Warbucks",
-      Benefits: "Allows nuclear weapon development under 150,000 strength, Cannot be destroyed",
+      Benefits: "Allows nuclear weapon development under 150,000 strength",
       Requirements: "3,000 infrastructure, 300 technology, Uranium resource"
     },
     miningIndustryConsortium: {

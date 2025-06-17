@@ -59,6 +59,8 @@ export const getNukeCount = async (
         return;
     }
 
+    console.log("Fetching nuke count for nation:", nationId);
+
     return await publicClient.readContract({
         abi: missileContract.abi,
         address: missileContract.address,
