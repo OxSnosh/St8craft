@@ -51,9 +51,10 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     }
 
     event BlockadeCompleted(
-        uint256[] attackerLosses,
-        uint256[] defenderLosses,
-        uint256 battleId
+        uint256 attackerId,
+        uint256 defenderId,
+        uint256 battleId,
+        uint256 percentageReduction
     );
 
     mapping(uint256 => Blockade) public blockadeIdToBlockade;
@@ -278,6 +279,12 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint256 blockadePercentage = ((s_randomWords[0] % 5) + 1);
         blockadeIdToBlockade[battleId]
             .blockadePercentageReduction = blockadePercentage;
+        emit BlockadeCompleted(
+            blockadeIdToBlockade[battleId].blockaderId,
+            blockadeIdToBlockade[battleId].blockadedId,
+            battleId,
+            blockadePercentage
+        );
     }
 
     function getActiveBlockadesAgainst(

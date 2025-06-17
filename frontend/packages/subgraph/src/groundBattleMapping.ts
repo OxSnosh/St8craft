@@ -3,7 +3,7 @@ import { GroundBattleResultsEvent } from "../generated/GroundBattleContract/Grou
 import { GroundBattle } from "../generated/schema";
 
 
-export function handleGroundBattleResults(event: GroundBattleResultsEvent): void {
+export function handleGroundBattle(event: GroundBattleResultsEvent): void {
     let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString();
     
     let groundBattle = new GroundBattle(id);

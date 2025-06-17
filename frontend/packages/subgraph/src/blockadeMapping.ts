@@ -9,8 +9,9 @@ export function handleBlockade(event: BlockadeCompleted): void {
     let blockade = new Blockade(id)
     
     blockade.battleId = event.params.battleId,
-    blockade.attackerLosses = event.params.attackerLosses,
-    blockade.defenderLosses = event.params.defenderLosses,
+    blockade.blockaderId = event.params.attackerId,
+    blockade.blockadedId = event.params.defenderId,
+    blockade.percentageReduction = event.params.percentageReduction,
     blockade.transactionHash = event.transaction.hash.toHex()
     
     blockade.save();

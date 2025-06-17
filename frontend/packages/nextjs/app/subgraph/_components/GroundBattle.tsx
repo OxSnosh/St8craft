@@ -53,7 +53,7 @@ const GroundBattleTable = () => {
                 <th>{groundBattle.attackerId}</th>
                 <th>{groundBattle.attackerSoldierLosses}</th>
                 <th>{groundBattle.attackerTankLosses}</th>
-                <th>{groundBattle.defender}</th>
+                <th>{groundBattle.defenderId}</th>
                 <th>{groundBattle.defenderSoldierLosses}</th>
                 <th>{groundBattle.defenderTankLosses}</th>
               </tr>

@@ -12,8 +12,7 @@ export function handleNukeAttackResults(event: NukeAttackEvent): void {
     nukeAttack.defenderId = event.params.defenderId,
     nukeAttack.warId = event.params.warId,
     nukeAttack.landed = event.params.landed,
-    
-    event.transaction.hash.toHex()
-    
+    nukeAttack.transactionHash = event.transaction.hash.toHex()
+
     nukeAttack.save();
 }

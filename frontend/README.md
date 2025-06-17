@@ -78,3 +78,240 @@ To know more about its features, check out our [website](https://scaffoldeth.io)
 We welcome contributions to Scaffold-ETH 2!
 
 Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
+
+
+
+
+specVersion: 0.0.4
+description: CountryMinter
+repository: https://github.com/scaffold-eth/se-2/packages/subgraph/
+schema:
+  file: ./src/schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: CountryMinter
+    network: base_sepolia
+    source:
+      abi: CountryMinter
+      address: "0x06883877571987A2d45092269186A4EBAFFBDB16"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Nation
+      abis:
+        - name: CountryMinter
+          file: ./abis/base_sepolia_CountryMinter.json
+      eventHandlers:
+        - event: NationCreated(string,string,indexed uint256,address)
+          handler: handleNationCreated
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: WarContract
+    network: base_sepolia
+    source:
+      abi: WarContract
+      address: "0x3439Ce508acdB0627FBa615954b7a6A9C6f29e64"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - War
+      abis:
+        - name: WarContract
+          file: ./abis/base_sepolia_WarContract.json
+      eventHandlers:
+        - event: WarDeclared(indexed uint256,indexed uint256,indexed uint256)
+          handler: handleWarDeclared
+      file: ./src/warMapping.ts
+  - kind: ethereum/contract
+    name: CruiseMissileContract
+    network: base_sepolia
+    source:
+      abi: CruiseMissileContract
+      address: "0x1cdCF1de59c9A0d19e093817c71Bee048Fbcb6BA"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - CruiseMissileAttack
+      abis:
+        - name: CruiseMissileContract
+          file: ./abis/base_sepolia_CruiseMissileContract.json
+      eventHandlers:
+        - event: CruiseMissileAttackResults(indexed uint256,indexed uint256,indexed
+            uint256,bool,uint256,uint256)
+          handler: handleCruiseMissileAttackResults
+      file: ./src/cruiseMissileMapping.ts
+  - kind: ethereum/contract
+    name: NukeContract
+    network: base_sepolia
+    source:
+      abi: NukeContract
+      address: "0xa0Dcb1fC1399AEfC97C21c43bB50Ee7D795A88Db"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - NukeAttack
+      abis:
+        - name: NukeContract
+          file: ./abis/base_sepolia_NukeContract.json
+      eventHandlers:
+        - event: NukeAttackEvent(indexed uint256,indexed uint256,indexed
+            uint256,uint256,bool)
+          handler: handleNukeAttackResults
+      file: ./src/nukeMapping.ts
+  - kind: ethereum/contract
+    name: SpyOperationsContract
+    network: base_sepolia
+    source:
+      abi: SpyOperationsContract
+      address: "0xB40B4C55a7891A4c7D13Ad14F4BBb573527d08F3"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - SpyOperation
+      abis:
+        - name: SpyOperationsContract
+          file: ./abis/base_sepolia_SpyOperationsContract.json
+      eventHandlers:
+        - event: SpyAttackResults(indexed uint256,indexed uint256,indexed
+            uint256,bool,uint256)
+          handler: handleSpyOperation
+      file: ./src/spyOperationMapping.ts
+  - kind: ethereum/contract
+    name: AdditionalAirBattle
+    network: base_sepolia
+    source:
+      abi: AdditionalAirBattle
+      address: "0xf351919b3E3936E3549e820a3382A66458240BFC"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - SpyOperation
+      abis:
+        - name: AdditionalAirBattle
+          file: ./abis/base_sepolia_AdditionalAirBattle.json
+      eventHandlers:
+        - event: AirBattleFulfilled(indexed uint256,indexed uint256,indexed
+            uint256,uint256[],uint256[],uint256[],uint256,uint256,uint256)
+          handler: handleAirBattle
+      file: ./src/airBattleMapping.ts
+  - kind: ethereum/contract
+    name: NavalAttackContract
+    network: base_sepolia
+    source:
+      abi: NavalAttackContract
+      address: "0x823656D368b2409F1aDDe41F1991a34408770722"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - NavyAttack
+      abis:
+        - name: NavalAttackContract
+          file: ./abis/base_sepolia_NavalAttackContract.json
+      eventHandlers:
+        - event: NavalAttackComplete(uint256[],uint256[],uint256)
+          handler: handleNavyAttack
+      file: ./src/navyAttackMapping.ts
+  - kind: ethereum/contract
+    name: BreakBlocadeContract
+    network: base_sepolia
+    source:
+      abi: BreakBlocadeContract
+      address: "0x35d40644c2522d0A905d47c9Fab85cbA7B2b6474"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - BreakBlockade
+      abis:
+        - name: BreakBlocadeContract
+          file: ./abis/base_sepolia_BreakBlocadeContract.json
+      eventHandlers:
+        - event: BreakBlockadeComlpete(uint256[],uint256,uint256[],uint256,uint256)
+          handler: handleBreakBlockade
+      file: ./src/breakBlockadeMapping.ts
+  - kind: ethereum/contract
+    name: NavalBlockadeContract
+    network: base_sepolia
+    source:
+      abi: NavalBlockadeContract
+      address: "0x150B19CB4a34B5Fc4b36D5A2E643Aa00224Cc6d9"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - BreakBlockade
+      abis:
+        - name: NavalBlockadeContract
+          file: ./abis/base_sepolia_NavalBlockadeContract.json
+      eventHandlers:
+        - event: BlockadeCompleted(uint256[],uint256[],uint256)
+          handler: handleBlockade
+      file: ./src/blockadeMapping.ts
+  - kind: ethereum/contract
+    name: Messenger
+    network: base_sepolia
+    source:
+      abi: Messenger
+      address: "0xD74274be93893f58a21381a596C4E7c2e88C2069"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Message
+        - Post
+      abis:
+        - name: Messenger
+          file: ./abis/base_sepolia_Messenger.json
+      eventHandlers:
+        - event: MessageSent(indexed uint256,indexed uint256,string,uint256)
+          handler: handleMessage
+        - event: PostSent(indexed uint256,string,uint256)
+          handler: handlePost
+      file: ./src/messengerMapping.ts
+  - kind: ethereum/contract
+    name: GroundBattleContract
+    network: base_sepolia
+    source:
+      abi: GroundBattleContract
+      address: "0x620A48673533223987a34A5e706Db4241E87Cb74"
+      startBlock: 27100000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - GroundBattle
+      abis:
+        - name: GroundBattleContract
+          file: ./abis/base_sepolia_GroundBattleContract.json
+      eventHandlers:
+        - event: GroundBattleResultsEvent(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleGroundBattle
+      file: ./src/groundBattleMapping.ts
