@@ -188,8 +188,9 @@ export type Block_height = {
 export type Blockade = {
   id: Scalars['ID']['output'];
   battleId: Scalars['BigInt']['output'];
-  attackerLosses: Array<Scalars['BigInt']['output']>;
-  defenderLosses: Array<Scalars['BigInt']['output']>;
+  blockaderId: Scalars['BigInt']['output'];
+  blockadedId: Scalars['BigInt']['output'];
+  percentageReduction: Scalars['BigInt']['output'];
   transactionHash: Scalars['String']['output'];
 };
 
@@ -210,18 +211,30 @@ export type Blockade_filter = {
   battleId_lte?: InputMaybe<Scalars['BigInt']['input']>;
   battleId_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   battleId_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses_not?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses_not_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses_not?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses_not_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockaderId?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockaderId_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockadedId?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockadedId_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  percentageReduction?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_not?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  percentageReduction_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   transactionHash?: InputMaybe<Scalars['String']['input']>;
   transactionHash_not?: InputMaybe<Scalars['String']['input']>;
   transactionHash_gt?: InputMaybe<Scalars['String']['input']>;
@@ -251,8 +264,9 @@ export type Blockade_filter = {
 export type Blockade_orderBy =
   | 'id'
   | 'battleId'
-  | 'attackerLosses'
-  | 'defenderLosses'
+  | 'blockaderId'
+  | 'blockadedId'
+  | 'percentageReduction'
   | 'transactionHash';
 
 export type BreakBlockade = {
@@ -1937,8 +1951,9 @@ export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 export type BlockadeResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Blockade'] = ResolversParentTypes['Blockade']> = ResolversObject<{
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   battleId?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  attackerLosses?: Resolver<Array<ResolversTypes['BigInt']>, ParentType, ContextType>;
-  defenderLosses?: Resolver<Array<ResolversTypes['BigInt']>, ParentType, ContextType>;
+  blockaderId?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  blockadedId?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  percentageReduction?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
   transactionHash?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -2222,19 +2237,19 @@ const merger = new(BareMerger as any)({
         store: rootStore.child('bareMerger')
       })
 const documentHashMap = {
-        "984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetNationsDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetWarsDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetGroundBattlesDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetCruiseMissileAttacksDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetNukeAttacksDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetSpyOperationsDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetAirBattlesDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetNavalAttacksDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetBreakBlockadesDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetBlockadesDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetPostsDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetReceivedMessagesDocument,
-"984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480": GetSentMessagesDocument
+        "cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetNationsDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetWarsDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetGroundBattlesDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetCruiseMissileAttacksDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetNukeAttacksDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetSpyOperationsDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetAirBattlesDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetNavalAttacksDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetBreakBlockadesDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetBlockadesDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetPostsDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetReceivedMessagesDocument,
+"cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13": GetSentMessagesDocument
       }
 additionalEnvelopPlugins.push(usePersistedOperations({
         getPersistedOperation(key) {
@@ -2261,91 +2276,91 @@ additionalEnvelopPlugins.push(usePersistedOperations({
           return printWithCache(GetNationsDocument);
         },
         location: 'GetNationsDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetWarsDocument,
         get rawSDL() {
           return printWithCache(GetWarsDocument);
         },
         location: 'GetWarsDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetGroundBattlesDocument,
         get rawSDL() {
           return printWithCache(GetGroundBattlesDocument);
         },
         location: 'GetGroundBattlesDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetCruiseMissileAttacksDocument,
         get rawSDL() {
           return printWithCache(GetCruiseMissileAttacksDocument);
         },
         location: 'GetCruiseMissileAttacksDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetNukeAttacksDocument,
         get rawSDL() {
           return printWithCache(GetNukeAttacksDocument);
         },
         location: 'GetNukeAttacksDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetSpyOperationsDocument,
         get rawSDL() {
           return printWithCache(GetSpyOperationsDocument);
         },
         location: 'GetSpyOperationsDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetAirBattlesDocument,
         get rawSDL() {
           return printWithCache(GetAirBattlesDocument);
         },
         location: 'GetAirBattlesDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetNavalAttacksDocument,
         get rawSDL() {
           return printWithCache(GetNavalAttacksDocument);
         },
         location: 'GetNavalAttacksDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetBreakBlockadesDocument,
         get rawSDL() {
           return printWithCache(GetBreakBlockadesDocument);
         },
         location: 'GetBreakBlockadesDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetBlockadesDocument,
         get rawSDL() {
           return printWithCache(GetBlockadesDocument);
         },
         location: 'GetBlockadesDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetPostsDocument,
         get rawSDL() {
           return printWithCache(GetPostsDocument);
         },
         location: 'GetPostsDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetReceivedMessagesDocument,
         get rawSDL() {
           return printWithCache(GetReceivedMessagesDocument);
         },
         location: 'GetReceivedMessagesDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       },{
         document: GetSentMessagesDocument,
         get rawSDL() {
           return printWithCache(GetSentMessagesDocument);
         },
         location: 'GetSentMessagesDocument.graphql',
-        sha256Hash: '984185862fa8433bca10d78279c284ee9b059c63d658b6d6f741c88ff5f33480'
+        sha256Hash: 'cb7f71512c8ac41ab12e8565fdaaafedffdfdbda68c6cd0ffc905a18fad5dc13'
       }
     ];
     },
@@ -2448,7 +2463,7 @@ export type GetBreakBlockadesQuery = { breakBlockades: Array<Pick<BreakBlockade,
 export type GetBlockadesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetBlockadesQuery = { blockades: Array<Pick<Blockade, 'battleId' | 'attackerLosses' | 'defenderLosses'>> };
+export type GetBlockadesQuery = { blockades: Array<Pick<Blockade, 'battleId' | 'blockaderId' | 'blockadedId' | 'percentageReduction' | 'transactionHash'>> };
 
 export type GetPostsQueryVariables = Exact<{
   sender?: InputMaybe<Scalars['BigInt']['input']>;
@@ -2588,8 +2603,10 @@ export const GetBlockadesDocument = gql`
     query GetBlockades {
   blockades {
     battleId
-    attackerLosses
-    defenderLosses
+    blockaderId
+    blockadedId
+    percentageReduction
+    transactionHash
   }
 }
     ` as unknown as DocumentNode<GetBlockadesQuery, GetBlockadesQueryVariables>;

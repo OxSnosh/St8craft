@@ -162,8 +162,9 @@ input Block_height {
 type Blockade {
   id: ID!
   battleId: BigInt!
-  attackerLosses: [BigInt!]!
-  defenderLosses: [BigInt!]!
+  blockaderId: BigInt!
+  blockadedId: BigInt!
+  percentageReduction: BigInt!
   transactionHash: String!
 }
 
@@ -184,18 +185,30 @@ input Blockade_filter {
   battleId_lte: BigInt
   battleId_in: [BigInt!]
   battleId_not_in: [BigInt!]
-  attackerLosses: [BigInt!]
-  attackerLosses_not: [BigInt!]
-  attackerLosses_contains: [BigInt!]
-  attackerLosses_contains_nocase: [BigInt!]
-  attackerLosses_not_contains: [BigInt!]
-  attackerLosses_not_contains_nocase: [BigInt!]
-  defenderLosses: [BigInt!]
-  defenderLosses_not: [BigInt!]
-  defenderLosses_contains: [BigInt!]
-  defenderLosses_contains_nocase: [BigInt!]
-  defenderLosses_not_contains: [BigInt!]
-  defenderLosses_not_contains_nocase: [BigInt!]
+  blockaderId: BigInt
+  blockaderId_not: BigInt
+  blockaderId_gt: BigInt
+  blockaderId_lt: BigInt
+  blockaderId_gte: BigInt
+  blockaderId_lte: BigInt
+  blockaderId_in: [BigInt!]
+  blockaderId_not_in: [BigInt!]
+  blockadedId: BigInt
+  blockadedId_not: BigInt
+  blockadedId_gt: BigInt
+  blockadedId_lt: BigInt
+  blockadedId_gte: BigInt
+  blockadedId_lte: BigInt
+  blockadedId_in: [BigInt!]
+  blockadedId_not_in: [BigInt!]
+  percentageReduction: BigInt
+  percentageReduction_not: BigInt
+  percentageReduction_gt: BigInt
+  percentageReduction_lt: BigInt
+  percentageReduction_gte: BigInt
+  percentageReduction_lte: BigInt
+  percentageReduction_in: [BigInt!]
+  percentageReduction_not_in: [BigInt!]
   transactionHash: String
   transactionHash_not: String
   transactionHash_gt: String
@@ -225,8 +238,9 @@ input Blockade_filter {
 enum Blockade_orderBy {
   id
   battleId
-  attackerLosses
-  defenderLosses
+  blockaderId
+  blockadedId
+  percentageReduction
   transactionHash
 }
 

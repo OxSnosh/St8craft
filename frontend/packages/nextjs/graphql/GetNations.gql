@@ -104,8 +104,10 @@ query GetBreakBlockades {
 query GetBlockades {
   blockades {
     battleId
-    attackerLosses
-    defenderLosses
+    blockaderId
+    blockadedId
+    percentageReduction
+    transactionHash
   }
 }
 

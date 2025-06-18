@@ -93,8 +93,9 @@ const Subgraph: NextPage = () => {
         <NukeAttackTable />
         <SpyOperationsTable />
         <AirBattleTable />
-        <BreakBlockadeTable />
         <BlockadeTable/>
+        <BreakBlockadeTable />
+        
         <PostTable />
         <RecievedMessagesTable />
         <SentMessagesTable />

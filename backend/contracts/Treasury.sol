@@ -57,7 +57,7 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
     address public parameters;
     uint256 public daysToInactive = 30;
     uint256 public maxDaysOfTaxes = 20;
-    uint256 private silt = 0;
+    uint256 private silt = 100;
     uint256 public seedMoney = 2000000 * (10 ** 18);
 
     CountryMinter mint;

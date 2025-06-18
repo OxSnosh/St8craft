@@ -14,9 +14,9 @@ const BlockadeTable = () => {
       }
       try {
         const { data: result } = await execute(GetBlockadesDocument, {});
-        console.log(result.navalAttacks);
+        console.log(result.blockades);
+        console.log("Blockade", result);
         setBlockadeData(result);
-        console.log(result);
       } catch (err) {
         setError(err);
       } finally {
@@ -37,17 +37,18 @@ const BlockadeTable = () => {
           <thead>
             <tr className="rounded-xl">
               <th className="bg-primary">Battle ID</th>
-              <th className="bg-primary">Attacker Losses</th>
-              <th className="bg-primary">Defender Losses</th>
+              <th className="bg-primary">Blockader ID</th>
+              <th className="bg-primary">Blockaded ID</th>
+              <th className="bg-primary">Percentage Reduction</th>
             </tr>
           </thead>
           <tbody>
             {blockadeData?.blockades?.map((blockade: any, index: number) => (
                 <tr key={blockade.battleId}>
                 <th>{blockade.battleId}</th>
-                <th>{blockade.attackerLosses}</th>
-                <th>{blockade.defenderLosses}</th>
-
+                <th>{blockade.blockaderId}</th>
+                <th>{blockade.blockadedId}</th>
+                <th>{blockade.percentageReduction}</th>
               </tr>
             ))}
           </tbody>

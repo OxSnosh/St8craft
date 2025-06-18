@@ -165,8 +165,9 @@ export type Block_height = {
 export type Blockade = {
   id: Scalars['ID']['output'];
   battleId: Scalars['BigInt']['output'];
-  attackerLosses: Array<Scalars['BigInt']['output']>;
-  defenderLosses: Array<Scalars['BigInt']['output']>;
+  blockaderId: Scalars['BigInt']['output'];
+  blockadedId: Scalars['BigInt']['output'];
+  percentageReduction: Scalars['BigInt']['output'];
   transactionHash: Scalars['String']['output'];
 };
 
@@ -187,18 +188,30 @@ export type Blockade_filter = {
   battleId_lte?: InputMaybe<Scalars['BigInt']['input']>;
   battleId_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   battleId_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses_not?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses_not_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  attackerLosses_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses_not?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses_not_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>;
-  defenderLosses_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockaderId?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockaderId_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockaderId_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockadedId?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_not?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  blockadedId_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  blockadedId_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  percentageReduction?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_not?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_gt?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_lt?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_gte?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_lte?: InputMaybe<Scalars['BigInt']['input']>;
+  percentageReduction_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
+  percentageReduction_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>;
   transactionHash?: InputMaybe<Scalars['String']['input']>;
   transactionHash_not?: InputMaybe<Scalars['String']['input']>;
   transactionHash_gt?: InputMaybe<Scalars['String']['input']>;
@@ -228,8 +241,9 @@ export type Blockade_filter = {
 export type Blockade_orderBy =
   | 'id'
   | 'battleId'
-  | 'attackerLosses'
-  | 'defenderLosses'
+  | 'blockaderId'
+  | 'blockadedId'
+  | 'percentageReduction'
   | 'transactionHash';
 
 export type BreakBlockade = {

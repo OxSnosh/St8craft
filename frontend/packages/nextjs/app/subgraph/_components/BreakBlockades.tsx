@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { GetBreakBlockadesDocument, execute } from "~~/.graphclient";
+import { breakBlockade } from '../../../utils/attacks';
 
 const BreakBlockadeTable = () => {
   const [breakBlockadeData, setBreakBlockadeData] = useState<any>(null);
@@ -14,7 +15,7 @@ const BreakBlockadeTable = () => {
       }
       try {
         const { data: result } = await execute(GetBreakBlockadesDocument, {});
-        console.log(result.navalAttacks);
+        console.log(result.breakBlockades);
         setBreakBlockadeData(result);
         console.log(result);
       } catch (err) {

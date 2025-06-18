@@ -93,7 +93,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: CountryMinter
-      address: "0x06883877571987A2d45092269186A4EBAFFBDB16"
+      address: "0x8d0Ad52E29543959F9Ca0BFF8EC7cE47F1CB51C9"
       startBlock: 27100000
     mapping:
       kind: ethereum/events
@@ -113,7 +113,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: WarContract
-      address: "0x3439Ce508acdB0627FBa615954b7a6A9C6f29e64"
+      address: "0xC7c8793918cfb22BC3728d74bd43F64E29428BED"
       startBlock: 27100000
     mapping:
       kind: ethereum/events
@@ -133,7 +133,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: CruiseMissileContract
-      address: "0x1cdCF1de59c9A0d19e093817c71Bee048Fbcb6BA"
+      address: "0x3AC3a7AB8d384C0B3A9BF37b5661d465f71901DB"
       startBlock: 27100000
     mapping:
       kind: ethereum/events
@@ -154,7 +154,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: NukeContract
-      address: "0xa0Dcb1fC1399AEfC97C21c43bB50Ee7D795A88Db"
+      address: "0x3b20D1eFa9aC2bf83ff392f9eFc2e77348eA46f6"
       startBlock: 27100000
     mapping:
       kind: ethereum/events
@@ -175,7 +175,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: SpyOperationsContract
-      address: "0xB40B4C55a7891A4c7D13Ad14F4BBb573527d08F3"
+      address: "0x60f94cEEfc4168E90aA47FeDdD3A5D06ce7543d3"
       startBlock: 27100000
     mapping:
       kind: ethereum/events
@@ -196,7 +196,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: AdditionalAirBattle
-      address: "0xf351919b3E3936E3549e820a3382A66458240BFC"
+      address: "0xDf3b89a98861E4E37B2E038236441ECA2aa6989F"
       startBlock: 27100000
     mapping:
       kind: ethereum/events
@@ -217,7 +217,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: NavalAttackContract
-      address: "0x823656D368b2409F1aDDe41F1991a34408770722"
+      address: "0x15737Ea79525aCf743132030cA807Bcc09362bd5"
       startBlock: 27100000
     mapping:
       kind: ethereum/events
@@ -237,7 +237,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: BreakBlocadeContract
-      address: "0x35d40644c2522d0A905d47c9Fab85cbA7B2b6474"
+      address: "0x45Ea91bE00Ee125c6Bb1d9c6CD8d5e919BDeA44d"
       startBlock: 27100000
     mapping:
       kind: ethereum/events
@@ -257,7 +257,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: NavalBlockadeContract
-      address: "0x150B19CB4a34B5Fc4b36D5A2E643Aa00224Cc6d9"
+      address: "0xb93eCeDa7f3C1ebf7c0be189703b04dE8Dda8e63"
       startBlock: 27100000
     mapping:
       kind: ethereum/events
@@ -269,7 +269,7 @@ dataSources:
         - name: NavalBlockadeContract
           file: ./abis/base_sepolia_NavalBlockadeContract.json
       eventHandlers:
-        - event: BlockadeCompleted(uint256[],uint256[],uint256)
+        - event: BlockadeCompleted(uint256,uint256,uint256,uint256)
           handler: handleBlockade
       file: ./src/blockadeMapping.ts
   - kind: ethereum/contract
@@ -277,7 +277,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: Messenger
-      address: "0xD74274be93893f58a21381a596C4E7c2e88C2069"
+      address: "0x0879Fae642BA716dC1023992A02aCe0D1c9BF560"
       startBlock: 27100000
     mapping:
       kind: ethereum/events
@@ -300,7 +300,7 @@ dataSources:
     network: base_sepolia
     source:
       abi: GroundBattleContract
-      address: "0x620A48673533223987a34A5e706Db4241E87Cb74"
+      address: "0xEc1D29483270146aFe61E3E4170cd74Bda91f67d"
       startBlock: 27100000
     mapping:
       kind: ethereum/events

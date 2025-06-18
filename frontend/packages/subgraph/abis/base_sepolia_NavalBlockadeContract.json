@@ -91,20 +91,26 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint256[]",
-        "name": "attackerLosses",
-        "type": "uint256[]"
+        "internalType": "uint256",
+        "name": "attackerId",
+        "type": "uint256"
       },
       {
         "indexed": false,
-        "internalType": "uint256[]",
-        "name": "defenderLosses",
-        "type": "uint256[]"
+        "internalType": "uint256",
+        "name": "defenderId",
+        "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
         "name": "battleId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "percentageReduction",
         "type": "uint256"
       }
     ],
