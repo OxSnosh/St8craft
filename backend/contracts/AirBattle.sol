@@ -547,7 +547,9 @@ contract AdditionalAirBattle is Ownable, ReentrancyGuard {
         address _forces,
         address _fighterLosses,
         address _mint,
-        address _airBattle
+        address _airBattle,
+        address _wonder1,
+        address _missiles
     ) public onlyOwner {
         warAddress = _warAddress;
         war = WarContract(_warAddress);
@@ -565,6 +567,10 @@ contract AdditionalAirBattle is Ownable, ReentrancyGuard {
         mint = CountryMinter(_mint);
         airBattleAddress = _airBattle;
         airBattle = AirBattleContract(_airBattle);
+        wonders1 = _wonder1;
+        won1 = WondersContract1(_wonder1);
+        missiles = _missiles;
+        mis = MissilesContract(_missiles);
     }
 
     function completeAirBattle(
@@ -616,27 +622,30 @@ contract AdditionalAirBattle is Ownable, ReentrancyGuard {
             tankDamage = ((tankDamage * 60) / 100);
             cruiseMissileDamage = ((cruiseMissileDamage * 60) / 100);
         }
-        require(
-            inf.decreaseInfrastructureCountFromAirBattleContract(
-                defenderId,
-                infrastructureDamage
-            ),
-            "failed to decrease infrastructure count"
-        );
-        require(
-            force.decreaseDefendingTankCountFromAirBattleContract(
-                defenderId,
-                tankDamage
-            ),
-            "failed to decrease tank count"
-        );
-        require(
-            mis.decreaseCruiseMissileCountFromAirBattleContract(
-                defenderId,
-                cruiseMissileDamage
-            ),
-            "failed to decrease cruise missile count"
-        );
+
+        try inf.decreaseInfrastructureCountFromAirBattleContract(defenderId, infrastructureDamage) returns (bool success1) {
+            require(success1, "INFRASTRUCTURE: returned false");
+        } catch Error(string memory reason) {
+            revert(string(abi.encodePacked("INFRASTRUCTURE ERROR: ", reason)));
+        } catch {
+            revert("INFRASTRUCTURE: unknown failure");
+        }
+
+        try force.decreaseDefendingTankCountFromAirBattleContract(defenderId, tankDamage) returns (bool success2) {
+            require(success2, "TANK: returned false");
+        } catch Error(string memory reason) {
+            revert(string(abi.encodePacked("TANK ERROR: ", reason)));
+        } catch {
+            revert("TANK: unknown failure");
+        }
+
+        try mis.decreaseCruiseMissileCountFromAirBattleContract(defenderId, cruiseMissileDamage) returns (bool success3) {
+            require(success3, "MISSILE: returned false");
+        } catch Error(string memory reason) {
+            revert(string(abi.encodePacked("MISSILE ERROR: ", reason)));
+        } catch {
+            revert("MISSILE: unknown failure");
+        }
     }
 
     function handleCasualties(
@@ -646,17 +655,32 @@ contract AdditionalAirBattle is Ownable, ReentrancyGuard {
         uint256 defenderId,
         uint256 attackerId
     ) internal {
-        require(
-            fighterLoss.decrementLosses(attackerFighterCasualties, attackerId),
-            "failed to decrement fighter losses"
-        );
-        require(
-            bomber.decrementBomberLosses(attackerBomberCasualties, attackerId),
-            "failed to decrement bomber losses"
-        );
-        require(
-            fighterLoss.decrementLosses(defenderFighterCasualties, defenderId),
-            "failed to decrement defender fighter losses"
-        );
+        if (attackerFighterCasualties.length != 0) {
+            try fighterLoss.decrementLosses(attackerFighterCasualties, attackerId) returns (bool success1) {
+                require(success1, "ATTACKER FIGHTER: returned false");
+            } catch Error(string memory reason) {
+                revert(string(abi.encodePacked("ATTACKER FIGHTER ERROR: ", reason)));
+            } catch {
+                revert("ATTACKER FIGHTER: unknown failure");
+            } 
+        }
+        if (attackerBomberCasualties.length != 0) {
+            try bomber.decrementBomberLosses(attackerBomberCasualties, attackerId) returns (bool success2) {
+                require(success2, "ATTACKER BOMBER: returned false");
+            } catch Error(string memory reason) {
+                revert(string(abi.encodePacked("ATTACKER BOMBER ERROR: ", reason)));
+            } catch {
+                revert("ATTACKER BOMBER: unknown failure");
+            }
+        }
+        if (defenderFighterCasualties.length != 0) {
+            try fighterLoss.decrementLosses(defenderFighterCasualties, defenderId) returns (bool success3) {
+                require(success3, "DEFENDER FIGHTER: returned false");
+            } catch Error(string memory reason) {
+                revert(string(abi.encodePacked("DEFENDER FIGHTER ERROR: ", reason)));
+            } catch {
+                revert("DEFENDER FIGHTER: unknown failure");
+            }
+        }
     }
 }

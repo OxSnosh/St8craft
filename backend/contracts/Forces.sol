@@ -679,27 +679,39 @@ contract ForcesContract is Ownable, ReentrancyGuard {
         emit TankDamageFromNukeAttack(id, defendingTanksToDecrease);
     }
 
-    ///@dev this is a public function that can only be called from the air battle contract
-    ///@notice this funtion will allow the cruise missile contact to decrease the number of tanks in a bombing attack
-    ///@param amountToDecrease is the number of tanks being decreased
-    ///@param id is the nation id of the nation being attacked
+    /// @dev This is a public function that can only be called from the air battle contract
+    /// @notice This function decreases the number of tanks in a bombing attack
+    /// @param amountToDecrease is the number of tanks being decreased
+    /// @param id is the nation id of the nation being attacked
     function decreaseDefendingTankCountFromAirBattleContract(
         uint256 id,
         uint256 amountToDecrease
     ) public onlyAirBattle returns (bool) {
         uint256 defendingTanks = idToForces[id].defendingTanks;
+        uint256 totalTanks = idToForces[id].numberOfTanks;
+
         if (amountToDecrease > 30) {
             amountToDecrease = 30;
         }
-        if (amountToDecrease >= defendingTanks) {
-            idToForces[id].numberOfTanks -= defendingTanks;
-            idToForces[id].defendingTanks = 0;
-            amountToDecrease = defendingTanks;
-        } else {
-            idToForces[id].numberOfTanks -= amountToDecrease;
-            idToForces[id].defendingTanks -= amountToDecrease;
+
+        uint256 tanksToRemove = amountToDecrease;
+
+        if (defendingTanks == 0 || totalTanks == 0) {
+            emit TankDamageFromAirAssault(id, 0);
+            return true;
         }
-        emit TankDamageFromAirAssault(id, amountToDecrease);
+
+        if (tanksToRemove > defendingTanks) {
+            tanksToRemove = defendingTanks;
+        }
+        if (tanksToRemove > totalTanks) {
+            tanksToRemove = totalTanks;
+        }
+
+        idToForces[id].defendingTanks -= tanksToRemove;
+        idToForces[id].numberOfTanks -= tanksToRemove;
+
+        emit TankDamageFromAirAssault(id, tanksToRemove);
         return true;
     }
 

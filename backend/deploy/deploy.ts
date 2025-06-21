@@ -526,7 +526,9 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             forcesContract.address,
             fighterLosses.address,
             countryMinter.address,
-            airBattleContract.address
+            airBattleContract.address,
+            wondersContract1.address,
+            missilesContract.address,
           );
 
         console.log("additional air battle contract settings");
