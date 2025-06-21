@@ -1,7 +1,6 @@
 import { BigInt, Address } from "@graphprotocol/graph-ts";
 import { BlockadeCompleted } from "../generated/NavalBlockadeContract/NavalBlockadeContract";
 import { Blockade } from "../generated/schema";
-import { blockade } from '../../nextjs/utils/attacks';
 
 export function handleBlockade(event: BlockadeCompleted): void {
 

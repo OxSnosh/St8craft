@@ -108,10 +108,20 @@ export const launchAirBattle = async (
     airBattleContract: any,
     writeContractAsync: any,
 ) => {
+    console.log("Launching air battle with data:", {
+        warId,
+        nationId,
+        defenderId,
+        attackingFighters,
+        attackingBombers,
+    }
+    )
+
     if (!warId || !nationId || !defenderId || !attackingFighters || !attackingBombers) {
         console.error("Missing required data: warId, nationId, defenderId, attackingFighters, or attackingBombers.");
         return;
     }
+
 
     try {
         const tx = await writeContractAsync({
@@ -120,7 +130,9 @@ export const launchAirBattle = async (
             functionName: "airBattle",
             args: [warId, nationId, defenderId, attackingFighters, attackingBombers],
         });
+
         return tx
+
     } catch (error) {
         console.error("Error launching air battle:", error);
     }

@@ -802,222 +802,235 @@ const PeaceOfferCard = () => {
     };
     
     const LaunchAirstrikeCard = () => {
+        const fighterLabels = [
+            "Yak-9",
+            "P-51 Mustang",
+            "F-86 Sabre",
+            "MiG-15",
+            "F-100 Super Sabre",
+            "F-35 Lightning",
+            "F-15 Eagle",
+            "Su-30MKI",
+            "F-22 Raptor",
+        ];
+
+        const bomberLabels = [
+            "AH-1 Cobra",
+            "AH-64 Apache",
+            "Bristol Blenheim",
+            "B-25 Mitchell",
+            "B-17G Flying Fortress",
+            "B-52 Stratofortress",
+            "B-2 Spirit",
+            "B-1B Lancer",
+            "Tupolev Tu-160",
+        ];
+
         const [attackingFighters, setAttackingFighters] = useState<number[]>(Array(9).fill(0));
         const [attackingBombers, setAttackingBombers] = useState<number[]>(Array(9).fill(0));
         const [defenderFighters, setDefenderFighters] = useState<number[]>(Array(9).fill(0));
         const [ownedFighters, setOwnedFighters] = useState<number[]>(Array(9).fill(0));
         const [ownedBombers, setOwnedBombers] = useState<number[]>(Array(9).fill(0));
         const [totalSelected, setTotalSelected] = useState<number>(0);
-    
+
         useEffect(() => {
             if (!selectedNation || !defendingNationId || !contractsData?.AirBattleContract) return;
-    
+
             const fetchAircraftCounts = async () => {
-                // Fetch Fighters
-                const fighterCounts = await Promise.all([
-                    getYak9Count(selectedNation, publicClient, contractsData.FightersContract),
-                    getP51MustangCount(selectedNation, publicClient, contractsData.FightersContract),
-                    getF86SabreCount(selectedNation, publicClient, contractsData.FightersContract),
-                    getMig15Count(selectedNation, publicClient, contractsData.FightersContract),
-                    getF100SuperSabreCount(selectedNation, publicClient, contractsData.FightersContract),
-                    getF35LightningCount(selectedNation, publicClient, contractsData.FightersContract),
-                    getF15EagleCount(selectedNation, publicClient, contractsData.FightersContract),
-                    getSu30MkiCount(selectedNation, publicClient, contractsData.FightersContract),
-                    getF22RaptorCount(selectedNation, publicClient, contractsData.FightersContract),
-                ]);
-                setOwnedFighters(fighterCounts);
-    
-                // Fetch Bombers
-                const bomberCounts = await Promise.all([
-                    getAh1CobraCount(selectedNation, publicClient, contractsData.BombersContract),
-                    getAh64ApacheCount(selectedNation, publicClient, contractsData.BombersContract),
-                    getBristolBlenheimCount(selectedNation, publicClient, contractsData.BombersContract),
-                    getB52MitchellCount(selectedNation, publicClient, contractsData.BombersContract),
-                    getB17gFlyingFortressCount(selectedNation, publicClient, contractsData.BombersContract),
-                    getB52StratofortressCount(selectedNation, publicClient, contractsData.BombersContract),
-                    getB2SpiritCount(selectedNation, publicClient, contractsData.BombersContract),
-                    getB1bLancerCount(selectedNation, publicClient, contractsData.BombersContract),
-                    getTupolevTu160Count(selectedNation, publicClient, contractsData.BombersContract),
-                ]);
-                setOwnedBombers(bomberCounts);
-    
-                // Fetch Defender Fighters
-                const defenderFighterCounts = await Promise.all([
-                    getYak9Count(defendingNationId, publicClient, contractsData.FightersContract),
-                    getP51MustangCount(defendingNationId, publicClient, contractsData.FightersContract),
-                    getF86SabreCount(defendingNationId, publicClient, contractsData.FightersContract),
-                    getMig15Count(defendingNationId, publicClient, contractsData.FightersContract),
-                    getF100SuperSabreCount(defendingNationId, publicClient, contractsData.FightersContract),
-                    getF35LightningCount(defendingNationId, publicClient, contractsData.FightersContract),
-                    getF15EagleCount(defendingNationId, publicClient, contractsData.FightersContract),
-                    getSu30MkiCount(defendingNationId, publicClient, contractsData.FightersContract),
-                    getF22RaptorCount(defendingNationId, publicClient, contractsData.FightersContract),
-                ]);
-                setDefenderFighters(defenderFighterCounts);
+            const fighterCounts = await Promise.all([
+                getYak9Count(selectedNation, publicClient, contractsData.FightersContract),
+                getP51MustangCount(selectedNation, publicClient, contractsData.FightersContract),
+                getF86SabreCount(selectedNation, publicClient, contractsData.FightersContract),
+                getMig15Count(selectedNation, publicClient, contractsData.FightersContract),
+                getF100SuperSabreCount(selectedNation, publicClient, contractsData.FightersContract),
+                getF35LightningCount(selectedNation, publicClient, contractsData.FightersContract),
+                getF15EagleCount(selectedNation, publicClient, contractsData.FightersContract),
+                getSu30MkiCount(selectedNation, publicClient, contractsData.FightersContract),
+                getF22RaptorCount(selectedNation, publicClient, contractsData.FightersContract),
+            ]);
+            setOwnedFighters(fighterCounts.map((c) => Number(c) || 0));
+
+            const bomberCounts = await Promise.all([
+                getAh1CobraCount(selectedNation, publicClient, contractsData.BombersContract),
+                getAh64ApacheCount(selectedNation, publicClient, contractsData.BombersContract),
+                getBristolBlenheimCount(selectedNation, publicClient, contractsData.BombersContract),
+                getB52MitchellCount(selectedNation, publicClient, contractsData.BombersContract),
+                getB17gFlyingFortressCount(selectedNation, publicClient, contractsData.BombersContract),
+                getB52StratofortressCount(selectedNation, publicClient, contractsData.BombersContract),
+                getB2SpiritCount(selectedNation, publicClient, contractsData.BombersContract),
+                getB1bLancerCount(selectedNation, publicClient, contractsData.BombersContract),
+                getTupolevTu160Count(selectedNation, publicClient, contractsData.BombersContract),
+            ]);
+            setOwnedBombers(bomberCounts.map((c) => Number(c) || 0));
+
+            const defenderCounts = await Promise.all([
+                getYak9Count(defendingNationId, publicClient, contractsData.FightersContract),
+                getP51MustangCount(defendingNationId, publicClient, contractsData.FightersContract),
+                getF86SabreCount(defendingNationId, publicClient, contractsData.FightersContract),
+                getMig15Count(defendingNationId, publicClient, contractsData.FightersContract),
+                getF100SuperSabreCount(defendingNationId, publicClient, contractsData.FightersContract),
+                getF35LightningCount(defendingNationId, publicClient, contractsData.FightersContract),
+                getF15EagleCount(defendingNationId, publicClient, contractsData.FightersContract),
+                getSu30MkiCount(defendingNationId, publicClient, contractsData.FightersContract),
+                getF22RaptorCount(defendingNationId, publicClient, contractsData.FightersContract),
+            ]);
+            setDefenderFighters(defenderCounts.map((c) => Number(c) || 0));
             };
-    
+
             fetchAircraftCounts();
         }, [selectedNation, defendingNationId, contractsData]);
-    
-        // Ensure the total of all selected aircraft does not exceed 25
+
         const handleAircraftSelection = (index: number, type: "fighter" | "bomber", value: number) => {
-            value = Math.max(0, value); // Ensure no negative numbers
+            value = Math.max(0, value);
             const maxValue = type === "fighter" ? ownedFighters[index] : ownedBombers[index];
-            value = Math.min(value, maxValue); // Ensure does not exceed owned aircraft
-    
+            value = Math.min(value, maxValue);
+
             const newFighters = [...attackingFighters];
             const newBombers = [...attackingBombers];
-    
+
             if (type === "fighter") newFighters[index] = value;
             else newBombers[index] = value;
-    
-            const newTotal = newFighters.reduce((sum, val) => sum + val, 0) + 
-                             newBombers.reduce((sum, val) => sum + val, 0);
-    
-            if (newTotal > 25) return; // Prevent exceeding 25 aircraft
-    
+
+            const newTotal = newFighters.reduce((sum, val) => sum + val, 0) + newBombers.reduce((sum, val) => sum + val, 0);
+
+            if (newTotal > 25) return;
+
             setAttackingFighters(newFighters);
             setAttackingBombers(newBombers);
             setTotalSelected(newTotal);
         };
-    
-        // const handleLaunchAirstrike = async () => {
-        //     if (!selectedWar || !selectedNation || !defendingNationId || totalSelected === 0) return;
-    
-        //     await launchAirBattle(
-        //         selectedWar,
-        //         selectedNation,
-        //         defendingNationId,
-        //         attackingFighters,
-        //         attackingBombers,
-        //         contractsData.AirBattleContract,
-        //         writeContractAsync
-        //     );
-    
-        //     alert(`Airstrike launched against ${defendingNationId} with ${totalSelected} aircraft!`);
-        // };
 
-        const handleLaunchAirstrike = async () => { ////update function name
-            if (!selectedNation || !defendingNationId || !selectedWar || totalSelected === 0) { // Check if all required fields are filled
-                alert("Please select both an attacking and defending nation.");
+        const handleLaunchAirstrike = async () => {
+            if (!selectedNation || !defendingNationId || !selectedWar || totalSelected === 0) {
+            alert("Please select both an attacking and defending nation.");
+            return;
+            }
+
+            try {
+            const contractData = contractsData.AirBattleContract;
+            const abi = contractData.abi;
+
+            if (!contractData.address || !abi) {
+                console.error("Contract address or ABI is missing");
                 return;
             }
-        
-            try {
-                const contractData = contractsData.AirBattleContract; // Update Contract
-                const abi = contractData.abi;
-        
-                if (!contractData.address || !abi) {
-                    console.error("Contract address or ABI is missing");
-                    return;
-                }
-        
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const userAddress = await signer.getAddress();
-        
-                const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-        
-                const data = contract.interface.encodeFunctionData("airBattle", [ //// update function and args
-                    selectedWar,
-                    selectedNation,
-                    defendingNationId,
-                    attackingFighters,
-                    attackingBombers
-                ]);
-        
-                try {
-                    const result = await provider.call({
-                        to: contract.address,
-                        data: data,
-                        from: userAddress,
-                    });
-        
-                    console.log("Transaction Simulation Result:", result);
-        
-                    if (result.startsWith("0x08c379a0")) {
-                        const errorMessage = parseRevertReason({ data: result });
-                        alert(`Transaction failed: ${errorMessage}`);
-                        return;
-                    }
-                } catch (error: any) {
-                    const errorMessage = parseRevertReason(error);
-                    console.error("Transaction simulation failed:", errorMessage);
-                    alert(`Transaction failed: ${errorMessage}`);
-                    return;            
-                }
-        
-                const tx = await launchAirBattle(
-                    selectedWar,
-                    selectedNation,
-                    defendingNationId,
-                    attackingFighters,
-                    attackingBombers,
-                    contractsData.AirBattleContract,
-                    writeContractAsync
-                ); //// update function call
-        
-                alert(`Air Strike launched at ${defendingNationId}!`);
 
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            const signer = provider.getSigner();
+            const userAddress = await signer.getAddress();
+
+            const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+
+            const data = contract.interface.encodeFunctionData("airBattle", [
+                selectedWar,
+                selectedNation,
+                defendingNationId,
+                attackingFighters,
+                attackingBombers,
+            ]);
+
+            const result = await provider.call({
+                to: contract.address,
+                data: data,
+                from: userAddress,
+            });
+
+            if (result.startsWith("0x08c379a0")) {
+                const errorMessage = parseRevertReason({ data: result });
+                alert(`Transaction failed: ${errorMessage}`);
+                return;
+            }
+
+            console.log("Transaction Simulation Result:", result);
+            console.log("selectedWar:", selectedWar);
+            console.log("selectedNation:", selectedNation);
+            console.log("defendingNationId:", defendingNationId);
+            console.log("attackingFighters:", attackingFighters);
+            console.log("attackingBombers:", attackingBombers);
+            console.log("contract:", contract);
+            console.log("writeContractAsync:", writeContractAsync);
+
+            await launchAirBattle(
+                selectedWar,
+                selectedNation,
+                defendingNationId,
+                attackingFighters,
+                attackingBombers,
+                contract,
+                writeContractAsync
+            );
+
+            alert(`Air Strike launched at ${defendingNationId}!`);
             } catch (error: any) {
-                const errorMessage = parseRevertReason(error);
-                console.error("Error declaring war:", errorMessage);
-                alert(`Failed to declare war: ${errorMessage}`);
+            const errorMessage = parseRevertReason(error);
+            console.error("Airstrike failed:", errorMessage);
+            alert(`Failed to launch airstrike: ${errorMessage}`);
             }
         };
-    
+
         if (!selectedWar || !selectedNation || !defendingNationId) return null;
-    
+
         return (
             <div className="border border-blue-500 p-4 rounded-lg shadow-md mt-4">
-                <h2 className="text-lg font-bold">Launch Airstrike</h2>
-    
-                <p><strong>Your Fighters:</strong></p>
-                {ownedFighters.map((count, index) => count > 0 && (
-                    <div key={`fighter-${index}`} className="mt-2">
-                        <label className="block font-bold">Fighter {index + 1}: ({count} available)</label>
-                        <input
-                            type="number"
-                            min="0"
-                            max={count}
-                            value={attackingFighters[index]}
-                            onChange={(e) => handleAircraftSelection(index, "fighter", Number(e.target.value))}
-                            className="border p-2 w-full rounded"
-                        />
-                    </div>
-                ))}
-    
-                <p><strong>Your Bombers:</strong></p>
-                {ownedBombers.map((count, index) => count > 0 && (
-                    <div key={`bomber-${index}`} className="mt-2">
-                        <label className="block font-bold">Bomber {index + 1}: ({count} available)</label>
-                        <input
-                            type="number"
-                            min="0"
-                            max={count}
-                            value={attackingBombers[index]}
-                            onChange={(e) => handleAircraftSelection(index, "bomber", Number(e.target.value))}
-                            className="border p-2 w-full rounded"
-                        />
-                    </div>
-                ))}
-    
-                <p><strong>Defender's Fighters:</strong></p>
-                {defenderFighters.map((count, index) => count > 0 && (
-                    <p key={`defender-fighter-${index}`}>Fighter {index + 1}: {count}</p>
-                ))}
-    
-                <p className="mt-2"><strong>Total Selected:</strong> {totalSelected}/25</p>
-    
-                {/* Launch Button */}
-                <button
-                    onClick={handleLaunchAirstrike}
-                    className="bg-blue-500 text-white p-2 rounded mt-4 w-full"
-                    disabled={totalSelected === 0}
-                >
-                    {totalSelected > 0 ? "Launch Airstrike" : "Select Aircraft"}
-                </button>
+            <h2 className="text-lg font-bold">Launch Airstrike</h2>
+
+            <p className="mt-2 font-semibold">Your Fighters:</p>
+            {ownedFighters.map((count, index) =>
+                count > 0 ? (
+                <div key={`fighter-${index}`} className="mt-2">
+                    <label className="block font-bold">
+                    {fighterLabels[index]} ({count ?? 0} available)
+                    </label>
+                    <input
+                    type="number"
+                    min="0"
+                    max={count}
+                    value={attackingFighters[index] ?? 0}
+                    onChange={(e) => handleAircraftSelection(index, "fighter", Number(e.target.value))}
+                    className="border p-2 w-full rounded"
+                    />
+                </div>
+                ) : null
+            )}
+
+            <p className="mt-4 font-semibold">Your Bombers:</p>
+            {ownedBombers.map((count, index) =>
+                count > 0 ? (
+                <div key={`bomber-${index}`} className="mt-2">
+                    <label className="block font-bold">
+                    {bomberLabels[index]} ({count ?? 0} available)
+                    </label>
+                    <input
+                    type="number"
+                    min="0"
+                    max={count}
+                    value={attackingBombers[index] ?? 0}
+                    onChange={(e) => handleAircraftSelection(index, "bomber", Number(e.target.value))}
+                    className="border p-2 w-full rounded"
+                    />
+                </div>
+                ) : null
+            )}
+
+            <p className="mt-4 font-semibold">Defender's Fighters:</p>
+            {defenderFighters.map((count, index) =>
+                count > 0 ? (
+                <p key={`defender-${index}`}>
+                    {fighterLabels[index]}: {count}
+                </p>
+                ) : null
+            )}
+
+            <p className="mt-4"><strong>Total Selected:</strong> {totalSelected}/25</p>
+
+            <button
+                onClick={handleLaunchAirstrike}
+                className="bg-blue-500 text-white p-2 rounded mt-4 w-full"
+                disabled={totalSelected === 0}
+            >
+                {totalSelected > 0 ? "Launch Airstrike" : "Select Aircraft"}
+            </button>
             </div>
         );
     };

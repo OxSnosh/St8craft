@@ -180,169 +180,169 @@
   },
   "base_sepolia": {
     "AdditionalAirBattle": {
-      "address": "0xDf3b89a98861E4E37B2E038236441ECA2aa6989F"
+      "address": "0x8c5C3332c6586608E7007412fEA1d4EE3c486cfC"
     },
     "AdditionalNavyContract": {
-      "address": "0x8980f778782EAfa2F53359245c5BAf5a6d9a4Ba9"
+      "address": "0x36F1F514868707E786d1387d40fDDEE8C703b028"
     },
     "AdditionalTaxesContract": {
-      "address": "0x547598f90A52D4649f32f6b4f5171F544D2b95bC"
+      "address": "0xd34feF56FE72BBec78FaE2595a768eBFDC55f331"
     },
     "AidContract": {
-      "address": "0x9f131B3FB964CE47F36f5d2d4C8b71df257D8C41"
+      "address": "0xD56A4B551c427353416cc06b637abF2f7F8B7477"
     },
     "AirBattleContract": {
-      "address": "0xf56BC19ac60971B927901829A5243875296CB94f"
+      "address": "0x9413D7C82900d1b0a31E832A4BE4346CFF85a4ce"
     },
     "AllianceManager": {
-      "address": "0x83FC2B9F542713203915bD0ae47b86Aaac1E5f67"
+      "address": "0xf40dEB03b1D7F2016725f5389aABEB5CC429566D"
     },
     "BillsContract": {
-      "address": "0xcFAe496A6A7cf62488Ee8f555861890b150cC389"
+      "address": "0x78ED06023c5A1447D3FEB9Ffb64A2A2B8220d7d5"
     },
     "BombersContract": {
-      "address": "0x87080673d595d4c26a76E11Bd39322C20Cd33151"
+      "address": "0xA3339005fa75368e23f782669B213f665d21Cc01"
     },
     "BombersMarketplace1": {
-      "address": "0x419b6b8B1146B3b5AE59915d3b20da1e6D3EfAC0"
+      "address": "0xC575D4180CD50F9084102946C23667f69081ECc5"
     },
     "BombersMarketplace2": {
-      "address": "0x1a2ECe3247af3190aC4dA6F809f14f19503284a5"
+      "address": "0x25b2D7b03c498Ee36766f5Bc657e3DCea0D2CB48"
     },
     "BonusResourcesContract": {
-      "address": "0x3e73ECeD8320C8dC159C06B9Aa10317C5b6B9c8f"
+      "address": "0x880CA762875D800B72fB2267A7a67C2765730aed"
     },
     "BreakBlocadeContract": {
-      "address": "0x45Ea91bE00Ee125c6Bb1d9c6CD8d5e919BDeA44d"
+      "address": "0x07132032614f654E9027c0Ab9318839E33c9170c"
     },
     "CountryMinter": {
-      "address": "0x8d0Ad52E29543959F9Ca0BFF8EC7cE47F1CB51C9"
+      "address": "0x128C8Ebb4000167c556AFa53315F07c69AEd7912"
     },
     "CountryParametersContract": {
-      "address": "0x9DAFAb2A5493ea6fF5c3Ac22693F2cd965f9F91B"
+      "address": "0xA947d3901215C4c8bb1611Dc73656c2db32C98B2"
     },
     "CrimeContract": {
-      "address": "0x2630B7811B21Cb71695cA103e2080DE22456b2c8"
+      "address": "0x1522Bc1C090dc05c12EE79d28031a147184f4FD5"
     },
     "CruiseMissileContract": {
-      "address": "0x3AC3a7AB8d384C0B3A9BF37b5661d465f71901DB"
+      "address": "0xC1efE8D4001016f24F36FFA6B994D2CD0a661f66"
     },
     "EnvironmentContract": {
-      "address": "0xDd66B2bD12e223E25B67c6aa3B7A70341A3610c7"
+      "address": "0x1926C5Fd7fB7463d65a11FA7a7cd75Fe69Bd469C"
     },
     "FighterLosses": {
-      "address": "0xf8BE0411b68Caa20EbFAAB1eE890A37e6EcCaB6b"
+      "address": "0x5b4Bc9e18Edd6E6323CAfC23a0000600A2A2ab66"
     },
     "FightersContract": {
-      "address": "0x7ad09053a2a0931DEaFbB1375b4410Da10A8C34D"
+      "address": "0x3599B49166D21A33167C9351E87c5C7A760CceD1"
     },
     "FightersMarketplace1": {
-      "address": "0x7b3B72fB98ed63936B77e72D4aA7ABa4f0361B29"
+      "address": "0x64316e142b3BEd6473Fe380A665648CF8E6C153E"
     },
     "FightersMarketplace2": {
-      "address": "0xe3C310f9D7e22D3b5702cdD55c5f469375561e53"
+      "address": "0xa93c2CB55df5d7C9558296cC3171585f80c8d1fa"
     },
     "ForcesContract": {
-      "address": "0x99b6317e47C6911eA9a8928782b7e5228Bb93c0E"
+      "address": "0xE36572E25689B06351a07794550203CE4421C49A"
     },
     "GroundBattleContract": {
-      "address": "0xEc1D29483270146aFe61E3E4170cd74Bda91f67d"
+      "address": "0x1c097135319745364d345238Fd1556F723a4b9e4"
     },
     "ImprovementsContract1": {
-      "address": "0x1E98A81246Ce7Ab25fa1d8668EDa8e2e1a3eE19A"
+      "address": "0x71038E7f6C0aaBA21335244b1AD9778e32BeFDC7"
     },
     "ImprovementsContract2": {
-      "address": "0x6311E4EBe991bfe4564E3cce63b75fd1410Af8ad"
+      "address": "0x70BA3221083CCb6A8A64cf9b18a7b777d7C96eb0"
     },
     "ImprovementsContract3": {
-      "address": "0xa32b81755241Aa3a5ec1e4C98a7d8e36e0c991b7"
+      "address": "0x4Bb8B80633BEBe69FaE25658a50101492B1F488c"
     },
     "ImprovementsContract4": {
-      "address": "0x5460F3F41a590753CDAc6C8480d4aC4f22B40622"
+      "address": "0xCF5586986D10b3Ab23fe9Ef49ef010A53bDebaf7"
     },
     "InfrastructureContract": {
-      "address": "0x9B2bFb1264DE2e6394179a94317D8618291F2508"
+      "address": "0xb1A4Fb3c549a9e2F6A338a8d324AbEDE40Dc5D95"
     },
     "InfrastructureMarketContract": {
-      "address": "0xCE2034fbC0512016e09E20637f79Ed63D0A8A9C2"
+      "address": "0x26A660ab32A773c36daD7C560dc130F7Fd5ba4E3"
     },
     "KeeperContract": {
-      "address": "0xC51ACAA02cA5f88A09c4a540Db78eF3EcE27d61a"
+      "address": "0x26db9Bd5E155B87416B10C35eeF6D8CA6e4f48B2"
     },
     "LandMarketContract": {
-      "address": "0x994E24ae3c5971096d155cc237d1f0E96A9D633e"
+      "address": "0x9FcF32cE8750200Bf7A6f4Ed23cBf0384f865e7C"
     },
     "Messenger": {
-      "address": "0x0879Fae642BA716dC1023992A02aCe0D1c9BF560"
+      "address": "0xE81580a3918B36F9e4525f5e3fFcB60709CC15B2"
     },
     "MilitaryContract": {
-      "address": "0xE2a5e4938F048BEc897480DCCC96a02C47EcD55F"
+      "address": "0xE8ff14d511A0B19527fC8b5A4C791eb5283c12C2"
     },
     "MissilesContract": {
-      "address": "0x2E200DD3b36235D08Ef12982da235E594301e3Eb"
+      "address": "0x844bfC7806a0d47dcD5F6ADeb844b6119357528B"
     },
     "NationStrengthContract": {
-      "address": "0xd191346b253B3CFFd303f074CB6C24A7aff824DB"
+      "address": "0x5661cdbaD4904eFcB610542b66c43a607b59f6ea"
     },
     "NavalActionsContract": {
-      "address": "0x786eD7a84b88D41ce126E059Cd02F983e8CE405b"
+      "address": "0x8AFF28038e50437BDb87FCE3C9EbFC5690Fa81Ee"
     },
     "NavalAttackContract": {
-      "address": "0x15737Ea79525aCf743132030cA807Bcc09362bd5"
+      "address": "0x5F9EfF01208F016D324b7FBd68145419a1eaeeaf"
     },
     "NavalBlockadeContract": {
-      "address": "0xb93eCeDa7f3C1ebf7c0be189703b04dE8Dda8e63"
+      "address": "0x82A3bA90d16b5db379045b0781Edf0CE9814a27c"
     },
     "NavyContract": {
-      "address": "0xdaE37c107d6B81fcA98FB094Fbb9A560fe4c8bfF"
+      "address": "0x194212032e19bC40F03556436c712DF74c5FF1ca"
     },
     "NavyContract2": {
-      "address": "0x2e8194bBFD8B6C2286A8ca93fd4bd4fA5679eC1d"
+      "address": "0x3421ceA42b212943976E2662769F06C4f18C19e4"
     },
     "NukeContract": {
-      "address": "0x3b20D1eFa9aC2bf83ff392f9eFc2e77348eA46f6"
+      "address": "0xa9561f0Fac5F2f78795C8B7EF6FFd5342bb01C09"
     },
     "ResourcesContract": {
-      "address": "0x0A0C6225C0275d782f93b282d25C7ACAf573ca78"
+      "address": "0x250d94146e546fEF92CCcAa5c098c87e214299d9"
     },
     "SenateContract": {
-      "address": "0xEDF9A125c3DB7414404528b33bA25d3dD5794c17"
+      "address": "0x353CB1E2e026186732ADD58AD86494E8FB850fF3"
     },
     "SpyContract": {
-      "address": "0xe9dC3C313e674a832E9af463b84c26e547202575"
+      "address": "0xb875Ea27C9E52CcB4a7298D230b57F44A258786a"
     },
     "SpyOperationsContract": {
-      "address": "0x60f94cEEfc4168E90aA47FeDdD3A5D06ce7543d3"
+      "address": "0xf7179FA2284CF31ED4858Ae357e70a4d85Aa9C0A"
     },
     "St8craftGovToken": {
       "address": "0x3eE9aD8BbAd6402fA6408aEDfF1B73Ee62814F52"
     },
     "TaxesContract": {
-      "address": "0x9335A00A7319a2B1D73a1BC98e180d1bF589874E"
+      "address": "0x320C11F84E53Bf06610d9b24E247B0c26C4566C2"
     },
     "TechnologyMarketContract": {
-      "address": "0x38D1A1e6cfAE7A131C25992D8e8527E53Fe948Ce"
+      "address": "0xb61111439288fb82951f836F4f314FE91c99e106"
     },
     "TreasuryContract": {
-      "address": "0x33f2DF918308217e1bC3de9522eeF526de390e1f"
+      "address": "0xE6fe0C130584FE467cD0160917D35BcBBe1e77e1"
     },
     "WarBucks": {
       "address": "0x4DeaEee7C7a34aAfED7BCDDB9CC042eAD4aD98F9"
     },
     "WarContract": {
-      "address": "0xC7c8793918cfb22BC3728d74bd43F64E29428BED"
+      "address": "0x846d2C1869A4260279909042cC90329413Ff7b7d"
     },
     "WondersContract1": {
-      "address": "0xD280bb6905fB852fbe2C2B451a026460B2Aa5349"
+      "address": "0x0c663866E3A09f1D7983DC25CBDcc8F4Ad1D1016"
     },
     "WondersContract2": {
-      "address": "0x99312d4C6116Db4FD2C7B5FC18630ed8F72c6549"
+      "address": "0x84530Bb4c7048a6F4791D24b212b05Face84f34d"
     },
     "WondersContract3": {
-      "address": "0x76fAc9E9f6743BE405706D7D548b4D50148FB64b"
+      "address": "0x72062D4274c3C73518bb234BEb2B150bca26Cea9"
     },
     "WondersContract4": {
-      "address": "0xb87f7860df443A1e57196508F7c57b7Da956AFB2"
+      "address": "0xD78d398C79a2558d55fCcA9EaDEAc026B373c514"
     }
   }
 }

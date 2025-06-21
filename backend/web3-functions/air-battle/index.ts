@@ -1,47 +1,50 @@
 import { Web3Function, Web3FunctionContext } from "@gelatonetwork/web3-functions-sdk";
-import { Contract, ethers, Interface, Log, id } from "ethers";
+import { Contract, Interface, JsonRpcProvider } from "ethers";
 
 const ORACLE_ABI = [
   "function completeAirBattle(uint256[], uint256[], uint256[], uint256, uint256, uint256, uint256, uint256, uint256)",
 ];
 
 Web3Function.onRun(async (context: Web3FunctionContext) => {
-  const { userArgs, gelatoArgs, multiChainProvider } = context;
-  const provider = multiChainProvider.default()
+  const { multiChainProvider } = context;
+  const provider = new JsonRpcProvider("https://sepolia.base.org");
 
-  const airBattleAddress = "0x9666Bb2cDb359D5b7A0F49Ec2026cB5B62823010"; //update
-  const airBattle = new Contract(airBattleAddress, ORACLE_ABI);
+  const airBattleAddress = "0x1bd4cC850Ae92d1d3Ae1856D6a5EBD580f6aA628";
+  const airBattle = new Contract(airBattleAddress, ORACLE_ABI, provider);
 
   const AIR_BATTLE_ABI = [
     "event AirBattleRequested(uint256 battleId, uint256 attackerId, uint256 defenderId, uint256[] randomWords, uint256[] attackerFighters, uint256[] attackerBombers, uint256[] defenderFighters, uint256 timestamp)"
   ];
 
-  const eventSignature = "AirBattleRequested(uint256,uint256,uint256,uint256[],uint256[],uint256[],uint256[],uint256)";
-  const eventTopic = id(eventSignature);
-  // const eventTopic = ethers.utils.id(eventSignature);
-
   const iface = new Interface(AIR_BATTLE_ABI);
   const latestBlock = await provider.getBlockNumber();
 
-  // Fetch logs
   const logs = await provider.getLogs({
     address: airBattleAddress,
-    topics: [eventTopic],
-    fromBlock: latestBlock - 15,
+    fromBlock: latestBlock - 100,
     toBlock: "latest",
   });
 
-  // 3. Sort and decode the most recent event
-  if (logs.length === 0) throw new Error("No AirBattleRequested events found");
+  console.log(`Fetched ${logs.length} logs from last 100 blocks`);
 
-  const latestLog = logs[logs.length - 1];
-  const event = iface.parseLog(latestLog);
+  const parsedEvents = logs
+    .map((log) => {
+      try {
+        return iface.parseLog(log);
+      } catch {
+        return null;
+      }
+    })
+    .filter((e) => e?.name === "AirBattleRequested");
+
+  if (parsedEvents.length === 0) throw new Error("No AirBattleRequested events found");
+
+  const event = parsedEvents[parsedEvents.length - 1];
 
   if (!event) {
-    throw new Error("Failed to parse AirBattleRequested event log");
+    throw new Error("No valid AirBattleRequested event found");
   }
 
-  // 4. Extract arguments from the event
   const battleId = Number(event.args.battleId);
   const attackerId = Number(event.args.attackerId);
   const defenderId = Number(event.args.defenderId);
@@ -49,6 +52,14 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
   const attackerFightersArr = event.args.attackerFighters.map((n: bigint) => Number(n));
   const attackerBombersArr = event.args.attackerBombers.map((n: bigint) => Number(n));
   const defenderFightersArr = event.args.defenderFighters.map((n: bigint) => Number(n));
+
+  // console.log(battleId, "battleId");
+  // console.log(attackerId, "attackerId");
+  // console.log(defenderId, "defenderId");
+  // console.log(randomNumbers, "randomNumbers");
+  // console.log(attackerFightersArr, "attackerFightersArr");
+  // console.log(attackerBombersArr, "attackerBombersArr");
+  // console.log(defenderFightersArr, "defenderFightersArr");
 
   let defenderBattleArray: number[] = []
   let i = 0
@@ -67,7 +78,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         break
     }
     }
-    console.log(defenderBattleArray, "defenderBattleArray")
+    // console.log(defenderBattleArray, "defenderBattleArray")
 
     let attackerBattleArray: number[] = []
     let j = 0;
@@ -86,7 +97,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         break
     }
     }
-    console.log(attackerBattleArray, "attackerBattleArray")
+    // console.log(attackerBattleArray, "attackerBattleArray")
 
     let attackerBomberBattleArray: number[] = []
     let x = 0
@@ -105,7 +116,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         break
     }
     }
-    console.log(attackerBomberBattleArray, "attackerBomberBattleArray")
+    // console.log(attackerBomberBattleArray, "attackerBomberBattleArray")
 
     let defenderFightersInvolved = 0
     let attackerFightersInvolved = 0
@@ -123,51 +134,52 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 
     let totalFighersInvolved = defenderFightersInvolved + attackerFightersInvolved
     let casualties = Math.round(totalFighersInvolved * 0.3)
-    console.log(casualties, "casualties")
+    // console.log(casualties, "casualties")
 
     //calculate attacker fighter strength
     let attackerFighterStrength = 0
     for (let m = 0; m < attackerBattleArray.length; m++) {
     attackerFighterStrength += attackerBattleArray[m]
     }
-    console.log(attackerFighterStrength, "attackerFighterStrength")
+    // console.log(attackerFighterStrength, "attackerFighterStrength")
     let defenderFighterStrength = 0
     for (let n = 0; n < defenderBattleArray.length; n++) {
     defenderFighterStrength += defenderBattleArray[n]
     }
-    console.log(defenderFighterStrength, "defenderFighterStrength")
+    // console.log(defenderFighterStrength, "defenderFighterStrength")
 
     let totalStrength = attackerFighterStrength + defenderFighterStrength
-    console.log(totalStrength, "totalStrength")
+    // console.log(totalStrength, "totalStrength")
 
     let attackerBomberStrength = 0
     for (let y = 0; y < attackerBomberBattleArray.length; y++) {
     attackerBomberStrength += attackerBomberBattleArray[y]
     }
-    console.log(attackerBomberStrength, "attackerBomberStrength")
+    // console.log(attackerBomberStrength, "attackerBomberStrength")
 
     let numbers : number[] = []
 
     for (let i = 0; i < 50; i += 10) {
-    const number = randomNumbers[2].toString().substring(i, i + 10)
-    numbers.push(Number(number))
+      const number = String(randomNumbers[2]).substring(i, i + 10)
+      numbers.push(Number(number))
     }
-    for (let i = 0; i < 50; i += 10) {
-    const number = randomNumbers[3].toString().substring(i, i + 10)
-    numbers.push(Number(number))
+        for (let i = 0; i < 50; i += 10) {
+      const number = String(randomNumbers[3]).substring(i, i + 10)
+      numbers.push(Number(number))
     }
-    for (let i = 0; i < 50; i += 10) {
-    const number = randomNumbers[4].toString().substring(i, i + 10)
-    numbers.push(Number(number))
+        for (let i = 0; i < 50; i += 10) {
+      const number = String(randomNumbers[4]).substring(i, i + 10)
+      numbers.push(Number(number))
     }
-    for (let i = 0; i < 50; i += 10) {
-    const number = randomNumbers[5].toString().substring(i, i + 10)
-    numbers.push(Number(number))
+        for (let i = 0; i < 50; i += 10) {
+      const number = String(randomNumbers[5]).substring(i, i + 10)
+      numbers.push(Number(number))
     }
-    for (let i = 0; i < 50; i += 10) {
-    const number = randomNumbers[6].toString().substring(i, i + 10)
-    numbers.push(Number(number))
+        for (let i = 0; i < 50; i += 10) {
+      const number = String(randomNumbers[6]).substring(i, i + 10)
+      numbers.push(Number(number))
     }
+    // console.log(numbers, "numbers")
 
     let attackerFighterCasualties : number [] = []
     let attackerBomberCasualties : number [] = []
@@ -175,20 +187,20 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
     let bomberDamage = 0
 
     for (let o = 0; o <= casualties; o++) {
-    console.log(`dogfight ${o}`)
+    // console.log(`dogfight ${o}`)
     var randomNumner = numbers[o]
-    console.log(randomNumner, "randomNumner")
+    // console.log(randomNumner, "randomNumner")
     var randomModulus = randomNumner % totalStrength
-    console.log(randomModulus, "randomModulus")
+    // console.log(randomModulus, "randomModulus")
     if (randomModulus < attackerFighterStrength) {
-        console.log("attacker wins")
+        // console.log("attacker wins")
         //an attacker victory will result in a defender plane being lost and bomber damage inflicted (if bombers are present)
         var randomIndex = Math.floor(Math.random() * defenderFightersInvolved)
         if (defenderFightersInvolved === 0) {
-          console.log("bombing")
+          // console.log("bombing")
         } else if (defenderFightersInvolved >= 1) {
-          console.log(randomIndex, "randomIndex")
-          console.log(defenderBattleArray[randomIndex], "type of defender fighter lost")
+          // console.log(randomIndex, "randomIndex")
+          // console.log(defenderBattleArray[randomIndex], "type of defender fighter lost")
           defenderFighterCasualties.push(defenderBattleArray[randomIndex])
           if(defenderFighterStrength >= defenderBattleArray[randomIndex]) {
             defenderFighterStrength -= defenderBattleArray[randomIndex]
@@ -197,50 +209,49 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
           }
           totalStrength -= defenderBattleArray[randomIndex]
           defenderBattleArray[randomIndex] = 0
-          console.log(defenderBattleArray, "defenderBattleArray")
+          // console.log(defenderBattleArray, "defenderBattleArray")
           defenderBattleArray.splice(randomIndex, 1)
           defenderFightersInvolved -= 1
         }
-        console.log(defenderFighterStrength, "new defenderFighterStrength")
-        console.log(totalStrength, "new totalStrength")
-        // defenderBattleArray[randomIndex] = defenderBattleArray[defenderBattleArray.length - 1];
-        console.log(defenderFighterCasualties, "defenderFighterCasualties")
+        // console.log(defenderFighterStrength, "new defenderFighterStrength")
+        // console.log(totalStrength, "new totalStrength")
+        // console.log(defenderFighterCasualties, "defenderFighterCasualties")
         //inflict bomber damage if bombers are present
         bomberDamage += attackerBomberStrength
-        console.log(bomberDamage, "bomberDamage")
-        console.log(attackerBomberStrength, "attackerBomberStrength")
+        // console.log(bomberDamage, "bomberDamage")
+        // console.log(attackerBomberStrength, "attackerBomberStrength")
       } else if (randomModulus >= attackerFighterStrength) {
-        console.log("defender wins")
+        // console.log("defender wins")
         //a defender victory in a dogfight will remove an attacker fighter and an attacker bomber
         var randomIndex = Math.floor(Math.random() * attackerFightersInvolved)
-        console.log(randomIndex, "randomIndex")
-        console.log(attackerBattleArray[randomIndex], "type of attacker fighter lost")
+        // console.log(randomIndex, "randomIndex")
+        // console.log(attackerBattleArray[randomIndex], "type of attacker fighter lost")
         attackerFighterCasualties.push(attackerBattleArray[randomIndex])
         if(attackerFighterStrength >= attackerBattleArray[randomIndex]) {
           attackerFighterStrength -= attackerBattleArray[randomIndex]
         } else if (attackerFighterStrength < attackerBattleArray[randomIndex]) {
           attackerFighterStrength = 0
         }
-        console.log(attackerFighterStrength, "new attackerFighterStrength")
+        // console.log(attackerFighterStrength, "new attackerFighterStrength")
         totalStrength -= attackerBattleArray[randomIndex]
-        console.log(totalStrength, "new totalStrength")
+        // console.log(totalStrength, "new totalStrength")
         attackerBattleArray[randomIndex] = 0
         // attackerBattleArray[randomIndex] = attackerBattleArray[attackerBattleArray.length - 1];
         attackerBattleArray.splice(randomIndex, 1)
         attackerFightersInvolved -= 1
-        console.log(attackerBattleArray, "attackerBattleArray")
-        console.log(attackerFighterCasualties, "attackerFighterCasualties")
+        // console.log(attackerBattleArray, "attackerBattleArray")
+        // console.log(attackerFighterCasualties, "attackerFighterCasualties")
         //remove bomber
         if (attackerBomberBattleArray.length > 0) {
         var randomIndexForBomber = Math.floor(Math.random() * attackerBomberBattleArray.length)
-        console.log(randomIndexForBomber, "randomIndexForBomber")
+        // console.log(randomIndexForBomber, "randomIndexForBomber")
         attackerBomberCasualties.push(attackerBomberBattleArray[randomIndexForBomber])
-        console.log(attackerBomberCasualties, "attackerBomberCasualties")
+        // console.log(attackerBomberCasualties, "attackerBomberCasualties")
         attackerBomberStrength -= attackerBomberBattleArray[randomIndexForBomber]
-        console.log(attackerBomberStrength, "new attackerBomberStrength")
+        // console.log(attackerBomberStrength, "new attackerBomberStrength")
         attackerBomberBattleArray[randomIndexForBomber] = 0
         attackerBomberBattleArray.splice(randomIndexForBomber, 1)
-        console.log(attackerBomberBattleArray, "attackerBomberBattleArray")
+        // console.log(attackerBomberBattleArray, "attackerBomberBattleArray")
         }
       }
     }
@@ -255,11 +266,16 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
     const tankDamage = Math.floor(bomberDamage / 4)
     const cruiseMissileDamage = Math.floor(bomberDamage / 20)
 
+    console.log(infrastructureDamage, "infrastructureDamage")
+    console.log(tankDamage, "tankDamage")
+    console.log(cruiseMissileDamage, "cruiseMissileDamage")
+    console.log(battleId, "battleId")
+
   return {
     canExec: true,
     callData: [{
       to: airBattleAddress,
-      data: airBattle.interface.encodeFunctionData("completeBattleSequence", [attackerFighterCasualties, attackerBomberCasualties, defenderFighterCasualties, attackerId, defenderId, infrastructureDamage, tankDamage, cruiseMissileDamage, battleId]),
+      data: airBattle.interface.encodeFunctionData("completeAirBattle", [attackerFighterCasualties, attackerBomberCasualties, defenderFighterCasualties, attackerId, defenderId, infrastructureDamage, tankDamage, cruiseMissileDamage, battleId]),
     }],
   };
 });

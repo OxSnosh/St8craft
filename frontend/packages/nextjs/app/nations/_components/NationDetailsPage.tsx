@@ -157,10 +157,10 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
       const water = await publicClient.readContract({
         abi: resourcesContract.abi,
         address: resourcesContract.address,
-        functionName: "viewWater",
+        functionName: "getResources2",
         args: [nationId],
-      });
-      setWaterAccess(Boolean(water));
+      }) as any[];
+      setWaterAccess(Boolean(water[7]));
     };
 
     fetchOwnership();

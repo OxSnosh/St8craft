@@ -563,7 +563,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             countryMinter.address,
             bombersMarketplace1.address,
             bombersMarketplace2.address,
-            airBattleContract.address,
+            additionalAirBattle.address,
             treasuryContract.address,
             fightersContract.address,
             infrastructureContract.address,
@@ -721,7 +721,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         
         await deployedFighterLosses.settings(
             fightersContract.address,
-            airBattleContract.address
+            additionalAirBattle.address
           );
 
         console.log("fighter losses settings");
@@ -765,7 +765,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             spyOperationsContract.address,
             cruiseMissileContract.address,
             nukeContract.address,
-            airBattleContract.address,
+            additionalAirBattle.address,
             groundBattleContract.address,
             warContract.address
           );
@@ -787,7 +787,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             treasuryContract.address,
             spyOperationsContract.address,
             nukeContract.address,
-            airBattleContract.address,
+            additionalAirBattle.address,
             wondersContract2.address,
             nationStrengthContract.address,
             infrastructureContract.address
@@ -902,7 +902,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             taxesContract.address,
             cruiseMissileContract.address,
             nukeContract.address,
-            airBattleContract.address,
+            additionalAirBattle.address,
             groundBattleContract.address,
             countryMinter.address,
             crimeContract.address,

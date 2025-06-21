@@ -10,12 +10,11 @@ contract KeeperContract is Ownable {
     uint256 public gameDay;
     uint public interval;
     uint public lastTimeStamp;
-    address public keeperRegistry;
 
     event GameDayIncremented(uint256 indexed gameDay);
 
     constructor() {
-        interval = 30 seconds;
+        interval = 12 hours;
         lastTimeStamp = block.timestamp;
         gameDay = 0;
     }

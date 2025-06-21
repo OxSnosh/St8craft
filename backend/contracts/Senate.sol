@@ -278,7 +278,7 @@ contract SenateContract is Ownable {
         orderId++;
     }
 
-    address public oracle = 0xdB3892b0FD38D73B65a9AD2fC3920B74B2B71dfb;
+    address public oracle = 0xA918a6FE02d64e999FadB6FB9c3E2C74A63ED67C;
 
     modifier onlyOracle() {
         require(msg.sender == oracle, "!ORACLE");
