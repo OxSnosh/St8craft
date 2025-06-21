@@ -1,16 +1,16 @@
 import { Web3Function, Web3FunctionContext } from "@gelatonetwork/web3-functions-sdk";
-import { Contract, Interface, id } from "ethers";
+import { Contract, Interface, id, JsonRpcProvider } from "ethers";
 
 const ORACLE_ABI = [
-  "function completeBreakBlockade(uint256 battleId, uint256[] attackerChances, uint256[] attackerTypes, uint256[] defenderChances, uint256[] defenderTypes, uint256[] randomNumbers) external"
+  "function completeBattleSequence(uint256[] attackerlosses, uint256[] defenderLosses, uint256 battleId)"
 ];
 
 Web3Function.onRun(async (context: Web3FunctionContext) => {
   const { gelatoArgs, multiChainProvider } = context;
-  const provider = multiChainProvider.default();
+  const provider = new JsonRpcProvider("https://sepolia.base.org")
 
-    const breakBlockadeAddress = "0x35d40644c2522d0A905d47c9Fab85cbA7B2b6474"; // update if needed
-    const breakBlockade = new Contract(breakBlockadeAddress, ORACLE_ABI);
+    const breakBlockadeAddress = "0x10F1f79713A49B9Ae0ba9be50e86590f54Fc2571"; // update if needed
+    const breakBlockade = new Contract(breakBlockadeAddress, ORACLE_ABI, provider);
 
     const EVENT_ABI = [
         "event BreakBlockadeRequested(uint256 requestId, uint256 battleId, uint256[] randomWords, uint256[] attackerChances, uint256[] attackerTypes, uint256[] defenderChances, uint256[] defenderTypes)"
@@ -164,7 +164,13 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
     }
 
     let losses = calculateLosses(totalShipCount);
-    console.log(losses)
+
+    //losses should be 0 if attacker or defender has no ships
+    if (shipCountAttacker === 0 || shipCountdefender === 0) {
+        losses = 0;
+    }
+
+    console.log("losses", losses)
 
     function calulateBattleResults(
         losses : number,
@@ -179,7 +185,9 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         console.log("here?")
         for (let i=1; i<=losses; i++) {
             let randomNumber = Number(chunks[i])
-            let totalStrength : number = (attackerChances[attackerChances.length-1] + defenderChances[defenderChances.length-1])
+             const lastAttackerChance = attackerChances.length > 0 ? attackerChances[attackerChances.length - 1] : 0;
+            const lastDefenderChance = defenderChances.length > 0 ? defenderChances[defenderChances.length - 1] : 0;
+            let totalStrength: number = lastAttackerChance + lastDefenderChance;
             let selector = (randomNumber % totalStrength)
             console.log(totalStrength, "totalStrength")
             console.log(randomNumber, "randomNumber")
@@ -256,6 +264,10 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
     let results = calulateBattleResults(losses, attackerChances, attackerTypes, defenderChances, defenderTypes)
     let attackerLosses = results[0]
     let defenderLosses = results[1]
+
+    console.log("attackerLosses", attackerLosses)
+    console.log("defenderLosses", defenderLosses)
+    console.log("battleId", battleId)
 
   return {
     canExec: true,

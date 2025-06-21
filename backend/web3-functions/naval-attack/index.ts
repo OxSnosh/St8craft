@@ -1,31 +1,31 @@
 import { Web3Function, Web3FunctionContext } from "@gelatonetwork/web3-functions-sdk";
-import { Contract, Interface, id } from "ethers";
+import { Contract, Interface, id, JsonRpcProvider } from "ethers";
 
 const ORACLE_ABI = [
-  "function completeNavalAttack(uint256[] attackerChances, uint256[] defenderChances, uint256 battleId) external"
+  "function completeNavalAttack(uint256[], uint256[], uint256)"
 ];
 
 Web3Function.onRun(async (context: Web3FunctionContext) => {
   const { multiChainProvider } = context;
-  const provider = multiChainProvider.default();
+  const provider = new JsonRpcProvider("https://sepolia.base.org")
 
-  const navalAttackAddress = "0x71b9b0f6c999cbbb0fef9c92b80d54e4973214da"; // update if needed
-  const navalAttack = new Contract(navalAttackAddress, ORACLE_ABI);
+  const navalAttackAddress = "0x66FB32bF3891008d33df9A4E9F749DE9A4191875";
+  const navalAttack = new Contract(navalAttackAddress, ORACLE_ABI, provider);
 
   const EVENT_ABI = [
     "event NavalAttackRequested(uint256 requestId, uint256 battleId, uint256[] randomWords, uint256[] attackerChances, uint256[] attackerTypes, uint256[] defenderChances, uint256[] defenderTypes, uint256 losses)"
   ];
 
   const iface = new Interface(EVENT_ABI);
-  const eventTopic = id("NavalAttackRequested(uint256,uint256,uint256[],uint256[],uint256[],uint256[],uint256[],uint256)");
 
   const latestBlock = await provider.getBlockNumber();
   const logs = await provider.getLogs({
     address: navalAttackAddress,
-    topics: [eventTopic],
-    fromBlock: latestBlock - 15,
+    fromBlock: latestBlock - 100,
     toBlock: "latest"
   });
+
+  console.log(`Fetched ${logs.length} logs from last 100 blocks`);
 
   if (logs.length === 0) {
     return { canExec: false, message: "No NavalAttackRequested events found" };
@@ -33,11 +33,22 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 
   const event = iface.parseLog(logs[logs.length - 1]);
 
+  const parsedEvents = logs
+    .map((log) => {
+      try {
+        return iface.parseLog(log);
+      } catch {
+        return null;
+      }
+    })
+    .filter((e) => e?.name === "NavalAttackRequested");
+
+  if (parsedEvents.length === 0) throw new Error("No NavalAttackRequested events found");
+
   if (!event) {
-    return { canExec: false, message: "Failed to parse event log" };
+    throw new Error("No valid AirBattleRequested event found");
   }
 
-  // Extract variables from event
   const battleId = Number(event.args.battleId);
   const attackerChances = event.args.attackerChances.map((n: bigint) => Number(n));
   const defenderChances = event.args.defenderChances.map((n: bigint) => Number(n));
@@ -49,7 +60,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
     let chunks: string[] = []; // Declare chunks outside the loop to store all results
 
     for (let i = 0; i < numbers.length; i++) { // Iterate over all numbers
-        let numberToSlice = BigInt(numbers[i]).toString(); // Convert the number to BigInt and then to a string
+        let numberToSlice = String(BigInt(numbers[i])); // Convert the number to BigInt and then to a string
         let sliceNumber = 0;
 
         for (let j = 0; j < 5; j++) { // Extract 5 chunks per number
@@ -136,9 +147,9 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
     }
 
     let shipCountAttacker = shipCount(attackerTypes, attackerChances)
-    console.log(shipCountAttacker)
+    console.log(shipCountAttacker, "shipCountAttacker")
     let shipCountdefender = shipCount(defenderTypes, defenderChances)
-    console.log(shipCountdefender)
+    console.log(shipCountdefender, "shipCountdefender")
 
     let totalShipCount : number = (shipCountAttacker + shipCountdefender)
 
@@ -165,7 +176,11 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
     }
 
     let losses = calculateLosses(totalShipCount);
-    console.log(losses)
+    
+    if (shipCountAttacker == 0 || shipCountdefender == 0) {
+        losses = 0;
+    }
+    console.log(losses, "losses")
 
     function calulateBattleResults(
         losses : number,
@@ -177,10 +192,11 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
         let attackerLosses : number[] = []
         let defenderLosses : number[] = []
 
-        console.log("here?")
         for (let i=1; i<=losses; i++) {
             let randomNumber = Number(chunks[i])
-            let totalStrength : number = (attackerChances[attackerChances.length-1] + defenderChances[defenderChances.length-1])
+            const lastAttackerChance = attackerChances.length > 0 ? attackerChances[attackerChances.length - 1] : 0;
+            const lastDefenderChance = defenderChances.length > 0 ? defenderChances[defenderChances.length - 1] : 0;
+            let totalStrength: number = lastAttackerChance + lastDefenderChance;
             let selector = (randomNumber % totalStrength)
             console.log(totalStrength, "totalStrength")
             console.log(randomNumber, "randomNumber")
@@ -257,6 +273,10 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
     let results = calulateBattleResults(losses, attackerChances, attackerTypes, defenderChances, defenderTypes)
     let attackerLosses = results[0]
     let defenderLosses = results[1]
+
+    console.log("Attacker losses:", attackerLosses);
+    console.log("Defender losses:", defenderLosses);
+    console.log("Battle ID:", battleId);
 
   return {
     canExec: true,

@@ -24,7 +24,8 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     address public countryMinter;
     address public keeper;
     address public breakBlockadeAddress;
-    address public billsContract;
+    address public taxesContract;
+    address public navalAttack;
 
     //Chainlik Variables
     uint256[] private s_randomWords;
@@ -89,7 +90,8 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         address _countryMinter,
         address _keeper,
         address _breakBlockadeAddress,
-        address _billsContract
+        address _taxesContract,
+        address _navalAttack
     ) public onlyOwner {
         navy = _navy;
         nav = NavyContract(_navy);
@@ -104,7 +106,8 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         keeper = _keeper;
         keep = KeeperContract(_keeper);
         breakBlockadeAddress = _breakBlockadeAddress;
-        billsContract = _billsContract;
+        taxesContract = _taxesContract;
+        navalAttack = _navalAttack;
     }
 
     ///@dev this is a public function callable only from the nation owner
@@ -312,10 +315,10 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         return percentageReduction;
     }
 
-    modifier onlyBreakBlockade() {
+    modifier onlyBreakBlockadeOrNavalAttack() {
         require(
-            msg.sender == breakBlockadeAddress,
-            "function only callable from the break blockade contract"
+            msg.sender == breakBlockadeAddress || msg.sender == navalAttack,
+            "function only callable from the break blockade contract or naval attack contract"
         );
         _;
     }
@@ -324,7 +327,7 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
     function checkIfBlockadeCapable(
         uint256 countryId
-    ) external onlyBreakBlockade {
+    ) external onlyBreakBlockadeOrNavalAttack {
         uint256 blockadeCapableShips = addNav.getBlockadeCapableShips(
             countryId
         );
@@ -362,7 +365,7 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     function breakBlockade(
         uint256 blockaderId,
         uint256 breakerId
-    ) external onlyBreakBlockade {
+    ) external onlyBreakBlockadeOrNavalAttack {
         uint256[] storage blockadesAgainst = idToActiveBlockadesAgainst[
             breakerId
         ];
@@ -389,15 +392,15 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         }
     }
 
-    modifier onlyBills() {
+    modifier onlyTaxes() {
         require(
-            msg.sender == billsContract,
+            msg.sender == taxesContract,
             "Only callable from the Bills contract"
         );
         _;
     }
 
-    function removeAllBlockadesAgainst(uint256 countryId) external onlyBills {
+    function removeAllBlockadesAgainst(uint256 countryId) external onlyTaxes {
         uint256[] storage blockadesAgainst = idToActiveBlockadesAgainst[
             countryId
         ];
@@ -1053,7 +1056,8 @@ contract NavalAttackContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         address _navalActions,
         address _navy2,
         address _additionalNavy,
-        address _countryMinter
+        address _countryMinter,
+        address _navalBlockade
     ) public onlyOwner {
         navy = _navy;
         nav = NavyContract(_navy);
@@ -1069,6 +1073,8 @@ contract NavalAttackContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         addNav = AdditionalNavyContract(_additionalNavy);
         countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
+        navyBlockade = _navalBlockade;
+        navBlock = NavalBlockadeContract(_navalBlockade);
     }
 
     ///@dev this is a public function callable only from the nation owner

@@ -1034,7 +1034,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             countryMinter.address,
             keeperContract.address,
             breakBlocadeContract.address,
-            billsContract.address
+            taxesContract.address,
+            navalAttackContract.address,
           );
 
         console.log("naval blockade contract settings");
@@ -1059,7 +1060,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             navalActionsContract.address,
             navyContract2.address,
             additionalNavyContract.address,
-            countryMinter.address
+            countryMinter.address,
+            navalBlockadeContract.address,
           );
 
         console.log("naval attack contract settings");

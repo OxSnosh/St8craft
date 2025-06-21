@@ -148,7 +148,6 @@ contract BillsContract is Ownable, ReentrancyGuard {
         require(
             tsy.decreaseBalanceOnBillsPaid(id, billsPayable), "Payment failed"
         );
-        bloc.removeAllBlockadesAgainst(id);
         emit BillsPaid(id, billsPayable);
     }
 
