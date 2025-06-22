@@ -112,12 +112,7 @@ query GetBlockades {
 }
 
 query GetPosts($sender: BigInt) {
-  posts(
-    where: { sender: $sender }
-    orderBy: createdAt
-    orderDirection: desc
-    first: 10
-  ) {
+  posts(where: { sender: $sender }, orderBy: createdAt, orderDirection: desc, first: 10) {
     id
     sender
     post
@@ -136,7 +131,6 @@ query GetReceivedMessages($receiver: BigInt!) {
     transactionHash
   }
 }
-
 
 query GetSentMessages($sender: BigInt!) {
   messages(where: { sender: $sender }) {

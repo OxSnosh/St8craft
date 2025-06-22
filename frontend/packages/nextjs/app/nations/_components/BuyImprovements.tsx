@@ -1,18 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import * as Tooltip from "@radix-ui/react-tooltip";
+import { useTheme } from "next-themes";
 import { usePublicClient, useWriteContract } from "wagmi";
 import { useAccount } from "wagmi";
-import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
-import { useSearchParams } from "next/navigation";
+import { simulateContract } from "wagmi/actions";
+import { parseRevertReason } from "~~/utils/errorHandling";
 import { deleteImprovement } from "~~/utils/improvements";
 import { getImprovements } from "~~/utils/improvements";
+import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
 import { checkBalance } from "~~/utils/treasury";
-import { useTheme } from "next-themes";
-import { parseRevertReason } from "~~/utils/errorHandling";
-import { simulateContract } from "wagmi/actions";
 import { wagmiConfig } from "~~/utils/wagmiConfig";
-import * as Tooltip from '@radix-ui/react-tooltip';
 
 const BuyImprovement = () => {
   const { theme } = useTheme();
@@ -64,174 +64,181 @@ const BuyImprovement = () => {
     airports: {
       Cost: "100,000 Warbucks",
       Limit: "3",
-      Benefits: "Reduces aircraft purchase cost -2%, Reduces aircraft upkeep cost -2%"
+      Benefits: "Reduces aircraft purchase cost -2%, Reduces aircraft upkeep cost -2%",
     },
     banks: {
       Cost: "100,000 Warbucks",
       Limit: "5",
-      Benefits: "Increases population income +7%"
+      Benefits: "Increases population income +7%",
     },
     barracks: {
       Cost: "50,000 Warbucks",
       Limit: "5",
-      Benefits: "Increases soldier efficiency +10%, Reduces soldier upkeep cost -10%"
+      Benefits: "Increases soldier efficiency +10%, Reduces soldier upkeep cost -10%",
     },
     borderFortifications: {
       Cost: "125,000 Warbucks",
       Limit: "3",
-      Benefits: "Raises effectiveness of defending soldiers +2%, Reduces max deployment -2%, Requires Border Wall, Cannot own if Forward Operating Base is owned"
+      Benefits:
+        "Raises effectiveness of defending soldiers +2%, Reduces max deployment -2%, Requires Border Wall, Cannot own if Forward Operating Base is owned",
     },
     borderWalls: {
       Cost: "60,000 Warbucks",
       Limit: "5",
-      Benefits: "Decreases citizen count -2%, Increases population happiness +2, Improves environment (+1), Reduces criminals -1% per wall, Only one purchase at a time"
+      Benefits:
+        "Decreases citizen count -2%, Increases population happiness +2, Improves environment (+1), Reduces criminals -1% per wall, Only one purchase at a time",
     },
     bunker: {
       Cost: "200,000 Warbucks",
       Limit: "5",
-      Benefits: "Reduces infrastructure damage from aircraft, cruise missiles, and nukes, Requires Barracks, Cannot build if Munitions Factory or Forward Operating Base is owned"
+      Benefits:
+        "Reduces infrastructure damage from aircraft, cruise missiles, and nukes, Requires Barracks, Cannot build if Munitions Factory or Forward Operating Base is owned",
     },
     casinos: {
       Cost: "100,000 Warbucks",
       Limit: "2",
-      Benefits: "Increases happiness +1%, Decreases citizen income -1%, Decreases crime prevention"
+      Benefits: "Increases happiness +1%, Decreases citizen income -1%, Decreases crime prevention",
     },
     churches: {
       Cost: "40,000 Warbucks",
       Limit: "5",
-      Benefits: "Increases population happiness +1"
+      Benefits: "Increases population happiness +1",
     },
     clinics: {
       Cost: "50,000 Warbucks",
       Limit: "5",
-      Benefits: "Increases population count +2%, 2+ Clinics allow Hospital purchase, Clinics must exist for Hospital"
+      Benefits: "Increases population count +2%, 2+ Clinics allow Hospital purchase, Clinics must exist for Hospital",
     },
     drydocks: {
       Cost: "100,000 Warbucks",
       Limit: "5",
-      Benefits: "Allows building and maintaining Corvettes, Battleships, Cruisers, and Destroyers, Requires Harbor"
+      Benefits: "Allows building and maintaining Corvettes, Battleships, Cruisers, and Destroyers, Requires Harbor",
     },
     factories: {
       Cost: "150,000 Warbucks",
       Limit: "5",
-      Benefits: "Decreases cruise missile cost -5%, Decreases tank cost -10%, Reduces infrastructure purchase cost -8%"
+      Benefits: "Decreases cruise missile cost -5%, Decreases tank cost -10%, Reduces infrastructure purchase cost -8%",
     },
     foreignMinistries: {
       Cost: "120,000 Warbucks",
       Limit: "1",
-      Benefits: "Increases population income +5%"
+      Benefits: "Increases population income +5%",
     },
     forwardOperatingBases: {
       Cost: "125,000 Warbucks",
       Limit: "2",
-      Benefits: "Increases ground attack effectiveness +1 per FOB, Reduces defending soldier effectiveness -3%, Requires Barracks, Cannot own with Border Fortifications or Bunker"
+      Benefits:
+        "Increases ground attack effectiveness +1 per FOB, Reduces defending soldier effectiveness -3%, Requires Barracks, Cannot own with Border Fortifications or Bunker",
     },
     guerillaCamps: {
       Cost: "20,000 Warbucks",
       Limit: "5",
-      Benefits: "Increases soldier efficiency +35%, Reduces soldier upkeep cost -10%, Reduces citizen income -8%"
+      Benefits: "Increases soldier efficiency +35%, Reduces soldier upkeep cost -10%, Reduces citizen income -8%",
     },
     harbors: {
       Cost: "200,000 Warbucks",
       Limit: "1",
-      Benefits: "Increases population income +1%, Opens +1 extra trade slot, Required for Drydock, Shipyard, Naval Academy"
+      Benefits:
+        "Increases population income +1%, Opens +1 extra trade slot, Required for Drydock, Shipyard, Naval Academy",
     },
     hospitals: {
       Cost: "180,000 Warbucks",
       Limit: "1",
-      Benefits: "Increases population count +6%, Requires 2 Clinics"
+      Benefits: "Increases population count +6%, Requires 2 Clinics",
     },
     intelAgencies: {
       Cost: "38,500 Warbucks",
       Limit: "5",
-      Benefits: "Increases happiness +1 for tax rates >23%, Each agency allows +100 spies"
+      Benefits: "Increases happiness +1 for tax rates >23%, Each agency allows +100 spies",
     },
     jails: {
       Cost: "25,000 Warbucks",
       Limit: "5",
-      Benefits: "Incarcerates up to 500 criminals"
+      Benefits: "Incarcerates up to 500 criminals",
     },
     laborCamps: {
       Cost: "150,000 Warbucks",
       Limit: "5",
-      Benefits: "Reduces infrastructure upkeep -10%, Reduces population happiness -1, Incarcerates 200 criminals"
+      Benefits: "Reduces infrastructure upkeep -10%, Reduces population happiness -1, Incarcerates 200 criminals",
     },
     missileDefenseSystems: {
       Cost: "90,000 Warbucks",
       Limit: "5",
-      Benefits: "Reduces odds of successful Nuclear and Cruise Missile strikes -5%, Minimum 3 Missile Defenses required if SDI wonder owned"
+      Benefits:
+        "Reduces odds of successful Nuclear and Cruise Missile strikes -5%, Minimum 3 Missile Defenses required if SDI wonder owned",
     },
     munitionsFactories: {
       Cost: "200,000 Warbucks",
       Limit: "5, Requires 3 Factories and Lead resource, Cannot build if Bunkers owned",
-      Benefits: "Increases enemy infrastructure damage +3%, Penalty to environment"
+      Benefits: "Increases enemy infrastructure damage +3%, Penalty to environment",
     },
     navalAcademies: {
       Cost: "300,000 Warbucks",
       Limit: "2, Requires Harbor",
-      Benefits: "Increases navy vessel attack/defense strength +1"
+      Benefits: "Increases navy vessel attack/defense strength +1",
     },
     navalConstructionYards: {
       Cost: "300,000 Warbucks",
       Limit: "3, Requires Harbor and navy support capabilities",
-      Benefits: "Increases daily navy vessel purchase limit +1"
+      Benefits: "Increases daily navy vessel purchase limit +1",
     },
     officesOfPropaganda: {
       Cost: "200,000 Warbucks",
       Limit: "2, Requires Forward Operating Base",
-      Benefits: "Decreases enemy defending soldier effectiveness -3%"
+      Benefits: "Decreases enemy defending soldier effectiveness -3%",
     },
     policeHeadquarters: {
       Cost: "75,000 Warbucks",
       Limit: "5",
-      Benefits: "Increases population happiness +2"
+      Benefits: "Increases population happiness +2",
     },
     prisons: {
       Cost: "200,000 Warbucks",
       Limit: "5",
-      Benefits: "Incarcerates up to 5,000 criminals"
+      Benefits: "Incarcerates up to 5,000 criminals",
     },
     radiationContainmentChambers: {
       Cost: "200,000 Warbucks",
       Limit: "2, Requires Radiation Cleanup resource and Bunker",
-      Benefits: "Lowers global radiation affecting nation by 20%"
+      Benefits: "Lowers global radiation affecting nation by 20%",
     },
     redLightDistricts: {
       Cost: "50,000 Warbucks",
       Limit: "2",
-      Benefits: "Increases happiness +1, Penalizes environment, Increases crime"
+      Benefits: "Increases happiness +1, Penalizes environment, Increases crime",
     },
     rehabilitationFacilities: {
       Cost: "500,000 Warbucks",
       Limit: "5",
-      Benefits: "Sends up to 500 criminals back into citizen population"
+      Benefits: "Sends up to 500 criminals back into citizen population",
     },
     satellites: {
       Cost: "90,000 Warbucks",
       Limit: "5",
-      Benefits: "Increases cruise missile and nuke success odds +5%, Minimum 3 Satellites required if SDI wonder owned"
+      Benefits: "Increases cruise missile and nuke success odds +5%, Minimum 3 Satellites required if SDI wonder owned",
     },
     schools: {
       Cost: "85,000 Warbucks",
       Limit: "5",
-      Benefits: "Increases population income +5%, Increases literacy rate +1%, 3 Schools needed for University purchase"
+      Benefits:
+        "Increases population income +5%, Increases literacy rate +1%, 3 Schools needed for University purchase",
     },
     shipyards: {
       Cost: "100,000 Warbucks",
       Limit: "5, Requires Harbor",
-      Benefits: "Allows building and maintaining Landing Ships, Frigates, Submarines, Aircraft Carriers"
+      Benefits: "Allows building and maintaining Landing Ships, Frigates, Submarines, Aircraft Carriers",
     },
     stadiums: {
       Cost: "110,000 Warbucks",
       Limit: "5",
-      Benefits: "Increases population happiness +3"
+      Benefits: "Increases population happiness +3",
     },
     universities: {
       Cost: "180,000 Warbucks",
       Limit: "2, Requires 3 Schools",
-      Benefits: "Increases population income +8%, Reduces technology cost -10%, Increases literacy rate +3%"
-    }
-  }; 
+      Benefits: "Increases population income +8%, Reduces technology cost -10%, Increases literacy rate +3%",
+    },
+  };
 
   const [improvementDetails, setImprovementDetails] = useState<{ [key: string]: string }>({});
   const [refreshTrigger, setRefreshTrigger] = useState(false);
@@ -252,23 +259,47 @@ const BuyImprovement = () => {
 
     const mappings = [
       [
-        "buyAirport", "buyBank", "buyBarracks", "buyBorderFortification",
-        "buyBorderWall", "buyBunker", "buyCasino", "buyChurch", "buyClinic",
-        "buyDrydock", "buyFactory"
+        "buyAirport",
+        "buyBank",
+        "buyBarracks",
+        "buyBorderFortification",
+        "buyBorderWall",
+        "buyBunker",
+        "buyCasino",
+        "buyChurch",
+        "buyClinic",
+        "buyDrydock",
+        "buyFactory",
       ],
       [
-        "buyForeignMinistry", "buyForwardOperatingBase", "buyGuerillaCamp",
-        "buyHarbor", "buyHospital", "buyIntelAgency", "buyJail", "buyLaborCamp"
+        "buyForeignMinistry",
+        "buyForwardOperatingBase",
+        "buyGuerillaCamp",
+        "buyHarbor",
+        "buyHospital",
+        "buyIntelAgency",
+        "buyJail",
+        "buyLaborCamp",
       ],
       [
-        "buyPrison", "buyRadiationContainmentChamber", "buyRedLightDistrict",
-        "buyRehabilitationFacility", "buySatellite", "buySchool", "buyShipyard",
-        "buyStadium", "buyUniversity"
+        "buyPrison",
+        "buyRadiationContainmentChamber",
+        "buyRedLightDistrict",
+        "buyRehabilitationFacility",
+        "buySatellite",
+        "buySchool",
+        "buyShipyard",
+        "buyStadium",
+        "buyUniversity",
       ],
       [
-        "buyMissileDefense", "buyMunitionsFactory", "buyNavalAcademy",
-        "buyNavalConstructionYard", "buyOfficeOfPropaganda", "buyPoliceHeadquarters"
-      ]
+        "buyMissileDefense",
+        "buyMunitionsFactory",
+        "buyNavalAcademy",
+        "buyNavalConstructionYard",
+        "buyOfficeOfPropaganda",
+        "buyPoliceHeadquarters",
+      ],
     ];
 
     let selectedContract = null;
@@ -324,7 +355,7 @@ const BuyImprovement = () => {
           contractsData.ImprovementsContract2,
           contractsData.ImprovementsContract3,
           contractsData.ImprovementsContract4,
-          writeContractAsync
+          writeContractAsync,
         );
         alert("Improvement deleted successfully!");
         window.location.reload();
@@ -347,13 +378,13 @@ const BuyImprovement = () => {
         contractsData.ImprovementsContract2,
         contractsData.ImprovementsContract3,
         contractsData.ImprovementsContract4,
-        publicClient
+        publicClient,
       );
       const warBuckBalance = await checkBalance(nationId, publicClient, contractsData.TreasuryContract);
 
       const details: { [key: string]: string } = {};
 
-      improvements?.forEach((improvement) => {
+      improvements?.forEach(improvement => {
         const key = improvement.name.charAt(0).toLowerCase() + improvement.name.slice(1).replace(/\s+/g, "");
         details[key] = improvement.improvementCount.toString();
       });
@@ -388,13 +419,11 @@ const BuyImprovement = () => {
             </tr>
           </thead>
           <tbody>
-            {Object.keys(improvementKeyMapping).map((key) => (
+            {Object.keys(improvementKeyMapping).map(key => (
               <tr key={key} className="border-b border-neutral">
                 <Tooltip.Root delayDuration={100}>
                   <Tooltip.Trigger asChild>
-                    <td className="p-3 capitalize cursor-pointer">
-                      {key.replace(/([A-Z])/g, " $1")}
-                    </td>
+                    <td className="p-3 capitalize cursor-pointer">{key.replace(/([A-Z])/g, " $1")}</td>
                   </Tooltip.Trigger>
                   <Tooltip.Portal>
                     <Tooltip.Content
@@ -402,9 +431,15 @@ const BuyImprovement = () => {
                       align="center"
                       className="bg-gray-800 text-white p-3 rounded-md text-sm shadow-lg max-w-xs break-words z-50"
                     >
-                      <div><strong>Cost:</strong> {improvementParameters[key]?.Cost || "N/A"}</div>
-                      <div><strong>Limit:</strong> {improvementParameters[key]?.Limit || "N/A"}</div>
-                      <div><strong>Benefits:</strong> {improvementParameters[key]?.Benefits || "N/A"}</div>
+                      <div>
+                        <strong>Cost:</strong> {improvementParameters[key]?.Cost || "N/A"}
+                      </div>
+                      <div>
+                        <strong>Limit:</strong> {improvementParameters[key]?.Limit || "N/A"}
+                      </div>
+                      <div>
+                        <strong>Benefits:</strong> {improvementParameters[key]?.Benefits || "N/A"}
+                      </div>
                     </Tooltip.Content>
                   </Tooltip.Portal>
                 </Tooltip.Root>
@@ -416,7 +451,7 @@ const BuyImprovement = () => {
                     min="1"
                     max="5"
                     value={purchaseAmounts[key] || 1}
-                    onChange={(e) => setPurchaseAmounts({ ...purchaseAmounts, [key]: Number(e.target.value) })}
+                    onChange={e => setPurchaseAmounts({ ...purchaseAmounts, [key]: Number(e.target.value) })}
                     className="input input-bordered w-16 bg-base-100 text-base-content"
                   />
                 </td>

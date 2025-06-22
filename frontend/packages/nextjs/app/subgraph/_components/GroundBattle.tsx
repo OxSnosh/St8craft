@@ -1,34 +1,15 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { GetGroundBattlesDocument, execute } from "~~/.graphclient";
-import { Address } from "~~/components/scaffold-eth";
 
-const GroundBattleTable = () => {
-  const [groundBattles, setGroundBattlesData] = useState<any>(null);
-  const [error, setError] = useState<any>(null);
+export default async function GroundBattleTable() {
+  let groundBattles = [];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!execute || !GetGroundBattlesDocument) {
-        return;
-      }
-      try {
-        const { data: result } = await execute(GetGroundBattlesDocument, {});
-        console.log(result.groundBattles);
-        setGroundBattlesData(result);
-        console.log(result);
-      } catch (err) {
-        setError(err);
-      } finally {
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (error) {
-    return null;
+  try {
+    const { data } = await execute(GetGroundBattlesDocument, {});
+    groundBattles = data?.groundBattles ?? [];
+    console.log("Ground Battles:", groundBattles);
+  } catch (err) {
+    console.error("Failed to fetch ground battles:", err);
+    return <div className="text-red-500 text-center mt-5">Failed to load ground battle data.</div>;
   }
 
   return (
@@ -47,15 +28,15 @@ const GroundBattleTable = () => {
             </tr>
           </thead>
           <tbody>
-            {groundBattles?.groundBattles?.map((groundBattle: any, index: number) => (
-              <tr key={groundBattle.groundBattleId}>
-                <th>{groundBattle.warId}</th>
-                <th>{groundBattle.attackerId}</th>
-                <th>{groundBattle.attackerSoldierLosses}</th>
-                <th>{groundBattle.attackerTankLosses}</th>
-                <th>{groundBattle.defenderId}</th>
-                <th>{groundBattle.defenderSoldierLosses}</th>
-                <th>{groundBattle.defenderTankLosses}</th>
+            {groundBattles.map((battle: any) => (
+              <tr key={battle.groundBattleId}>
+                <td>{battle.warId}</td>
+                <td>{battle.attackerId}</td>
+                <td>{battle.attackerSoldierLosses}</td>
+                <td>{battle.attackerTankLosses}</td>
+                <td>{battle.defenderId}</td>
+                <td>{battle.defenderSoldierLosses}</td>
+                <td>{battle.defenderTankLosses}</td>
               </tr>
             ))}
           </tbody>
@@ -63,6 +44,4 @@ const GroundBattleTable = () => {
       </div>
     </div>
   );
-};
-
-export default GroundBattleTable;
+}

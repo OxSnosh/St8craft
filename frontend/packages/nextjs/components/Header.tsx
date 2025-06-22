@@ -4,11 +4,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useAccount, usePublicClient } from "wagmi";
 import { Bars3Icon, BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
-import { useAccount, usePublicClient } from "wagmi";
 
 type HeaderMenuLink = {
   label: string;
@@ -38,12 +38,12 @@ export const menuLinks: HeaderMenuLink[] = [
   {
     label: "Gameplay Guide",
     href: "/gameplay",
-  }   
+  },
 ];
 
 export const HeaderMenuLinks = () => {
   const pathname = usePathname();
-  
+
   const playClickSound = () => {
     const audio = new Audio("/pageturn.wav");
     audio.play().catch(error => console.error("Audio playback failed:", error));
@@ -99,14 +99,14 @@ export const Header = () => {
     if (!publicClient) {
       throw new Error("publicClient is not defined");
     }
-    let nationName = await publicClient.readContract({
+    const nationName = await publicClient.readContract({
       abi: countryParametersContract.abi,
       address: countryParametersContract.address,
       functionName: "getNationName",
       args: [tokenIdString],
     });
     return nationName;
-  }
+  };
 
   useEffect(() => {
     const fetchMintedNations = async () => {
@@ -148,7 +148,7 @@ export const Header = () => {
               localStorage.setItem("selectedMenuItem", `Nation ${tokenId}`);
               router.push(`/nations?id=${tokenId}`);
             },
-          }))
+          })),
         );
 
         setMintedNations(nations);
@@ -163,9 +163,9 @@ export const Header = () => {
 
   const handleNationSelect = (nationId: string, nationName: string) => {
     console.log(`Nation selected: ${nationName} (ID: ${nationId})`);
-  
+
     localStorage.setItem("selectedMenuItem", `Nation ${nationId}`);
-  
+
     router.push(`/nations?id=${nationId}`);
   };
 
@@ -177,7 +177,7 @@ export const Header = () => {
             tabIndex={0}
             className={`ml-1 btn btn-ghost ${isDrawerOpen ? "hover:bg-secondary" : "hover:bg-transparent"}`}
             onClick={() => {
-              setIsDrawerOpen((prevIsOpenState) => !prevIsOpenState);
+              setIsDrawerOpen(prevIsOpenState => !prevIsOpenState);
             }}
           >
             <Bars3Icon className="h-1/2" />
@@ -196,11 +196,11 @@ export const Header = () => {
         </div>
         <Link href="/" passHref className="hidden lg:flex items-center gap-2 ml-4 mr-6 shrink-0">
           <div className="flex relative w-[200px] h-[40px]">
-            <Image 
-              alt="St8Craft Logo" 
+            <Image
+              alt="St8Craft Logo"
               className="cursor-pointer w-[200px] h-[40px] object-contain"
-              src="/Logo_Full.png" 
-              width={100} 
+              src="/Logo_Full.png"
+              width={100}
               height={100}
             />
           </div>
@@ -214,18 +214,18 @@ export const Header = () => {
         {walletAddress && mintedNations.length > 0 && (
           <div className="relative dropdown">
             <button className="btn btn-primary btn-sm">My Nations</button>
-              <ul className="dropdown-content menu mt-3 p-2 shadow bg-base-100 rounded-box w-52">
-                {mintedNations.map((nation) => (
-                  <li key={nation.href}>
-                    <button
-                      onClick={() => handleNationSelect(nation.href.split("=")[1], nation.name)}
-                      className="cursor-pointer hover:bg-secondary p-2 rounded w-full text-left"
-                    >
-                      {nation.name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            <ul className="dropdown-content menu mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+              {mintedNations.map(nation => (
+                <li key={nation.href}>
+                  <button
+                    onClick={() => handleNationSelect(nation.href.split("=")[1], nation.name)}
+                    className="cursor-pointer hover:bg-secondary p-2 rounded w-full text-left"
+                  >
+                    {nation.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
         <RainbowKitCustomConnectButton />

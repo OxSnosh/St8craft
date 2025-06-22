@@ -1,37 +1,15 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { GetReceivedMessagesDocument, GetSentMessagesDocument, execute } from "~~/.graphclient";
-import { useAccount } from "wagmi";
 
-export const RecievedMessagesTable = () => {
-  const { address: walletAddress } = useAccount(); // Get the connected wallet address
-  const [messages, setRecievedMessagesData] = useState<any>(null);
-  const [error, setError] = useState<any>(null);
+type Props = {
+  walletAddress: string;
+};
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!walletAddress || !execute || !GetReceivedMessagesDocument) {
-        return;
-      }
-      try {
-        const { data: result } = await execute(GetReceivedMessagesDocument, {
-          reciever: walletAddress, // Pass the wallet address to the query
-        });
+export const RecievedMessagesTable = async ({ walletAddress }: Props) => {
+  const { data, errors } = await execute(GetReceivedMessagesDocument, {
+    reciever: walletAddress,
+  });
 
-        console.log("Messages Recieved", result);
-        setRecievedMessagesData(result);
-      } catch (err) {
-        setError(err);
-      }
-    };
-
-    fetchData();
-  }, [walletAddress]); // Re-fetch messages when wallet address changes
-
-  if (error) {
-    return <p className="text-red-500">Error fetching messages</p>;
-  }
+  const messages = data?.messages ?? [];
 
   return (
     <div className="flex justify-center items-center mt-10">
@@ -39,16 +17,23 @@ export const RecievedMessagesTable = () => {
         <table className="table bg-base-100 table-zebra">
           <thead>
             <tr className="rounded-xl">
-            <th className="bg-primary">INBOX for {walletAddress ? `${walletAddress.slice(0, 3)}...${walletAddress.slice(-5)}` : "N/A"}
-            </th>
+              <th className="bg-primary">
+                INBOX for {walletAddress.slice(0, 3)}...{walletAddress.slice(-5)}
+              </th>
             </tr>
           </thead>
           <tbody>
-            {messages?.messages?.slice(0, 5).map((message: any) => (
-              <tr key={message.id}>
-                <td>{message.message}</td>
+            {messages.length > 0 ? (
+              messages.slice(0, 5).map((message: any) => (
+                <tr key={message.id}>
+                  <td>{message.message}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td className="italic text-gray-500">No received messages.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -56,34 +41,12 @@ export const RecievedMessagesTable = () => {
   );
 };
 
-export const SentMessagesTable = () => {
-  const { address: walletAddress } = useAccount(); 
-  const [messages, setSentMessagesData] = useState<any>(null);
-  const [error, setError] = useState<any>(null);
+export const SentMessagesTable = async ({ walletAddress }: Props) => {
+  const { data, errors } = await execute(GetSentMessagesDocument, {
+    sender: walletAddress,
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!walletAddress || !execute || !GetSentMessagesDocument) {
-        return;
-      }
-      try {
-        const { data: result } = await execute(GetSentMessagesDocument, {
-          sender: walletAddress,
-        });
-
-        console.log("Messages Sent", result?.messages);
-        setSentMessagesData(result);
-      } catch (err) {
-        setError(err);
-      }
-    };
-
-    fetchData();
-  }, [walletAddress]);
-
-  if (error) {
-    return <p className="text-red-500">Error fetching messages</p>;
-  }
+  const messages = data?.messages ?? [];
 
   return (
     <div className="flex justify-center items-center mt-10">
@@ -91,16 +54,24 @@ export const SentMessagesTable = () => {
         <table className="table bg-base-100 table-zebra">
           <thead>
             <tr className="rounded-xl">
-            <th className="bg-primary">Last 5 Sent Messages from {walletAddress ? `${walletAddress.slice(0, 3)}...${walletAddress.slice(-5)}` : "N/A"}
-            </th>
+              <th className="bg-primary">
+                Last 5 Sent Messages from {walletAddress.slice(0, 3)}...
+                {walletAddress.slice(-5)}
+              </th>
             </tr>
           </thead>
           <tbody>
-            {messages?.messages?.slice(0, 5).map((message: any) => (
-              <tr key={message.id}>
-                <td>{message.message}</td>
+            {messages.length > 0 ? (
+              messages.slice(0, 5).map((message: any) => (
+                <tr key={message.id}>
+                  <td>{message.message}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td className="italic text-gray-500">No sent messages.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

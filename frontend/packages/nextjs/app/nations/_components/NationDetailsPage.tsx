@@ -2,35 +2,36 @@
 
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
-import { usePublicClient, useAccount, useWriteContract } from "wagmi";
-
-import { getResources, getBonusResources, getTradingPartners } from '../../../utils/resources';
-import { getImprovements } from '../../../utils/improvements';
-import { getWonders } from '../../../utils/wonders';
-import { getEnvironmentScore } from "../../../utils/environment"
-import { getNationStrength } from "../../../utils/strength";
-import { getDefconLevel, getThreatLevel, getWarPeacePreference } from "~~/utils/military";
-import { 
-  getSoldierCount, 
-  getTankCount, 
-  getDefendingSoldierCount, 
-  getDeployedSoldierCount,
+import { getBombers } from "../../../utils/bombers";
+import { getEnvironmentScore } from "../../../utils/environment";
+import { parseRevertReason } from "../../../utils/errorHandling";
+import { getFighters } from "../../../utils/fighters";
+import {
+  getCasualties,
+  getDefendingSoldierCount,
   getDefendingSoldierEfficiencyModifier,
-  getDefendingTankCount, 
+  getDefendingTankCount,
+  getDeployedSoldierCount,
   getDeployedTankCount,
-  getCasualties
-} from "../../../utils/forces"
-import { getNationAllianceAndPlatoon } from "~~/utils/alliance";
-import { getFighters } from "../../../utils/fighters"
-import { getBombers } from "../../../utils/bombers"
-import { getNavy } from "../../../utils/navy"
-import { getCruiseMissileCount, getNukeCount } from "~~/utils/missiles";
-import { getSpyCount } from "~~/utils/spies";
-import { checkOwnership } from "~~/utils/countryMinter";
-import PostsTable from "../../../app/subgraph/_components/Posts";
-import { parseRevertReason } from '../../../utils/errorHandling';
+  getSoldierCount,
+  getTankCount,
+} from "../../../utils/forces";
+import { getImprovements } from "../../../utils/improvements";
+import { getNavy } from "../../../utils/navy";
+import { getBonusResources, getResources, getTradingPartners } from "../../../utils/resources";
+import { getNationStrength } from "../../../utils/strength";
+import { getWonders } from "../../../utils/wonders";
+import PostSubmissionClient from "../../subgraph/_components//PostSubmissionClient";
+import PostsTableServer from "../../subgraph/_components/PostTableServer";
+import PostsTable from "../../subgraph/_components/Posts";
 import { ethers } from "ethers";
+import { useAccount, usePublicClient, useWriteContract } from "wagmi";
+import { getNationAllianceAndPlatoon } from "~~/utils/alliance";
+import { checkOwnership } from "~~/utils/countryMinter";
+import { getDefconLevel, getThreatLevel, getWarPeacePreference } from "~~/utils/military";
+import { getCruiseMissileCount, getNukeCount } from "~~/utils/missiles";
+import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
+import { getSpyCount } from "~~/utils/spies";
 
 type NationDetails = {
   nationName: string | null;
@@ -131,7 +132,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
   const navyContract2 = contractsData?.NavyContract2;
   const missilesContract = contractsData?.MissilesContract;
   const spiesContract = contractsData?.SpyContract;
-  const allianceContract = contractsData?.AllianceManager
+  const allianceContract = contractsData?.AllianceManager;
 
   const [activeTab, setActiveTab] = useState("Government Information");
 
@@ -154,12 +155,12 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
       if (!walletAddress || !publicClient || !contractsData?.CountryMinter) return;
       const owner = await checkOwnership(nationId, publicClient, contractsData.CountryMinter);
       setIsOwner(owner);
-      const water = await publicClient.readContract({
+      const water = (await publicClient.readContract({
         abi: resourcesContract.abi,
         address: resourcesContract.address,
         functionName: "getResources2",
         args: [nationId],
-      }) as any[];
+      })) as any[];
       setWaterAccess(Boolean(water[7]));
     };
 
@@ -178,8 +179,8 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
       args: [tokenId, walletAddress],
     });
 
-    return owner 
-  }
+    return owner;
+  };
 
   const { writeContractAsync } = useWriteContract();
 
@@ -189,29 +190,29 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
   //     alert("Missing required parameters.");
   //     return;
   //   }
-  
+
   //   const contractData = contractsData.Messenger;
   //   const abi = contractData.abi;
-  
+
   //   if (!contractData.address || !abi) {
   //     console.error("Contract address or ABI is missing.");
   //     alert("Contract configuration is missing.");
   //     return;
   //   }
-  
+
   //   try {
   //     const provider = new ethers.providers.Web3Provider(window.ethereum);
   //     await provider.send("eth_requestAccounts", []);
   //     const signer = provider.getSigner();
   //     const userAddress = await signer.getAddress();
-  
+
   //     const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-  
+
   //     const data = contract.interface.encodeFunctionData("postMessage", [
   //       nationIdForPost,
   //       message,
   //     ]);
-  
+
   //     try {
   //       // Simulating the transaction call
   //       const result = await provider.call({
@@ -219,20 +220,20 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
   //         data: data,
   //         from: userAddress,
   //       });
-  
+
   //       if (result.startsWith("0x08c379a0")) {
   //         const errorMessage = parseRevertReason({ data: result });
   //         alert(`Transaction failed: ${errorMessage}`);
   //         return;
   //       }
-  
+
   //     } catch (error: any) {
   //       const errorMessage = parseRevertReason(error);
   //       console.error("Transaction simulation failed:", errorMessage);
   //       alert(`Transaction failed: ${errorMessage}`);
   //       return;
   //     }
-  
+
   //     // Sending the actual transaction
   //     await writeContractAsync({
   //       abi: contractData.abi,
@@ -240,10 +241,10 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
   //       functionName: "postMessage",
   //       args: [nationIdForPost, message],
   //     });
-  
+
   //     alert("Posted successfully!");
   //     setMessage(""); // Clear message input
-  
+
   //     window.location.reload()
   //   } catch (error: any) {
   //     const errorMessage = parseRevertReason(error);
@@ -258,24 +259,24 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
       alert("Missing required parameters.");
       return;
     }
-  
+
     const contractData = contractsData.Messenger;
     const abi = contractData.abi;
-  
+
     if (!contractData.address || !abi) {
       console.error("Contract address or ABI is missing.");
       alert("Contract configuration is missing.");
       return;
     }
-  
+
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
       const userAddress = await signer.getAddress();
-  
+
       const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-  
+
       console.log("nationId", nationId);
       console.log("message", post);
 
@@ -291,7 +292,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
         alert(`Simulation failed: ${errorMessage}`);
         return;
       }
-  
+
       // Sending the actual transaction
       await writeContractAsync({
         abi: contractData.abi,
@@ -299,7 +300,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
         functionName: "postMessage",
         args: [nationId, post],
       });
-  
+
       alert("Posted successfully!");
       setPost(""); // Clear message input
       window.location.reload();
@@ -309,7 +310,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
       alert(`Transaction failed: ${errorMessage}`);
     }
   };
-  
+
   useEffect(() => {
     const fetchNationDetails = async () => {
       if (!publicClient || !countryParametersContract) {
@@ -321,12 +322,12 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
       try {
         const tokenIdString = nationId.toString();
 
-        const balanceRaw = await publicClient.readContract({
+        const balanceRaw = (await publicClient.readContract({
           abi: treasuryContract.abi,
           address: treasuryContract.address,
           functionName: "checkBalance",
           args: [tokenIdString],
-        }) as Number;
+        })) as number;
 
         const balance = BigInt(balanceRaw as unknown as bigint).toString();
         const formattedBalance = Number(balance) / 10 ** 18;
@@ -339,7 +340,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
         })) as any[];
 
         const taxesCollectibleWihZeroes = taxesCollectibleArray[1]?.toString();
-        const taxesCollectible = taxesCollectibleWihZeroes/(10 ** 18);
+        const taxesCollectible = taxesCollectibleWihZeroes / 10 ** 18;
 
         const billsPayableRaw = (await publicClient.readContract({
           abi: billsContract.abi,
@@ -349,7 +350,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
         })) as any;
 
         const billsPayableWithZeroes = billsPayableRaw.toString();
-        const billsPayable = billsPayableWithZeroes/(10 ** 18);
+        const billsPayable = billsPayableWithZeroes / 10 ** 18;
 
         const taxablePopulationArray = (await publicClient.readContract({
           abi: infrastructureContract.abi,
@@ -366,14 +367,14 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
           functionName: "getCriminalCount",
           args: [tokenIdString],
         })) as any[];
-        
+
         const lastTaxCollectionDays = String(
           await publicClient.readContract({
             abi: treasuryContract.abi,
             address: treasuryContract.address,
             functionName: "getDaysSinceLastTaxCollection",
             args: [tokenIdString],
-          })
+          }),
         );
 
         const lastTaxCollection = `${lastTaxCollectionDays} days ago`;
@@ -384,7 +385,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
             address: treasuryContract.address,
             functionName: "getDaysSinceLastBillsPaid",
             args: [tokenIdString],
-          })
+          }),
         );
 
         const lastBillPayment = `${lastBillPaymentDays} days ago`;
@@ -395,21 +396,35 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
 
         const tradingPartners = await getTradingPartners(tokenIdString, resourcesContract, publicClient);
 
-        const improvements = await getImprovements(tokenIdString, improvementsContract1, improvementsContract2, improvementsContract3, improvementsContract4, publicClient);
+        const improvements = await getImprovements(
+          tokenIdString,
+          improvementsContract1,
+          improvementsContract2,
+          improvementsContract3,
+          improvementsContract4,
+          publicClient,
+        );
 
-        const wonders = await getWonders(tokenIdString, wondersContract1, wondersContract2, wondersContract3, wondersContract4, publicClient)
-        
-        const environmentScore = await getEnvironmentScore(tokenIdString, publicClient, environmentContract)
+        const wonders = await getWonders(
+          tokenIdString,
+          wondersContract1,
+          wondersContract2,
+          wondersContract3,
+          wondersContract4,
+          publicClient,
+        );
+
+        const environmentScore = await getEnvironmentScore(tokenIdString, publicClient, environmentContract);
 
         const strength = await getNationStrength(tokenIdString, publicClient, strenghtContract);
 
         const warPeacePreferenceBool = await getWarPeacePreference(tokenIdString, publicClient, militaryContract);
 
-        let warPeacePreference : string
+        let warPeacePreference: string;
         if (!warPeacePreferenceBool[0]) {
-          warPeacePreference = "Nation is in peace mode"
+          warPeacePreference = "Nation is in peace mode";
         } else {
-          warPeacePreference = "Nation is ready for war!"
+          warPeacePreference = "Nation is ready for war!";
         }
 
         const defconLevel = await getDefconLevel(tokenIdString, publicClient, militaryContract);
@@ -429,7 +444,11 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
 
         const deployedSoldierCount = await getDeployedSoldierCount(tokenIdString, publicClient, forcesContract);
 
-        const defendingSoldierEfficiencyModifier = await getDefendingSoldierEfficiencyModifier(tokenIdString, publicClient, forcesContract);
+        const defendingSoldierEfficiencyModifier = await getDefendingSoldierEfficiencyModifier(
+          tokenIdString,
+          publicClient,
+          forcesContract,
+        );
 
         const tankCount = await getTankCount(tokenIdString, publicClient, forcesContract);
 
@@ -439,17 +458,17 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
 
         const fighterCount = await getFighters(tokenIdString, publicClient, fightersContract);
 
-        const bomberCount = await getBombers(tokenIdString, publicClient, bombersContract)
+        const bomberCount = await getBombers(tokenIdString, publicClient, bombersContract);
 
-        const navy = await getNavy(tokenIdString, publicClient, navyContract, navyContract2)
+        const navy = await getNavy(tokenIdString, publicClient, navyContract, navyContract2);
 
-        const cruiseMissiles = await getCruiseMissileCount(tokenIdString, publicClient, missilesContract)
+        const cruiseMissiles = await getCruiseMissileCount(tokenIdString, publicClient, missilesContract);
 
-        const nukes = await getNukeCount(tokenIdString, publicClient, missilesContract)
+        const nukes = await getNukeCount(tokenIdString, publicClient, missilesContract);
 
-        const spies = await getSpyCount(tokenIdString, publicClient, spiesContract)
+        const spies = await getSpyCount(tokenIdString, publicClient, spiesContract);
 
-        const casualties = await getCasualties(tokenIdString, publicClient, forcesContract)
+        const casualties = await getCasualties(tokenIdString, publicClient, forcesContract);
 
         const allianceDetails = await getNationAllianceAndPlatoon(tokenIdString, publicClient, allianceContract);
 
@@ -488,10 +507,10 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: countryParametersContract.address,
               functionName: "getDayCreated",
               args: [tokenIdString],
-            })
+            }),
           ),
 
-          alliance : `${allianceDetails[0]}: ${allianceDetails[2]}` || null,
+          alliance: `${allianceDetails[0]}: ${allianceDetails[2]}` || null,
 
           team: String(
             await publicClient.readContract({
@@ -499,7 +518,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: countryParametersContract.address,
               functionName: "getTeam",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           resources: resources || null,
@@ -514,7 +533,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: countryParametersContract.address,
               functionName: "getGovernmentType",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           desiredGovernment: String(
@@ -523,7 +542,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: countryParametersContract.address,
               functionName: "getGovernmentPreference",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           religion: String(
@@ -532,7 +551,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: countryParametersContract.address,
               functionName: "getReligionType",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           desiredReligion: String(
@@ -541,7 +560,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: countryParametersContract.address,
               functionName: "getReligionPreference",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           balance: formattedBalance.toString(),
@@ -552,7 +571,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: taxesContract.address,
               functionName: "getHappiness",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           dailyIncome: String(
@@ -561,7 +580,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: taxesContract.address,
               functionName: "getDailyIncome",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           taxRate: String(
@@ -570,10 +589,10 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: infrastructureContract.address,
               functionName: "getTaxRate",
               args: [tokenIdString],
-            })
+            }),
           ),
 
-          taxesCollectible : taxesCollectible.toString(), 
+          taxesCollectible: taxesCollectible.toString(),
 
           billsPayable: billsPayable.toString(),
 
@@ -583,7 +602,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: infrastructureContract.address,
               functionName: "getTechnologyCount",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           infrastructureCount: String(
@@ -592,7 +611,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: infrastructureContract.address,
               functionName: "getInfrastructureCount",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           landCount: String(
@@ -601,7 +620,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: infrastructureContract.address,
               functionName: "getLandCount",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           areaOfInfluence: String(
@@ -610,7 +629,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: infrastructureContract.address,
               functionName: "getAreaOfInfluence",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           lastTaxCollection: lastTaxCollection,
@@ -623,7 +642,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: infrastructureContract.address,
               functionName: "getTotalPopulationCount",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           taxablePopulation: taxablePopulation.toString(),
@@ -636,17 +655,17 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: crimeContract.address,
               functionName: "getCrimePreventionScore",
               args: [tokenIdString],
-            })
+            }),
           ),
-          
+
           crimeIndex: String(
             await publicClient.readContract({
               abi: crimeContract.abi,
               address: crimeContract.address,
               functionName: "getCrimeIndex",
               args: [tokenIdString],
-            })
-          ),  
+            }),
+          ),
 
           literacyRate: String(
             await publicClient.readContract({
@@ -654,9 +673,9 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: crimeContract.address,
               functionName: "getLiteracy",
               args: [tokenIdString],
-            })
+            }),
           ),
-          
+
           rehabilitatedCitizens: criminalArray[1]?.toString(),
 
           incarceratedCitizens: criminalArray[2]?.toString(),
@@ -667,7 +686,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
               address: taxesContract.address,
               functionName: "checkPopulationDensity",
               args: [tokenIdString],
-            })
+            }),
           ),
 
           improvements: improvements || [],
@@ -809,7 +828,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
     9: "Totalitarian",
     10: "Transitional",
   };
-  
+
   const religionNames: { [key: number]: string } = {
     0: "None",
     1: "Mixed",
@@ -842,32 +861,35 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
       { label: "Resources", value: nationDetails.resources?.join(", ") || "Unknown" },
       { label: "Bonus Resources", value: nationDetails.bonusResources?.join(", ") || "Unknown" },
       { label: "Trading Partners", value: nationDetails.tradingPartners?.join(", ") || "None" },
-      { 
-        label: "Government Type", 
-        value: nationDetails.government != null
-          ? (nationDetails.government !== nationDetails.desiredGovernment
+      {
+        label: "Government Type",
+        value:
+          nationDetails.government != null
+            ? nationDetails.government !== nationDetails.desiredGovernment
               ? `⚠️ ${governmentNames[Number(nationDetails.government)] || "Unknown"} (Your nation prefers ${governmentNames[Number(nationDetails.desiredGovernment)] || "Unknown"})`
-              : governmentNames[Number(nationDetails.government)] || "Unknown")
-          : "Unknown"
+              : governmentNames[Number(nationDetails.government)] || "Unknown"
+            : "Unknown",
       },
-      { 
-        label: "National Religion", 
-        value: nationDetails.religion != null
-          ? (nationDetails.religion !== nationDetails.desiredReligion
+      {
+        label: "National Religion",
+        value:
+          nationDetails.religion != null
+            ? nationDetails.religion !== nationDetails.desiredReligion
               ? `⚠️ ${religionNames[Number(nationDetails.religion)] || "Unknown"} (Your nation prefers ${religionNames[Number(nationDetails.desiredReligion)] || "Unknown"})`
-              : religionNames[Number(nationDetails.religion)] || "Unknown")
-          : "Unknown"
+              : religionNames[Number(nationDetails.religion)] || "Unknown"
+            : "Unknown",
       },
     ],
     Treasury: [
       { label: "Nation Balance", value: nationDetails.balance ? Math.floor(Number(nationDetails.balance)) : "Unknown" },
       { label: "Happiness", value: nationDetails.happiness || "Unknown" },
       { label: "Daily Income Per Citizen", value: nationDetails.dailyIncome || "Unknown" },
-      { 
-        label: "Tax Rate", 
-        value: Number(nationDetails.taxRate) > 20 
-          ? `⚠️ ${nationDetails.taxRate || "Unknown"}`
-          : nationDetails.taxRate || "Unknown"
+      {
+        label: "Tax Rate",
+        value:
+          Number(nationDetails.taxRate) > 20
+            ? `⚠️ ${nationDetails.taxRate || "Unknown"}`
+            : nationDetails.taxRate || "Unknown",
       },
       { label: "Taxable Population", value: nationDetails.taxablePopulation || "Unknown" },
       { label: "Taxes Collectible", value: nationDetails.taxesCollectible || "Unknown" },
@@ -878,107 +900,128 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
     Military: [
       { label: "Nation Strength", value: nationDetails.strength || "Unknown" },
       { label: "War/Peace Preference", value: nationDetails.warPeacePreference || "Unknown" },
-      { 
-        label: "Defcon Level", 
-        value: Number(nationDetails.defconLevel) === 5 
-          ? "5" 
-          : `⚠️ ${nationDetails.defconLevel || "Unknown"}`
+      {
+        label: "Defcon Level",
+        value: Number(nationDetails.defconLevel) === 5 ? "5" : `⚠️ ${nationDetails.defconLevel || "Unknown"}`,
       },
-      { 
-        label: "Threat Level", 
-        value: Number(nationDetails.threatLevel) > 1 
-          ? `⚠️ ${nationDetails.threatLevel || "Unknown"}`
-          : nationDetails.threatLevel || "Unknown"
+      {
+        label: "Threat Level",
+        value:
+          Number(nationDetails.threatLevel) > 1
+            ? `⚠️ ${nationDetails.threatLevel || "Unknown"}`
+            : nationDetails.threatLevel || "Unknown",
       },
       { label: "Soldier Count", value: nationDetails.soldierCount || "Unknown" },
-      { 
-        label: "Soldier to Population Ratio", 
-        value: nationDetails.soldierToPopulationRatio 
-          ? (Number(nationDetails.soldierToPopulationRatio) < 10 || Number(nationDetails.soldierToPopulationRatio) > 60 
-              ? `⚠️ ${nationDetails.soldierToPopulationRatio}` 
-              : nationDetails.soldierToPopulationRatio)
-          : "Unknown"
-      },      
+      {
+        label: "Soldier to Population Ratio",
+        value: nationDetails.soldierToPopulationRatio
+          ? Number(nationDetails.soldierToPopulationRatio) < 10 || Number(nationDetails.soldierToPopulationRatio) > 60
+            ? `⚠️ ${nationDetails.soldierToPopulationRatio}`
+            : nationDetails.soldierToPopulationRatio
+          : "Unknown",
+      },
       { label: "Defending Soldier Count", value: nationDetails.defendingSoldierCount || "Unknown" },
       { label: "Deployed Soldier Count", value: nationDetails.deployedSoldierCount || "Unknown" },
-      { label: "Defending Soldier Efficiency Modifier", value: nationDetails.getDefendingSoldierEfficiencyModifier || "Unknown" },
+      {
+        label: "Defending Soldier Efficiency Modifier",
+        value: nationDetails.getDefendingSoldierEfficiencyModifier || "Unknown",
+      },
       { label: "Tank Count", value: nationDetails.tankCount || "Unknown" },
       { label: "Nukes", value: nationDetails.nukes || "Unknown" },
       { label: "Cruise Missiles", value: nationDetails.cruiseMissiles || "Unknown" },
-      { label: "Fighters", value: nationDetails.fighters.map(({ name, fighterCount }) => `${name} (${fighterCount})`).join(", ") || "Unknown" },
-      { label: "Bombers", value: nationDetails.bombers.map(({ name, bomberCount }) => `${name} (${bomberCount})`).join(", ") || "Unknown" },
-      { label: "Navy", value: nationDetails.navy.map(({ name, navyCount }) => `${name} (${navyCount})`).join(", ") || "Unknown" },
+      {
+        label: "Fighters",
+        value:
+          nationDetails.fighters.map(({ name, fighterCount }) => `${name} (${fighterCount})`).join(", ") || "Unknown",
+      },
+      {
+        label: "Bombers",
+        value: nationDetails.bombers.map(({ name, bomberCount }) => `${name} (${bomberCount})`).join(", ") || "Unknown",
+      },
+      {
+        label: "Navy",
+        value: nationDetails.navy.map(({ name, navyCount }) => `${name} (${navyCount})`).join(", ") || "Unknown",
+      },
       { label: "Spies", value: nationDetails.spies || "Unknown" },
       { label: "Soldier Casualties", value: nationDetails.soldierCasualties || "Unknown" },
       { label: "Tank Casualties", value: nationDetails.tankCasualties || "Unknown" },
     ],
     Infrastructure: [
-      { label: "Improvements", value: nationDetails.improvements.map(({ name, improvementCount }) => `${name} (${improvementCount})`).join(", ") || "Unknown" },
-      { label: "Wonders", value: nationDetails.wonders.map(({ name, wonderCount }) => `${name} (${wonderCount})`).join(", ") || "Unknown" },
-      { 
-        label: "Technology Count", 
-        value: Number(nationDetails.technologyCount) < 200 
-          ? `⚠️ ${nationDetails.technologyCount || "Unknown"}`
-          : nationDetails.technologyCount || "Unknown"
+      {
+        label: "Improvements",
+        value:
+          nationDetails.improvements.map(({ name, improvementCount }) => `${name} (${improvementCount})`).join(", ") ||
+          "Unknown",
+      },
+      {
+        label: "Wonders",
+        value: nationDetails.wonders.map(({ name, wonderCount }) => `${name} (${wonderCount})`).join(", ") || "Unknown",
+      },
+      {
+        label: "Technology Count",
+        value:
+          Number(nationDetails.technologyCount) < 200
+            ? `⚠️ ${nationDetails.technologyCount || "Unknown"}`
+            : nationDetails.technologyCount || "Unknown",
       },
       { label: "Infrastructure Count", value: nationDetails.infrastructureCount || "Unknown" },
       { label: "Land Count", value: nationDetails.landCount || "Unknown" },
       { label: "Total Population", value: nationDetails.totalPopulation || "Unknown" },
-      { 
-        label: "Population Density", 
-        value: nationDetails.populationDensity 
-          ? (
-              (!waterAccess && Number(nationDetails.populationDensity) > 75) || 
-              (waterAccess && Number(nationDetails.populationDensity) > 150) 
-                ? `⚠️ ${nationDetails.populationDensity}` 
-                : nationDetails.populationDensity
-            )
-          : "Unknown"
+      {
+        label: "Population Density",
+        value: nationDetails.populationDensity
+          ? (!waterAccess && Number(nationDetails.populationDensity) > 75) ||
+            (waterAccess && Number(nationDetails.populationDensity) > 150)
+            ? `⚠️ ${nationDetails.populationDensity}`
+            : nationDetails.populationDensity
+          : "Unknown",
       },
       { label: "Crime Index", value: nationDetails.crimeIndex || "Unknown" },
       { label: "Crime Prevention Score", value: nationDetails.crimePreventionScore || "Unknown" },
-      { 
-        label: "Criminal Count", 
-        value: Number(nationDetails.criminalCount) > 200 
-          ? `⚠️ ${nationDetails.criminalCount || "Unknown"}`
-          : nationDetails.criminalCount || "Unknown"
-      },      
+      {
+        label: "Criminal Count",
+        value:
+          Number(nationDetails.criminalCount) > 200
+            ? `⚠️ ${nationDetails.criminalCount || "Unknown"}`
+            : nationDetails.criminalCount || "Unknown",
+      },
       { label: "Rehabilitated Citizens", value: nationDetails.rehabilitatedCitizens || "Unknown" },
       { label: "Incarcerated Citizens", value: nationDetails.incarceratedCitizens || "Unknown" },
-      { 
-        label: "Literacy Rate", 
-        value: Number(nationDetails.literacyRate) < 100 
-          ? `⚠️ ${nationDetails.literacyRate || "Unknown"}`
-          : nationDetails.literacyRate || "Unknown"
+      {
+        label: "Literacy Rate",
+        value:
+          Number(nationDetails.literacyRate) < 100
+            ? `⚠️ ${nationDetails.literacyRate || "Unknown"}`
+            : nationDetails.literacyRate || "Unknown",
       },
-      { 
-        label: "Environment Score", 
-        value: nationDetails.environmentScore 
-          ? (Number(nationDetails.environmentScore) > 1 
-              ? `⚠️ ${nationDetails.environmentScore}` 
-              : nationDetails.environmentScore)
-          : "Unknown"
+      {
+        label: "Environment Score",
+        value: nationDetails.environmentScore
+          ? Number(nationDetails.environmentScore) > 1
+            ? `⚠️ ${nationDetails.environmentScore}`
+            : nationDetails.environmentScore
+          : "Unknown",
       },
     ],
   };
 
   const ResourceDisplay = () => {
     const resources = nationDetails.resources;
-  
+
     if (!resources || resources.length === 0) {
       return <p>No resources available</p>; // Handle empty array case
     }
-  
+
     return (
       <div className="flex flex-wrap gap-3 bg-base-100 p-3 rounded-lg">
-        {resources.map((resource) => {
-          const sanitizedResource = resource.toLowerCase().replace(/\s+/g, '-');
-  
+        {resources.map(resource => {
+          const sanitizedResource = resource.toLowerCase().replace(/\s+/g, "-");
+
           return (
             <div key={resource} className="tooltip" data-tip={resource}>
-              <img 
-                src={`/icons/${sanitizedResource}.svg`} 
-                alt={resource} 
+              <img
+                src={`/icons/${sanitizedResource}.svg`}
+                alt={resource}
                 className="w-10 h-10"
                 onError={() => console.error(`Image failed to load: ${sanitizedResource}.svg`)}
               />
@@ -989,7 +1032,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
     );
   };
 
-    const BonusResourceDisplay = () => {
+  const BonusResourceDisplay = () => {
     const resources = nationDetails.bonusResources;
 
     if (!resources || resources.length === 0) {
@@ -998,14 +1041,14 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
 
     return (
       <div className="flex flex-wrap gap-3 bg-base-100 p-3 rounded-lg">
-        {resources.map((resource) => {
-          const sanitizedResource = resource.toLowerCase().replace(/\s+/g, '-');
+        {resources.map(resource => {
+          const sanitizedResource = resource.toLowerCase().replace(/\s+/g, "-");
 
           return (
             <div key={resource} className="tooltip" data-tip={resource}>
-              <img 
-                src={`/icons/${sanitizedResource}.svg`} 
-                alt={resource} 
+              <img
+                src={`/icons/${sanitizedResource}.svg`}
+                alt={resource}
                 className="w-10 h-10"
                 onError={() => console.error(`Image failed to load: ${sanitizedResource}.svg`)}
               />
@@ -1017,130 +1060,133 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
   };
 
   return (
-      <div className="font-special flex w-full p-6 bg-aged-paper text-base-content rounded-lg shadow-center">
-          <div className="w-3/12 pr-4 border-r border-neutral flex flex-col gap-3">
-            <h2 className="text-2xl font-bold text-primary-content text-center">
-              Nation Details
-            </h2>
-            <div className="news-carousel-left flex flex-col gap-3">
-              {/* All Details Tab */}
+    <div className="font-special flex w-full p-6 bg-aged-paper text-base-content rounded-lg shadow-center">
+      <div className="w-3/12 pr-4 border-r border-neutral flex flex-col gap-3">
+        <h2 className="text-2xl font-bold text-primary-content text-center">Nation Details</h2>
+        <div className="news-carousel-left flex flex-col gap-3">
+          {/* All Details Tab */}
+          <button
+            className={`news-carousel-tab flex items-center gap-2 px-4 py-4 text-lg text-center font-semibold rounded-lg shadow-md transition-all ${
+              activeTab === "All Details" ? "bg-primary text-primary-content" : "bg-base-200 hover:bg-base-300"
+            }`}
+            onClick={() => setActiveTab("All Details")}
+          >
+            📜 All Details
+          </button>
+
+          {/* Dynamic Section Tabs */}
+          {Object.keys(sections).map((section: string) => {
+            const iconFileName = section.toLowerCase().replace(/\s+/g, "-") + ".svg";
+
+            return (
               <button
+                key={section}
                 className={`news-carousel-tab flex items-center gap-2 px-4 py-4 text-lg text-center font-semibold rounded-lg shadow-md transition-all ${
-                  activeTab === "All Details"
-                    ? "bg-primary text-primary-content"
-                    : "bg-base-200 hover:bg-base-300"
+                  activeTab === section ? "bg-primary text-primary-content" : "bg-base-200 hover:bg-base-300"
                 }`}
-                onClick={() => setActiveTab("All Details")}
+                onClick={() => setActiveTab(section)}
               >
-                📜 All Details
-              </button>
-
-              {/* Dynamic Section Tabs */}
-              {Object.keys(sections).map((section: string) => {
-                const iconFileName = section.toLowerCase().replace(/\s+/g, "-") + ".svg";
-
-                return (
-                  <button
-                    key={section}
-                    className={`news-carousel-tab flex items-center gap-2 px-4 py-4 text-lg text-center font-semibold rounded-lg shadow-md transition-all ${
-                      activeTab === section
-                        ? "bg-primary text-primary-content"
-                        : "bg-base-200 hover:bg-base-300"
-                    }`}
-                    onClick={() => setActiveTab(section)}
-                  >
-                    {/* Section Icon */}
-                    <img
+                {/* Section Icon */}
+                {/* <img
                       src={`icons/${iconFileName}`}
                       alt={section + " icon"}
                       className="w-6 h-6" 
-                    />
-                    {section}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="w-7/12 px-6">
-            <h2 className="text-2xl font-bold text-primary-content text-center mb-4">{activeTab}</h2>
-
-            {activeTab === "All Details" ? (
-                /* Display all sections in one view */
-                Object.keys(sections).map((section) => (
-                    <div key={section} className="mb-6">
-                        <h3 className="text-xl font-semibold text-secondary mt-4">{section}</h3>
-                        <div className="p-4 bg-base-200 rounded-lg shadow-md mt-2">
-                            <table className="table-auto border-collapse border border-neutral w-full text-sm">
-                                <colgroup>
-                                    <col style={{ width: "40%" }} />
-                                    <col style={{ width: "60%" }} />
-                                </colgroup>
-                                <tbody>
-                                    {sections[section].map(({ label, value }) => (
-                                        <tr key={label}>
-                                            <td className="border-neutral px-4 py-2 font-semibold">{label}:</td>
-                                            <td className="border-neutral px-4 py-2">
-                                                {label === "Resources" && nationDetails.resources ? <ResourceDisplay /> :
-                                                label === "Bonus Resources" && nationDetails.bonusResources ? <BonusResourceDisplay /> :
-                                                value} {/* ✅ Ensure value is displayed */}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                ))
-            ) : (
-                /* Display selected section */
-                <div className="p-4 bg-base-200 rounded-lg shadow-md">
-                    <table className="table-auto border-collapse w-full text-sm">
-                        <colgroup>
-                            <col style={{ width: "40%" }} />
-                            <col style={{ width: "60%" }} />
-                        </colgroup>
-                        <tbody>
-                            {sections[activeTab].map(({ label, value }) => (
-                                <tr key={label}>
-                                    <td className="px-4 py-2 font-semibold">{label}:</td>
-                                    <td className="px-4 py-2">
-                                        {label === "Resources" && nationDetails.resources ? <ResourceDisplay /> :
-                                        label === "Bonus Resources" && nationDetails.bonusResources ? <BonusResourceDisplay /> :
-                                        value} {/* ✅ Fixing incorrect nesting */}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-              )}
-          </div>
-
-          {/* Right Sidebar - Nation Posts */}
-          <div className="w-2/12 pl-4 border-l border-neutral">
-              <h2 className="text-lg font-semibold text-primary-content mb-4 text-center">Nation Posts</h2>
-              <PostsTable />
-              
-              {isOwner && (
-                  <div className="mt-4 p-4 bg-base-200 rounded-lg shadow-md">
-                      <textarea
-                          className="w-full p-2 border rounded-lg bg-base-100 text-base-content"
-                          placeholder="Create post..."
-                          value={post}
-                          onChange={(e) => setPost(e.target.value)}
-                      />
-                      <button 
-                          className="mt-2 px-4 py-2 bg-primary text-primary-content rounded-lg shadow-md w-full hover:bg-primary/80"
-                          onClick={handlePostMessage}
-                      >
-                          Create Post
-                      </button>
-                  </div>
-              )}
-          </div>
+                    /> */}
+                {section}
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      <div className="w-7/12 px-6">
+        <h2 className="text-2xl font-bold text-primary-content text-center mb-4">{activeTab}</h2>
+
+        {activeTab === "All Details" ? (
+          /* Display all sections in one view */
+          Object.keys(sections).map(section => (
+            <div key={section} className="mb-6">
+              <h3 className="text-xl font-semibold text-secondary mt-4">{section}</h3>
+              <div className="p-4 bg-base-200 rounded-lg shadow-md mt-2">
+                <table className="table-auto border-collapse border border-neutral w-full text-sm">
+                  <colgroup>
+                    <col style={{ width: "40%" }} />
+                    <col style={{ width: "60%" }} />
+                  </colgroup>
+                  <tbody>
+                    {sections[section].map(({ label, value }) => (
+                      <tr key={label}>
+                        <td className="border-neutral px-4 py-2 font-semibold">{label}:</td>
+                        <td className="border-neutral px-4 py-2">
+                          {label === "Resources" && nationDetails.resources ? (
+                            <ResourceDisplay />
+                          ) : label === "Bonus Resources" && nationDetails.bonusResources ? (
+                            <BonusResourceDisplay />
+                          ) : (
+                            value
+                          )}{" "}
+                          {/* ✅ Ensure value is displayed */}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))
+        ) : (
+          /* Display selected section */
+          <div className="p-4 bg-base-200 rounded-lg shadow-md">
+            <table className="table-auto border-collapse w-full text-sm">
+              <colgroup>
+                <col style={{ width: "40%" }} />
+                <col style={{ width: "60%" }} />
+              </colgroup>
+              <tbody>
+                {sections[activeTab].map(({ label, value }) => (
+                  <tr key={label}>
+                    <td className="px-4 py-2 font-semibold">{label}:</td>
+                    <td className="px-4 py-2">
+                      {label === "Resources" && nationDetails.resources ? (
+                        <ResourceDisplay />
+                      ) : label === "Bonus Resources" && nationDetails.bonusResources ? (
+                        <BonusResourceDisplay />
+                      ) : (
+                        value
+                      )}{" "}
+                      {/* ✅ Fixing incorrect nesting */}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Right Sidebar - Nation Posts */}
+      <div className="w-2/12 pl-4 border-l border-neutral">
+        <h2 className="text-lg font-semibold text-primary-content mb-4 text-center">Nation Posts</h2>
+        <PostsTable />
+        {isOwner && (
+          <div className="mt-4 p-4 bg-base-200 rounded-lg shadow-md">
+            <textarea
+              className="w-full p-2 border rounded-lg bg-base-100 text-base-content"
+              placeholder="Create post..."
+              value={post}
+              onChange={e => setPost(e.target.value)}
+            />
+            <button
+              className="mt-2 px-4 py-2 bg-primary text-primary-content rounded-lg shadow-md w-full hover:bg-primary/80"
+              onClick={handlePostMessage}
+            >
+              Create Post
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
-}
+};
 
 export default NationDetailsPage;

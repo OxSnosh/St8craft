@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-const plugin = require('tailwindcss/plugin');
+const plugin = require("tailwindcss/plugin");
 
 module.exports = {
   content: ["./app/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}", "./utils/**/*.{js,ts,jsx,tsx}"],
@@ -59,10 +59,10 @@ module.exports = {
         special: ["SpecialElite", "sans-serif"],
       },
       colors: {
-        agedPaper: '#b1986b',
+        agedPaper: "#b1986b",
       },
       backgroundImage: {
-        'aged-paper': 'linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05))',
+        "aged-paper": "linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05))",
       },
     },
   },
@@ -70,9 +70,9 @@ module.exports = {
     require("daisyui"),
     plugin(function ({ addUtilities }) {
       addUtilities({
-        '.bg-aged-paper': {
-          backgroundColor: '#b1986b',
-          backgroundImage: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05))',
+        ".bg-aged-paper": {
+          backgroundColor: "#b1986b",
+          backgroundImage: "linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05))",
         },
       });
     }),

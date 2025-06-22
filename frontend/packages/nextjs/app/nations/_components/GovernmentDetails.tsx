@@ -1,24 +1,24 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { usePublicClient, useAccount, useWriteContract } from "wagmi";
 import { useSearchParams } from "next/navigation";
-import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
-import { useTheme } from "next-themes";
-import { 
-  setRulerName,
-  setNationName, 
-  setCapitalCity, 
-  setNationSlogan, 
-  setAlliance, 
-  setTeam, 
-  setGovernment, 
-  setReligion
-} from "~~/utils/countryParameters";
-import { checkBalance } from "~~/utils/treasury";
-import { checkOwnership } from "~~/utils/countryMinter";
+import { parseRevertReason } from "../../../utils/errorHandling";
 import { ethers } from "ethers";
-import { parseRevertReason } from '../../../utils/errorHandling';
+import { useTheme } from "next-themes";
+import { useAccount, usePublicClient, useWriteContract } from "wagmi";
+import { checkOwnership } from "~~/utils/countryMinter";
+import {
+  setAlliance,
+  setCapitalCity,
+  setGovernment,
+  setNationName,
+  setNationSlogan,
+  setReligion,
+  setRulerName,
+  setTeam,
+} from "~~/utils/countryParameters";
+import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
+import { checkBalance } from "~~/utils/treasury";
 
 const GovernmentDetails = () => {
   const { theme } = useTheme();
@@ -57,13 +57,7 @@ const GovernmentDetails = () => {
     religion: "setReligion",
   };
 
-  const stringFunctionFields = new Set([
-    "rulerName",
-    "nationName",
-    "capitalCity",
-    "nationSlogan",
-    "alliance",
-  ]);
+  const stringFunctionFields = new Set(["rulerName", "nationName", "capitalCity", "nationSlogan", "alliance"]);
 
   useEffect(() => {
     if (successMessage || errorMessage) {
@@ -75,7 +69,15 @@ const GovernmentDetails = () => {
     }
   }, [successMessage, errorMessage]);
 
-  const updateFunctions: { [key: string]: Function } = {
+  const updateFunctions: {
+    [key: string]: (
+      nationId: string,
+      publicClient: any,
+      contract: any,
+      value: string,
+      writeContractAsync: any,
+    ) => Promise<any>;
+  } = {
     rulerName: setRulerName,
     nationName: setNationName,
     capitalCity: setCapitalCity,
@@ -96,138 +98,132 @@ const GovernmentDetails = () => {
     setErrorMessage("");
 
     if (!nationId) {
-        setErrorMessage("Nation ID not found.");
-        setLoading(false);
-        return;
+      setErrorMessage("Nation ID not found.");
+      setLoading(false);
+      return;
     }
     if (!walletAddress) {
-        setErrorMessage("Wallet not connected.");
-        setLoading(false);
-        return;
+      setErrorMessage("Wallet not connected.");
+      setLoading(false);
+      return;
     }
     if (!countryParametersContract || !publicClient || !writeContractAsync) {
-        setErrorMessage("Missing required dependencies to update nation details.");
-        setLoading(false);
-        return;
+      setErrorMessage("Missing required dependencies to update nation details.");
+      setLoading(false);
+      return;
     }
     if (!value.trim()) {
-        setErrorMessage(`${field.replace(/([A-Z])/g, " $1")} cannot be empty.`);
-        setLoading(false);
-        return;
+      setErrorMessage(`${field.replace(/([A-Z])/g, " $1")} cannot be empty.`);
+      setLoading(false);
+      return;
     }
 
-
-
     try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const userAddress = await signer.getAddress();
 
-        // **Check ownership**
-        const owner = await checkOwnership(nationId, walletAddress, publicClient, CountryMinterContract);
-        if (!owner) {
-            setErrorMessage("You do not own this nation.");
-            setLoading(false);
-            return;
-        }
+      // **Check ownership**
+      const owner = await checkOwnership(nationId, walletAddress, publicClient, CountryMinterContract);
+      if (!owner) {
+        setErrorMessage("You do not own this nation.");
+        setLoading(false);
+        return;
+      }
 
-        const parsedNationId = parseInt(nationId, 10);
-        if (isNaN(parsedNationId)) {
-            setErrorMessage("Invalid nation ID: Not a number.");
-            setLoading(false);
-            return;
-        }
+      const parsedNationId = parseInt(nationId, 10);
+      if (isNaN(parsedNationId)) {
+        setErrorMessage("Invalid nation ID: Not a number.");
+        setLoading(false);
+        return;
+      }
 
-        console.log("Parsed Nation ID:", parsedNationId);
-        const balance = await checkBalance(nationId, publicClient, TreasuryContract);
-        console.log("Balance:", balance.toString());
-        console.log("Nation ID:", nationId);
-        console.log("Wallet Address:", walletAddress);
-        console.log("Public Client:", publicClient);
-        console.log("Country Parameters Contract:", countryParametersContract);
-        if (balance < 20000000 && (field === "rulerName" || field === "nationName")) {
-          setErrorMessage("Insufficient balance to update " + field.replace(/([A-Z])/g, ' $1'));
+      console.log("Parsed Nation ID:", parsedNationId);
+      const balance = await checkBalance(nationId, publicClient, TreasuryContract);
+      console.log("Balance:", balance.toString());
+      console.log("Nation ID:", nationId);
+      console.log("Wallet Address:", walletAddress);
+      console.log("Public Client:", publicClient);
+      console.log("Country Parameters Contract:", countryParametersContract);
+      if (balance < 20000000 && (field === "rulerName" || field === "nationName")) {
+        setErrorMessage("Insufficient balance to update " + field.replace(/([A-Z])/g, " $1"));
+        setLoading(false);
+        return;
+      }
+
+      let formattedArgs: any[];
+
+      if (["rulerName", "nationName", "capitalCity", "nationSlogan", "alliance"].includes(field)) {
+        formattedArgs = [value, parsedNationId]; // ✅ Order: (value, uint)
+      } else if (["team", "government", "religion"].includes(field)) {
+        const parsedValue = parseInt(value, 10);
+        if (isNaN(parsedValue)) {
+          setErrorMessage(`Invalid number input for ${field}. Please enter a valid number.`);
           setLoading(false);
           return;
         }
-
-        let formattedArgs: any[];
-
-        if (["rulerName", "nationName", "capitalCity", "nationSlogan", "alliance"].includes(field)) {
-            formattedArgs = [value, parsedNationId]; // ✅ Order: (value, uint)
-        } else if (["team", "government", "religion"].includes(field)) {
-            const parsedValue = parseInt(value, 10);
-            if (isNaN(parsedValue)) {
-                setErrorMessage(`Invalid number input for ${field}. Please enter a valid number.`);
-                setLoading(false);
-                return;
-            }
-            formattedArgs = [parsedNationId, parsedValue]; // ✅ Order: (uint, value)
-        } else {
-            setErrorMessage(`No matching function found for ${field}`);
-            setLoading(false);
-            return;
-        }
-
-        console.log(`Executing function: ${field} with params:`, formattedArgs);
-
-        // ✅ Call the correct update function
-        await updateFunctions[field](parsedNationId.toString(), publicClient, countryParametersContract, value, writeContractAsync);
-
-        setSuccessMessage(`${field.replace(/([A-Z])/g, " $1")} updated successfully to: ${value}`);
-        setFormData(prev => ({ ...prev, [field]: "" })); // Reset field after update
-        setErrorMessage(""); // Clear any previous errors
-
-    } catch (error: any) {
-        const errorMessage = parseRevertReason(error) || error.message || `Failed to update ${field}.`;
-        console.error("Transaction failed:", errorMessage);
-        setErrorMessage(`Transaction failed: ${errorMessage}`);
-    } finally {
+        formattedArgs = [parsedNationId, parsedValue]; // ✅ Order: (uint, value)
+      } else {
+        setErrorMessage(`No matching function found for ${field}`);
         setLoading(false);
+        return;
+      }
+
+      console.log(`Executing function: ${field} with params:`, formattedArgs);
+
+      // ✅ Call the correct update function
+      await updateFunctions[field](
+        parsedNationId.toString(),
+        publicClient,
+        countryParametersContract,
+        value,
+        writeContractAsync,
+      );
+
+      setSuccessMessage(`${field.replace(/([A-Z])/g, " $1")} updated successfully to: ${value}`);
+      setFormData(prev => ({ ...prev, [field]: "" })); // Reset field after update
+      setErrorMessage(""); // Clear any previous errors
+    } catch (error: any) {
+      const errorMessage = parseRevertReason(error) || error.message || `Failed to update ${field}.`;
+      console.error("Transaction failed:", errorMessage);
+      setErrorMessage(`Transaction failed: ${errorMessage}`);
+    } finally {
+      setLoading(false);
     }
   };
-
 
   return (
     <div className="font-special p-6 border-l-4 rounded-lg shadow-center bg-aged-paper text-base-content border-primary transition-all">
       <h3 className="text-2xl font-bold text-primary-content text-center">
         <a href="gameplay/#country-parameters">Update Nation Details</a>
       </h3>
-      <p className="text-sm text-center text-secondary-content mb-4">
-        Modify your nation's attributes below.
-      </p>
-  
+      <p className="text-sm text-center text-secondary-content mb-4">Modify your nations attributes below.</p>
+
       {successMessage && (
-        <p className="mt-4 text-center text-sm text-success-content bg-success p-2 rounded-lg">
-          {successMessage}
-        </p>
+        <p className="mt-4 text-center text-sm text-success-content bg-success p-2 rounded-lg">{successMessage}</p>
       )}
       {errorMessage && (
-        <p className="mt-4 text-center text-sm text-error-content bg-error p-2 rounded-lg">
-          {errorMessage}
-        </p>
+        <p className="mt-4 text-center text-sm text-error-content bg-error p-2 rounded-lg">{errorMessage}</p>
       )}
-  
+
       {Object.entries(formData).map(([key, value]) => (
         <form
           key={key}
-          onSubmit={(e) => {
+          onSubmit={e => {
             e.preventDefault();
             handleSubmit(key as keyof typeof formData, value);
           }}
           className="p-4 bg-base-200 rounded-lg shadow-md mb-4"
         >
-          <label className="text-sm font-semibold text-primary">
-            {key.replace(/([A-Z])/g, " $1")}
-          </label>
-  
+          <label className="text-sm font-semibold text-primary">{key.replace(/([A-Z])/g, " $1")}</label>
+
           {/* FIELD INPUT HANDLING */}
           {key === "government" ? (
             // government = select dropdown
             <select
               value={value}
-              onChange={(e) => handleInputChange(key, e.target.value)}
+              onChange={e => handleInputChange(key, e.target.value)}
               className="select select-bordered w-full bg-base-100 text-base-content mt-1"
             >
               <option value="">Select Government Type</option>
@@ -247,13 +243,13 @@ const GovernmentDetails = () => {
             // religion = select dropdown
             <select
               value={value}
-              onChange={(e) => handleInputChange(key, e.target.value)}
+              onChange={e => handleInputChange(key, e.target.value)}
               className="select select-bordered w-full bg-base-100 text-base-content mt-1"
             >
               <option value="">Select Religion</option>
               <option value="0">None (0)</option>
               <option value="1">Mixed (1)</option>
-              <option value="2">Baha'i Faith (2)</option>
+              <option value="2">Bahai Faith (2)</option>
               <option value="3">Buddhism (3)</option>
               <option value="4">Christianity (4)</option>
               <option value="5">Confucianism (5)</option>
@@ -271,14 +267,10 @@ const GovernmentDetails = () => {
             // team = number input (0-15); all else = text input
             <input
               type={key === "team" ? "number" : "text"}
-              placeholder={
-                key === "team"
-                  ? "Enter Team ID (0-15)"
-                  : `Enter New ${key.replace(/([A-Z])/g, " $1")}`
-              }
+              placeholder={key === "team" ? "Enter Team ID (0-15)" : `Enter New ${key.replace(/([A-Z])/g, " $1")}`}
               value={value}
-              onChange={(e) => {
-                let newValue = e.target.value;
+              onChange={e => {
+                const newValue = e.target.value;
                 if (key === "team") {
                   const num = parseInt(newValue, 10);
                   if (newValue === "" || (num >= 0 && num <= 15)) {
@@ -293,26 +285,20 @@ const GovernmentDetails = () => {
               className="input input-bordered w-full bg-base-100 text-base-content mt-1"
             />
           )}
-  
+
           {/* SUBMIT BUTTON */}
-          <button
-            type="submit"
-            className="btn btn-primary w-full mt-3 disabled:opacity-50"
-            disabled={loading}
-          >
+          <button type="submit" className="btn btn-primary w-full mt-3 disabled:opacity-50" disabled={loading}>
             {loading ? "Updating..." : `Update ${key.replace(/([A-Z])/g, " $1")}`}
           </button>
-  
+
           {/* SPECIAL WARNING FOR Ruler Name and Nation Name */}
           {(key === "rulerName" || key === "nationName") && (
-            <p className="text-xs text-warning mt-1">
-              ⚠️ Updating this will cost 20,000,000 WBX
-            </p>
+            <p className="text-xs text-warning mt-1">⚠️ Updating this will cost 20,000,000 WBX</p>
           )}
         </form>
       ))}
     </div>
-  );  
+  );
 };
 
 export default GovernmentDetails;

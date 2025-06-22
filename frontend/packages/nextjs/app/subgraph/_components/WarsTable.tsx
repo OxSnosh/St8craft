@@ -1,34 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { GetWarsDocument, execute } from "~~/.graphclient";
-import { Address } from "~~/components/scaffold-eth";
 
-const WarsTable = () => {
-  const [wars, setWarData] = useState<any>(null);
-  const [error, setError] = useState<any>(null);
+const WarsTable = async () => {
+  let wars: any[] = [];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!execute || !GetWarsDocument) {
-        return;
-      }
-      try {
-        const { data: result } = await execute(GetWarsDocument, {});
-        console.log(result.wars);
-        setWarData(result);
-        console.log(result);
-      } catch (err) {
-        setError(err);
-      } finally {
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (error) {
-    return null;
+  try {
+    const { data } = await execute(GetWarsDocument, {});
+    wars = data?.wars || [];
+  } catch (err) {
+    return <div className="text-red-500">Error loading wars</div>;
   }
 
   return (
@@ -43,7 +22,7 @@ const WarsTable = () => {
             </tr>
           </thead>
           <tbody>
-            {wars?.wars?.map((war: any, index: number) => (
+            {wars.map((war: any) => (
               <tr key={war.warId}>
                 <th>{war.warId}</th>
                 <td>{war.offenseId}</td>

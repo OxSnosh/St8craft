@@ -1,279 +1,229 @@
+export const declareWar = async (offenseId: string, defenseId: string, warContract: any, writeContractAsync: any) => {
+  if (!warContract || !offenseId || !defenseId) {
+    console.error("Missing required data: warContract, offenseId, or defenseId.");
+    return;
+  }
 
-export const declareWar = async (
-    offenseId: string,
-    defenseId: string,
-    warContract: any,
-    writeContractAsync: any
-) => {
-    if (!warContract || !offenseId || !defenseId) {
-        console.error("Missing required data: warContract, offenseId, or defenseId.");
-        return;
-    }
-
-    try {
-        await writeContractAsync({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "declareWar",
-            args: [offenseId, defenseId],
-        });
-    } catch (error) {
-        console.error("Error declaring war:", error);
-    }
-}
-
-export const offensiveWarsAmount = async (
-    nationId: string,
-    warContract: any,
-    publicClient: any
-) => {
-    if (!warContract || !nationId) {
-        console.error("Missing required data: warContract or nationId.");
-        return;
-    }
-
-    try {
-        return await publicClient.readContract({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "offensiveWarLength",
-            args: [nationId],
-        });
-    } catch (error) {
-        console.error("Error fetching offensive wars amount:", error);
-    }
-}
-
-export const checkStrength = async (
-    offenseId: string,
-    defenseId: string,
-    warContract: any,
-    publicClient: any
-) => {
-    if (!warContract || !offenseId || !defenseId) {
-        console.error("Missing required data: warContract, offenseId, or defenseId.");
-        return;
-    }
-
-    try {
-        return await publicClient.readContract({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "checkStrength",
-            args: [offenseId, defenseId],
-        });
-    } catch (error) {
-        console.error("Error checking strength:", error);
-    }
-}
-
-export const offerPeace = async (
-    offererId: string,
-    warId: string,
-    warContract: any,
-    writeContractAsync: any
-) => {
-    if (!warContract || !offererId || !warId) {
-        console.error("Missing required data: warContract, offerId, or warId.");
-        return;
-    }
-
-    try {
-        const tx = await writeContractAsync({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "offerPeace",
-            args: [offererId, warId],
-        });
-        return tx
-    } catch (error) {
-        console.error("Error offering peace:", error);
-    }
-}
-
-export const returnWarDetails = async (warId : string, warContract: any, publicClient: any) => {
-    console.log("RETURN WAR DETAILS")
-    if (!warContract || !warId) {
-        console.error("Missing required data: warContract or warId.");
-        return;
-    }
-    
-    try {
-        console.log("TRYING")
-        const data = await publicClient.readContract({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "returnWarDetails",
-            args: [warId],
-        });
-        console.log(`War details for ID ${warId}:`, data);
-        return data;
-    } catch (error) {
-        console.error(`Error fetching details for war ID ${warId}:`, error);
-    }
+  try {
+    await writeContractAsync({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "declareWar",
+      args: [offenseId, defenseId],
+    });
+  } catch (error) {
+    console.error("Error declaring war:", error);
+  }
 };
 
-export const isWarActive = async (
-    warId: string,
-    warContract: any,
-    publicClient: any
-) => {
-    if (!warContract || !warId) {
-        console.error("Missing required data: warContract or warId.");
-        return;
-    }
+export const offensiveWarsAmount = async (nationId: string, warContract: any, publicClient: any) => {
+  if (!warContract || !nationId) {
+    console.error("Missing required data: warContract or nationId.");
+    return;
+  }
 
-    try {
-        return await publicClient.readContract({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "isWarActive",
-            args: [warId],
-        });
-    } catch (error) {
-        console.error("Error checking if war is active:", error);
-    }
-}
+  try {
+    return await publicClient.readContract({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "offensiveWarLength",
+      args: [nationId],
+    });
+  } catch (error) {
+    console.error("Error fetching offensive wars amount:", error);
+  }
+};
 
-export const isPeaceOffered = async (
-    warId: string,
-    warContract: any,
-    publicClient: any
-) => {
-    if (!warContract || !warId) {
-        console.error("Missing required data: warContract or warId.");
-        return;
-    }
+export const checkStrength = async (offenseId: string, defenseId: string, warContract: any, publicClient: any) => {
+  if (!warContract || !offenseId || !defenseId) {
+    console.error("Missing required data: warContract, offenseId, or defenseId.");
+    return;
+  }
 
-    try {
-        return await publicClient.readContract({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "isPeaceOffered",
-            args: [warId],
-        });
-    } catch (error) {
-        console.error("Error checking if peace is offered:", error);
-    }
-}
+  try {
+    return await publicClient.readContract({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "checkStrength",
+      args: [offenseId, defenseId],
+    });
+  } catch (error) {
+    console.error("Error checking strength:", error);
+  }
+};
 
-export const getDaysLeft = async (
-    warId: string,
-    warContract: any,
-    publicClient: any
-) => {
-    if (!warContract || !warId) {
-        console.error("Missing required data: warContract or warId.");
-        return;
-    }
+export const offerPeace = async (offererId: string, warId: string, warContract: any, writeContractAsync: any) => {
+  if (!warContract || !offererId || !warId) {
+    console.error("Missing required data: warContract, offerId, or warId.");
+    return;
+  }
 
-    try {
-        return await publicClient.readContract({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "getDaysLeft",
-            args: [warId],
-        });
-    } catch (error) {
-        console.error("Error fetching days left:", error);
-    }
-}
+  try {
+    const tx = await writeContractAsync({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "offerPeace",
+      args: [offererId, warId],
+    });
+    return tx;
+  } catch (error) {
+    console.error("Error offering peace:", error);
+  }
+};
+
+export const returnWarDetails = async (warId: string, warContract: any, publicClient: any) => {
+  console.log("RETURN WAR DETAILS");
+  if (!warContract || !warId) {
+    console.error("Missing required data: warContract or warId.");
+    return;
+  }
+
+  try {
+    console.log("TRYING");
+    const data = await publicClient.readContract({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "returnWarDetails",
+      args: [warId],
+    });
+    console.log(`War details for ID ${warId}:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error fetching details for war ID ${warId}:`, error);
+  }
+};
+
+export const isWarActive = async (warId: string, warContract: any, publicClient: any) => {
+  if (!warContract || !warId) {
+    console.error("Missing required data: warContract or warId.");
+    return;
+  }
+
+  try {
+    return await publicClient.readContract({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "isWarActive",
+      args: [warId],
+    });
+  } catch (error) {
+    console.error("Error checking if war is active:", error);
+  }
+};
+
+export const isPeaceOffered = async (warId: string, warContract: any, publicClient: any) => {
+  if (!warContract || !warId) {
+    console.error("Missing required data: warContract or warId.");
+    return;
+  }
+
+  try {
+    return await publicClient.readContract({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "isPeaceOffered",
+      args: [warId],
+    });
+  } catch (error) {
+    console.error("Error checking if peace is offered:", error);
+  }
+};
+
+export const getDaysLeft = async (warId: string, warContract: any, publicClient: any) => {
+  if (!warContract || !warId) {
+    console.error("Missing required data: warContract or warId.");
+    return;
+  }
+
+  try {
+    return await publicClient.readContract({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "getDaysLeft",
+      args: [warId],
+    });
+  } catch (error) {
+    console.error("Error fetching days left:", error);
+  }
+};
 
 export const deployForcesToWar = async (
-    nationId: string,
-    warId: string,
-    soldiers: number,
-    tanks: number,
-    forcesContract: any,
-    writeContractAsync: any
+  nationId: string,
+  warId: string,
+  soldiers: number,
+  tanks: number,
+  forcesContract: any,
+  writeContractAsync: any,
 ) => {
-    if (!forcesContract || !warId || !nationId) {
-        console.error("Missing required data: warContract, warId, or nationId.");
-        return;
-    }
+  if (!forcesContract || !warId || !nationId) {
+    console.error("Missing required data: warContract, warId, or nationId.");
+    return;
+  }
 
-    try {
+  try {
+    const tx = await writeContractAsync({
+      abi: forcesContract.abi,
+      address: forcesContract.address,
+      functionName: "deployForces",
+      args: [soldiers, tanks, nationId, warId],
+    });
 
-        const tx = await writeContractAsync({
-            abi: forcesContract.abi,
-            address: forcesContract.address,
-            functionName: "deployForces",
-            args: [soldiers, tanks, nationId, warId],
-        });
+    return tx;
+  } catch (error) {
+    console.error("Error deploying forces to war:", error);
+  }
+};
 
-        return tx
+export const getDeployedGroundForces = async (warId: string, nationId: string, warContract: any, publicClient: any) => {
+  if (!warContract || !warId || !nationId) {
+    console.error("Missing required data: warContract, warId, or nationId.");
+    return;
+  }
 
-    } catch (error) {
-        console.error("Error deploying forces to war:", error);
-    }
-}
+  try {
+    return await publicClient.readContract({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "getDeployedGroundForces",
+      args: [warId, nationId],
+    });
+  } catch (error) {
+    console.error("Error fetching deployed ground forces:", error);
+  }
+};
 
-export const getDeployedGroundForces = async (
-    warId: string,
-    nationId: string,
-    warContract: any,
-    publicClient: any
-) => {
-    if (!warContract || !warId || !nationId) {
-        console.error("Missing required data: warContract, warId, or nationId.");
-        return;
-    }
+export const recallTroopsFromDeactivatedWars = async (nationId: string, warContract: any, writeContractAsync: any) => {
+  if (!warContract || !nationId) {
+    console.error("Missing required data: warContract or nationId.");
+    return;
+  }
 
-    try {
-        return await publicClient.readContract({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "getDeployedGroundForces",
-            args: [warId, nationId],
-        });
-    } catch (error) {
-        console.error("Error fetching deployed ground forces:", error);
-    }
-}
+  try {
+    await writeContractAsync({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "recallTroopsFromDeactivatedWars",
+      args: [nationId],
+    });
+  } catch (error) {
+    console.error("Error recalling troops from deactivated wars:", error);
+  }
+};
 
-export const recallTroopsFromDeactivatedWars = async (
-    nationId: string,
-    warContract: any,
-    writeContractAsync: any
-) => {
-    if (!warContract || !nationId) {
-        console.error("Missing required data: warContract or nationId.");
-        return;
-    }
+export const nationActiveWars = async (nationId: string, warContract: any, publicClient: any) => {
+  if (!warContract || !nationId) {
+    console.error("Missing required data: warContract or nationId.");
+    return;
+  }
 
-    try {
-        await writeContractAsync({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "recallTroopsFromDeactivatedWars",
-            args: [nationId],
-        });
-    } catch (error) {
-        console.error("Error recalling troops from deactivated wars:", error);
-    }
-} 
-
-export const nationActiveWars = async (
-    nationId: string,
-    warContract: any,
-    publicClient: any
-) => {
-    if (!warContract || !nationId) {
-        console.error("Missing required data: warContract or nationId.");
-        return;
-    }
-
-    try {
-        return await publicClient.readContract({
-            abi: warContract.abi,
-            address: warContract.address,
-            functionName: "nationActiveWarsReturn",
-            args: [nationId],
-        });
-    } catch (error) {
-        console.error("Error fetching nation active wars:", error);
-    }
-}
-
-
-
+  try {
+    return await publicClient.readContract({
+      abi: warContract.abi,
+      address: warContract.address,
+      functionName: "nationActiveWarsReturn",
+      args: [nationId],
+    });
+  } catch (error) {
+    console.error("Error fetching nation active wars:", error);
+  }
+};

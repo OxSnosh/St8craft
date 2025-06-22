@@ -1,34 +1,15 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { GetCruiseMissileAttacksDocument, execute } from "~~/.graphclient";
-import { Address } from "~~/components/scaffold-eth";
 
-const CruiseMissileAttackTable = () => {
-  const [cruiseMissileAttacks, setCruiseMissileAttackData] = useState<any>(null);
-  const [error, setError] = useState<any>(null);
+export default async function CruiseMissileAttackTable() {
+  let cruiseMissileAttacks = [];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!execute || !GetCruiseMissileAttacksDocument) {
-        return;
-      }
-      try {
-        const { data: result } = await execute(GetCruiseMissileAttacksDocument, {});
-        console.log(result.cruiseMissileAttacks);
-        setCruiseMissileAttackData(result);
-        console.log(result);
-      } catch (err) {
-        setError(err);
-      } finally {
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (error) {
-    return null;
+  try {
+    const { data } = await execute(GetCruiseMissileAttacksDocument, {});
+    cruiseMissileAttacks = data?.cruiseMissileAttacks ?? [];
+    console.log("Cruise Missile Attacks:", cruiseMissileAttacks);
+  } catch (err) {
+    console.error("Failed to fetch cruise missile attack data:", err);
+    return <div className="text-red-500 text-center mt-5">Failed to load cruise missile attacks.</div>;
   }
 
   return (
@@ -45,21 +26,21 @@ const CruiseMissileAttackTable = () => {
             </tr>
           </thead>
           <tbody>
-            {cruiseMissileAttacks?.cruiseMissileAttacks?.map((cruiseMissileAttack: any, index: number) => (
-                <tr key={cruiseMissileAttack.attackId}>
-                <th>{cruiseMissileAttack.warId}</th>
-                <th>{cruiseMissileAttack.attackerId}</th>
-                <th>{cruiseMissileAttack.defenderId}</th>
-                <th>{cruiseMissileAttack.landed.toString()}</th>
-                <th>
-                  {cruiseMissileAttack.damageTypeNumber === "0"
+            {cruiseMissileAttacks.map((attack: any) => (
+              <tr key={attack.attackId}>
+                <td>{attack.warId}</td>
+                <td>{attack.attackerId}</td>
+                <td>{attack.defenderId}</td>
+                <td>{attack.landed.toString()}</td>
+                <td>
+                  {attack.damageTypeNumber === "0"
                     ? "tanks"
-                    : cruiseMissileAttack.damageTypeNumber === "1"
-                    ? "tech"
-                    : cruiseMissileAttack.damageTypeNumber === "2"
-                    ? "infrastructure"
-                    : "Unknown"}
-                </th>
+                    : attack.damageTypeNumber === "1"
+                      ? "tech"
+                      : attack.damageTypeNumber === "2"
+                        ? "infrastructure"
+                        : "Unknown"}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -67,6 +48,4 @@ const CruiseMissileAttackTable = () => {
       </div>
     </div>
   );
-};
-
-export default CruiseMissileAttackTable;
+}

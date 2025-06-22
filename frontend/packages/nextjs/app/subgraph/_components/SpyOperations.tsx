@@ -1,28 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { GetSpyOperationsDocument, execute } from "~~/.graphclient";
 
-const SpyOperationsTable = () => {
-  const [spyOperations, setSpyOperations] = useState<any[]>([]);
-  const [error, setError] = useState<any>(null);
+const SpyOperationsTable = async () => {
+  let spyOperations: any[] = [];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data: result } = await execute(GetSpyOperationsDocument, {});
-        console.log("Fetched Spy Operations:", result);
-        setSpyOperations(result?.spyOperations || []);
-      } catch (err) {
-        setError(err);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (error) {
-    return <div>Error loading spy operations</div>;
+  try {
+    const { data } = await execute(GetSpyOperationsDocument, {});
+    spyOperations = data?.spyOperations || [];
+  } catch (err) {
+    return <div className="text-red-500">Error loading spy operations</div>;
   }
 
   return (

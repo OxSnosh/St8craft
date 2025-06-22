@@ -1,6 +1,5 @@
 ---
 St8craft Gameplay Guide
-
 ---
 
 # Summary
@@ -10,21 +9,22 @@ St8craft is a text based mass multiplayer online game played in the browser. The
 Nations will compete against each other to grow faster, recover more efficiently from attack and maintain strong militaries to deter enemies and inflict damage on foes faster and more forcefully. The citizens of thriving nations will be happier and earn more income allowing their rulers to levy higher taxes. Revenues from taxes can be invested into civil, municipal or militay upgrades each with different costs and benefits. Your success and prosperity playing MataNations will likely be determined by your ability to form self sustaining autonomous alliances between your peer nations and coming to eachothers aid when wars break out.
 
 # Ecosystem
+
 ## The Fantom Blockchain
 
 The [Fantom Blockchain](https://https://fantom.foundation/) is a fast, scalable, and secure layer-1 EVM-compatible platform built on a permissionless aBFT consensus protocol. On Fantom, transactions are confirmed in seconds and cost just a few cents. Speed, low transaction costs, and high throughput make Fantom the ideal host for St8craft.
 
 ## FTM
 
-The native currency of Fantom is FTM. Funds can be bridged from any major EVM chain via the bridge on [SpookySwap](https://https://spooky.fi/#/bridge). 
+The native currency of Fantom is FTM. Funds can be bridged from any major EVM chain via the bridge on [SpookySwap](https://https://spooky.fi/#/bridge).
 
 ## WarBucks (WB)
 
 The contract address for WarBucks on the FTM chain is OxXXXXXXXXXXXXXXXXXXX. The WarBucks contract inherits from the OpenZeppelin ERC20 contract.
 
-FTM can then be swapped for WarBucks [here](https://). Nations rulers will need to deposit 2,000,000 WarBucks in order for a nation to be minted and, upon minting, the WarBucks will be burned and the nation will recieve 2,000,000 units of in game money reserves. 1 WB is equally and immidiately fungible for 1 unit of in game money reserves at the discretion of the nation ruler. WB can be deposited into a nation at any time for an equal amount of in game money reserves and in game reserves can be withdrawn to an equal amount of WB. 
+FTM can then be swapped for WarBucks [here](https://). Nations rulers will need to deposit 2,000,000 WarBucks in order for a nation to be minted and, upon minting, the WarBucks will be burned and the nation will recieve 2,000,000 units of in game money reserves. 1 WB is equally and immidiately fungible for 1 unit of in game money reserves at the discretion of the nation ruler. WB can be deposited into a nation at any time for an equal amount of in game money reserves and in game reserves can be withdrawn to an equal amount of WB.
 
-The initial supply for WarBucks will be 20? Trillion. The overall supply will be the sum of supply available in the ERC20 token in addition to all the in game balances of the nations. The overall supply will be in constant flux as nations collect taxes and pay bills. 
+The initial supply for WarBucks will be 20? Trillion. The overall supply will be the sum of supply available in the ERC20 token in addition to all the in game balances of the nations. The overall supply will be in constant flux as nations collect taxes and pay bills.
 
 When a nation collects taxes the overall balance of the game and thus the overall supply of WB will increase in the amount of the tax collection. When a nation spends money or pays bill the balance spent will be decresed from the overall game balance. Purchases will be taxed at the St8craft International Logistics Fee (SILF) percentage when money reserves are spent on upgarades at no additional cost to the consumer but with a percentage of the puchase being deposited as WB tokens in the treasury contract. The overall governance of the game, including the treasury contract, will initially be managed by a multisig wallet and eventually by a combination of the holders of the St8craft Governance Token and team senators to the fullest extent possible.
 
@@ -34,7 +34,7 @@ If is important to note that the WarBuck currency will be pegged to USDC at some
 
 The contract address for SGT on the FTM chain is OxXXXXXXXXXXXXXXXXXX. The SGT contract inherits from the OpenZeppelin ERC20 contract.
 
-Governance for the game will initially be controlled by a multisig wallet. However, to the fullest extent possible, governance of the game will be held by the holders of the St8craft Governance Token or perhaps elected team senators where possible. 
+Governance for the game will initially be controlled by a multisig wallet. However, to the fullest extent possible, governance of the game will be held by the holders of the St8craft Governance Token or perhaps elected team senators where possible.
 
 The economics of the game are structured so that the price of the WarBucks (WB) token will have a peg of 10 USDC for 2,000,000 WB.
 
@@ -86,34 +86,39 @@ A second option to support the price of WB is to burn WB form the treasury. WB c
 
 Nations can be minted on the [St8craft website](http://st8craft.gg/mint). The connected wallet will need 2,000,000 WarBucks in the wallet. Upon minting a nation, the 2,000,000 WarBucks will be burned from the connected wallet and the nation will be available in the connected wallet with a cooresponding 2,000,000 money reserves.
 
-When a nation is minted the ruler will be required to input  a *ruler name*, *nation name*, *capital city* and a *nation slogan*. Dont worry as these can be updated later.
+When a nation is minted the ruler will be required to input a _ruler name_, _nation name_, _capital city_ and a _nation slogan_. Dont worry as these can be updated later.
 
 ## Country Parameters
-Country parameters include *ruler name*, *nation name*, *capital city* and *nation slogan*. Country parameters can be updated at any time.
+
+Country parameters include _ruler name_, _nation name_, _capital city_ and _nation slogan_. Country parameters can be updated at any time.
 
 ## Country Affiliations
+
 Country affiliations include a nations alliance, team, government and religion.
 
 ### Alliances
+
 Alliances are autonomous groups of nations that will work together in the game. Alliances can serve as a good deterrent from attack if an agressor knows that you have the strength of a group of nations in the event a war breaks out. Naitons can set their alliance affiliation from their country affiliations page. While a nations alliance will be displayed under the nations affialiations, the coordination of the alliances will most likey take place on forums outside the game ecosystem.
 
 ### Team
+
 There are 15 teams in the game. Entering into a trade agreement with a team memeber will add an additional one point of happiness to each nation. However, nations can be sanctioned by team senators. Sanctioned nations will not have the ability to trade with other nations on the team they are sanctioned on. If a nation is sanctioned on one team, they will still be able to trade with members of another team where they are not sanctioned.
 
 #### Senators
 
-Each team has 5 democratically elected senators. Senators will be elected every thirty days. Each nation can vote for a senator on their team each election. If a nation switched teams they must wait 30 days before casting a vote in an election. 
+Each team has 5 democratically elected senators. Senators will be elected every thirty days. Each nation can vote for a senator on their team each election. If a nation switched teams they must wait 30 days before casting a vote in an election.
 
 Senators have the ability to sanction nations. Sanctioned nations will not have the ability to trade with anyone else on the team where they are sanctioned.
 
-A sanction only requires one vote from a senator. A sanction can be removed by one vote from a senator as well. Once a nation is sanctioned a senator on that team must wait 10 days before lifting a sanction. A senator can only sanction a fellow team member on a team where they are elected. 
+A sanction only requires one vote from a senator. A sanction can be removed by one vote from a senator as well. Once a nation is sanctioned a senator on that team must wait 10 days before lifting a sanction. A senator can only sanction a fellow team member on a team where they are elected.
 
 ### National Government
-Each nation will be in anarchy when it is minted. There are 11 types of governments that a nation can be. Governemnts can only be changed once every three days. 
+
+Each nation will be in anarchy when it is minted. There are 11 types of governments that a nation can be. Governemnts can only be changed once every three days.
 
 The national governemnts are as follows:
 
-#### Anarchy 
+#### Anarchy
 
 A political philosophy advocating for a society without government or hierarchical authority, often favoring voluntary associations and individual freedom.
 
@@ -296,41 +301,50 @@ A ruler has the option to enter into 4 trade agreements with other nations (5 wi
 Resources and their benefits to a nation are as follows:
 
 ### Aluminium
+
 Increases soldier efficiency +20%
 Lowers infrastructure purchase cost -7%
 Lowers aircraft purchase cost -8%
 
 ### Cattle
+
 Increases the number of citizens +5%
 Lowers land purchase cost -10%
 
 ### Coal
+
 Increases the land area of influence +15%
 Increases soldier efficiency +8%
 Lowers infrastructure purchase cost -4%
 
 ### Fish
+
 Increases number of citizens +8%
 Lowers land purchase cost -5%
 
 ### Furs
+
 Increases citizend daily income +3.50 WB
 
 ### Gems
+
 Increases citizen daily income +1.50 WB
 Increases population happiness +3
 
 ### Gold
+
 Increases citizen daily income +3.00 WB
 Lowes technology cost -5%
 
 ### Iron
+
 Lowers soldier purchase cost -3.00 WB
 Lowers infrastructure upkeep cost -10%
 Lowers infratructure purchase cost -5%
 Lowers tank upkeep cost -5%
 
 ### Lead
+
 Lowers cruise missile and nuke purchase cost and upkeep -20%
 Lowers aircraft upkeep -25%
 Lowers tank cost and upkeep -8%
@@ -339,13 +353,16 @@ Lowers all navy vessel upkeep -20%
 Reduces environemnt penalty for owning nuclear weapons -50%
 
 ### Lumber
+
 Lowers infrastructure purchase cost -6%
 Lowers infrastructure upkeep -8%
 
 ### Marble
+
 Lowers infrastructure purchase cost -10%
 
 ### Oil
+
 Lowers soldier purchase cost -3.00 WB
 Increases population happiness +2
 Increases soldier efficiency +10%
@@ -354,11 +371,13 @@ Lowers aircraft purchase cost -4%
 Lowers all navy vessel upkeep -10%
 
 ### Pigs
+
 Lowers soldier upkeep -10%
 Increases soldier efficiency +15%
 Increases number of citizens +4%
 
 ### Rubber
+
 Increases area of influence +20%
 Lowers land purchase cost -10%
 Triples value of land when selling from 100 to 300 WB per mile
@@ -366,106 +385,156 @@ Lowers infrastructure purchase cost -3%
 Lowers aircraft purchse cost -4%
 
 ### Silver
+
 Increases citizen daily income +2 WB
 Increaes population happiness +2
 
 ### Spices
+
 Increases area of influence +8%
 Increases population happiness +2
 
 ### Sugar
+
 Increases number of citizens +3%
 Increases population happiness +1
 
 ### Uranium
+
 Allows a nation to develop nuclear weapons
 If a nation has nuclear weapons without access to uranium the cost to maintain the nukes is doubled
 Lowers submarine and aircraft carrier purchase and upkeep cost -5%
 
 ### Water
+
 Increases number of citizens per mile before unhappiness penalty by 50
 Increases population happiness +3
 Improves nation environment by 1 (-1)
 
 ### Wheat
+
 Increases number of citizens +8%
 
 ### Wine
-Increases population happiness +3
 
+Increases population happiness +3
 
 ## Bonus Resources
 
 Resources can be combined for additional benefits. Certain combinations result in bonus resources. The bonus resources, their benefits and requirements are as follows
 
 ### Beer
+
 #### Requirements
+
 Water, Wheat, Lumber & Aluminium
+
 #### Benefit
+
 Increases population happiness +2
 
 ### Steel
+
 #### Requirements
+
 Coal & Iron
+
 #### Benefit
+
 Reduces infrastucture cost -2%
 Lowers all navy vessel costs -15%
 
 ### Construction
+
 #### Requirements
+
 Lumber, Iron, Marble, Aluminium & Technology greater than 5
+
 #### Benefit
+
 Reduces infrastructure cost -5%
 Raises aircraft limit +10
 
 ### Fast Food
+
 #### Reqirements
+
 Cattle, Sugar, Spices & Pigs
+
 #### Benefits
+
 Increases population happiness +2
 
 ### Fine Jewelry
+
 #### Requirements
+
 Gold, Silver, Gems & Coal
+
 #### Benefit
+
 Increases population happiness +3
 
 ### Scholars
+
 #### Requirements
+
 Literacy greater than 90%, Lumber & Lead
+
 #### Benefit
+
 Increases daily population income +3.00 WB
 
 ### Asphalt
+
 #### Requirements
+
 Construction, Oil & Rubber
+
 #### Benefits
+
 Lowers infrastructure upkeep -5%
 
 ### Automobiles
+
 #### Requirements
+
 Asphalt & Steel
+
 #### Benefits
+
 Increases population happiness +3
 
 ### Affluent Population
+
 #### Requirements
+
 Fine Jewelry, Fish, Furs & Wine
+
 #### Benefits
+
 Increases citizen count +5%
 
 ### Microchips
+
 #### Requirements
+
 Gold, Lead, Oil & Tech greater than 10
+
 #### Benefits
+
 Reduces tech cost -8%
 Increases population happiness +2
 Lowers frigate, destroyer, submarine and aircraft carrier cost -10%
 
 ### Radiation Cleanup
+
 #### Requirements
+
 Construction, Microchips, Steel & Technology greater than 15
+
 #### Benefits
+
 Improves a nations environemnt by 1
 Reduces global radiation for your nation by 50%
 
@@ -473,7 +542,7 @@ Reduces global radiation for your nation by 50%
 
 Infrastructure is one of the most important aspects of the game. When infrastructure is purchased it will increase your citizen count. Before modifiers, each point of infrastructure will contribute to another 8 citizens in your population. Each additional citizen means that you have more of a population to collect taxes from when you levy taxes. Your taxable citizen population will be your total population minus soldiers and criminals.
 
-Because infrastructure is so important it will also be very expensive to purchase and also very expensive to maintain. Infrastructure upkeep will likely be the most significant part of you bill payments. Infrastructure purchases are priced at a cost per level. 
+Because infrastructure is so important it will also be very expensive to purchase and also very expensive to maintain. Infrastructure upkeep will likely be the most significant part of you bill payments. Infrastructure purchases are priced at a cost per level.
 
 Infrastructure cost jumps occur at level 20, 100, 200, 1000, 2000, 4000, 5000, 8000 and 15000.
 
@@ -499,24 +568,28 @@ Nation improvements are structures available for purchase, allowing you to incre
 
 The improvements are as follows:
 
-### Airport 
+### Airport
+
 Cost 100,000 WB
 Limit 3
-Reduces aircraft purchase cost -2% 
+Reduces aircraft purchase cost -2%
 Reduces aircraft upkeep costs -2%
 
 ### Bank
+
 Cost 100,000 WB
 Limit 5
 Increases population income +7%.
 
 ### Barracks
+
 Cost 50,000 WB
 Limit 5
 Increases soldier efficiency +10%
 Reduces soldier upkeep cost -10%
 
 ### Border Fortifications
+
 Cost 125,000 WB
 Limit 3
 Raises effectiveness of defending soldiers +2%
@@ -525,6 +598,7 @@ Requires maintaining a Border Wall for each Border Fortification
 Cannot own if Forward Operating base is owned
 
 ### Border Walls
+
 Cost 60,000 WB
 Limit 5
 Decreases citizen count -2%
@@ -533,14 +607,16 @@ Improves environment 1 point (-1)
 Reduces the number of criminals in a nation 1% per Border Wall
 Border Walls may only be purchased one at a time
 
-### Bunker 
+### Bunker
+
 Cost 200,000 WB
 Limit 5
 Reduces infrastructure damage from aircraft, cruise missiles, and nukes
 Requires maintaining a Barracks for each Bunker
 Cannot build if Munitions Factory or Forward Operating Base is owned
 
-### Casino 
+### Casino
+
 Cost 100,000 WB
 Limit 2
 Increases happiness by 1%
@@ -548,11 +624,13 @@ Decreases citizen income by 1%
 Decreases crime prevention score
 
 ### Church
+
 Cost 40,000 WB
 Limit 5
 Increases population happiness +1
 
 ### Clinic
+
 Cost 50,000 WB
 Limit 5
 Increases population count by 2%
@@ -560,6 +638,7 @@ Purchasing 2 or more clinics allows you to purchase hospitals
 This improvement may not be destroyed if it is supporting a hospital until the hospital is first destroyed
 
 ### Drydock
+
 Cost 100,000 WB
 Limit 5
 Allows nations to build and maintain navy Corvettes, Battleships, Cruisers, and Destroyers
@@ -567,6 +646,7 @@ This improvement may not be destroyed if it is supporting navy vessels until tho
 Requires Harbor
 
 ### Factory
+
 Cost 150,000 WB
 Limit 5
 Decreases cost of cruise missiles -5%
@@ -574,11 +654,13 @@ Decreases tank cost -10%
 Reduces initial infrastructure purchase cost -8%
 
 ### Foreign Ministry
+
 Cost 120,000 WB
 Increases population income by 5%
 Limit one foreign ministry per nation
 
 ### Forward Operating Base
+
 Cost 125,000 WB
 Limit 2
 Increases ground attack effectiveness for claiming land and infrastructure 1 point per FOB
@@ -587,12 +669,14 @@ Requires maintaining a Barracks for each Forward Operating Base
 Cannot own if Border Fortifications or Bunker is owned
 
 ### Guerrilla Camp
+
 Cost 20,000 WB
 Increases soldier efficiency +35%
 Reduces soldier upkeep cost -10%
 Reduces citizen income -8%
 
 ### Harbor
+
 Cost 200,000 WB
 Limit 1
 Increases population income by 1%
@@ -600,6 +684,7 @@ Opens +1 extra trade slot
 This improvement may not be destroyed if it is supporting trade agreements or navy vessels until those trade agreements, drydocks and shipyards are first removed.
 
 ### Hospital
+
 Cost 180,000 WB
 Limit 1
 Increases population count by 6%
@@ -607,28 +692,33 @@ Requires 2 clinics to build a hospital.
 Nations must retain a hospital if that nation owns a Universal Health Care wonder.
 
 ### Intelligence Agency
+
 Cost 38,500 WB
 Increases happiness for tax rates greater than 23% +1
 Each Intelligence Agency allows nations to purchase +100 spies
 This improvement may not be destroyed if it is supporting spies until those spies are first destroyed
 
 ### Jail
+
 Cost 25,000 WB
 Limit 5
 Incarcerates up to 500 criminals
 
 ### Labor Camp
-Cost 150,000 WB 
+
+Cost 150,000 WB
 Reduces infrastructure upkeep costs -10%
 Reduces population happiness -1
 Incarcerates up to 200 criminals per Labor Camp
 
 ### Missile Defense
-Cost 90,000 WB 
+
+Cost 90,000 WB
 Reduces the odds of a successful Nuclear and Cruise Missile strike 5%
 Nations must retain at least three missile defenses if that nation owns a Strategic Defense Initiative wonder.
 
 ### Munitions Factory
+
 Cost 200,000 WB
 Limit 5
 Increases enemy infrastructure damage from your aircraft, cruise missiles, and nukes +3%
@@ -638,12 +728,14 @@ Requires having Lead as a resource
 Cannot build if Bunkers owned
 
 ### Naval Academy
+
 Cost 300,000 WB
 Limit 2
 Increases both attacking and defending navy vessel strength +1
 Requires Harbor
 
 ### Naval Construction Yard
+
 Cost 300,000 WB
 Limit 3
 Increases the daily purchase limit for navy vessels +1
@@ -651,28 +743,33 @@ Your nation must have pre-existing navy support capabilities (via Drydocks and S
 Requires Harbor
 
 ### Office of Propaganda
-Cost 200,000 WB 
+
+Cost 200,000 WB
 Limit 2
 Decreases the effectiveness of enemy defending soldiers 3%
 Requires maintaining a Forward Operating Base for each Office of Propaganda
 
 ### Police Headquarters
-Cost 75,000 WB 
+
+Cost 75,000 WB
 Increases population happiness +2
 
 ### Prison
+
 Cost 200,000 WB
 Limit 5
 Incarcerates up to 5,000 criminals
 
 ### Radiation Containment Chamber
-Cost 200,000 WB 
+
+Cost 200,000 WB
 Limit 2
 Lowers global radiation level that affects your nation by 20%
 Requires maintaining Radiation Cleanup bonus resource to function
 Requires maintaining a Bunker for each Radiation Containment Chamber
 
 ### Red Light District
+
 Cost 50,000 WB
 Limit 2
 Increases happiness by 1
@@ -680,35 +777,41 @@ Penalizes environment
 Increases crime
 
 ### Rehabilitation Facility
+
 Cost 500,000 WB
 Limit 5
 Sends up to 500 criminals back into the citizen count
 
 ### Satellite
+
 Cost 90,000 WB
 Increases success odds of cruise missiles and nuke attacks by your nation +5%
 Nations must retain at least three satellites if that nation owns a Strategic Defense Initiative wonder
 
 ### School
+
 Cost 85,000 WB
 Increases population income by 5%
 Increases literacy rate +1%
 Purchasing 3 or more schools allows you to purchase universities
 This improvement may not be destroyed if it is supporting universities until the universities are first destroyed.
 
-### Shipyard 
+### Shipyard
+
 Cost 100,000 WB
 Allows nations to build and maintain navy Landing Ships, Frigates, Submarines, and Aircraft Carriers
 Increases the number of each of these types of ships that a nation can support +1
 This improvement may not be destroyed if it is supporting navy vessels until those navy vessels are first destroyed
 Requires Harbor
 
-### Stadium 
+### Stadium
+
 Cost 110,000 WB
 Increases population happiness + 3
 
 ### University
-Cost 180,000 WB 
+
+Cost 180,000 WB
 Limit 2
 Increases population income by 8%
 Reduces technology cost -10%
@@ -720,6 +823,7 @@ Three schools must be purchased before any universities can be purchased
 National wonders offer additional advantages for nations. Unlinke improvements, national wonders are more expensive to purchase and maintain but there is no citizen requirement to purchase a wonder. However, wonders can only be purchased once every thirty days and a nation can only devlop one of each wonder. The wonders, their benefits and requirements are as follows:
 
 ### Agriculture Development Program
+
 30,000,000 WB
 Increases land size by 15%
 Increases citizen income +$2.00
@@ -727,26 +831,31 @@ Increases the citizen-bonus per infrastructre from 8 to 9
 Requires 3,000 land purchased, 500 technology
 
 ### Anti-Air Defense Network
-50,000,000 WB 
+
+50,000,000 WB
 Reduces damage from air attacks 40%
 
 ### Central Intelligence Agency
+
 40,000,000 WB
-Increases the number of spies that your nation can support +250 
+Increases the number of spies that your nation can support +250
 Increases your nation's spy attack strength +10%
 
 ### Disaster Relief Agency
-40,000,000 WB 
-The disaster relief agency helps restore your nation and its people after emergency situations. 
-Increases population +3% 
+
+40,000,000 WB
+The disaster relief agency helps restore your nation and its people after emergency situations.
+Increases population +3%
 Opens 3 extra foreign aid slots per 10 days
 
-### EMP Weaponization 
-200,000,000 WB 
+### EMP Weaponization
+
+200,000,000 WB
 Provides attackers with 5,000 or more technology the option to launch a targeted EMP nuclear attack. Nuclear weapons can target higher infrastructure, higher land, or higher technology damage based on attacker choice when launching nukes.
 Requires 5,000 technology and a Weapons Research Complex to purchase.
 
 ### Fallout Shelter System
+
 40,000,000 WB
 Allows 50% of your defending soldiers to survive a nuclear strike
 Reduces tank, cruise missile, and aircraft, losses from a nuclear strike by -25%
@@ -754,81 +863,98 @@ Reduces nuclear vulnerable navy losses by 20%
 Reduces anarchy effects by 1 day
 Requires 6,000 infrastructure, 2,000 technology.
 
-### Federal Aid Commission 
+### Federal Aid Commission
+
 25,000,000 WB
 Raises the cap on foreign money aid +50% provided that the foreign aid recipient also has a Federal Aid Commission
 
 ### Federal Reserve
+
 100,000,000 WB
 Increases the number of banks that can be purchased +2
 Requires Stock Market
 
 ### Foreign Air Force Base
+
 35,000,000 WB
 Raises the aircraft limit +20
 
-### Foreign Army Base 
-200,000,000 WB 
+### Foreign Army Base
+
+200,000,000 WB
 Adds an extra +1 offensive war slot
 Requires 8,000 technology to purchase.
 
 ### Foreign Naval Base
+
 200,000,000 WB
 Allows +2 naval vessels to be purchased per day (+1 in Peace Mode) and also allows +1 naval deployment per day
 Requires 20,000 infrastructure.
 
-### Great Monument 
-35,000,000 WB 
+### Great Monument
+
+35,000,000 WB
 The great monument is a testament to your great leadership. Increases happiness +4 and your population will always be happy with your government choice.
 
-### Great Temple 
-35,000,000 WB 
+### Great Temple
+
+35,000,000 WB
 The great temple is a dedicated shrine to your national religion. Increases happiness +5 and your population will always be happy with your religion choice.
 
 ### Great University
+
 35,000,000 WB
 The great university is a central location for scholars within your nation
 Decreases technology costs -10% and increases population happiness +2 for every 1000 technology level over 200 up to 3,000 tech
 
 ### Hidden Nuclear Missile Silo
+
 30,000,000 WB
-Allows your nation to develop +5 nuclear missiles that cannot be destroyed in spy attacks. 
+Allows your nation to develop +5 nuclear missiles that cannot be destroyed in spy attacks.
 
 ### Interceptor Missile System
+
 50,000,000 WB
 Reduces the odds of a successful incoming cruise missile strike -25%
 Requires 5,000 technology and a Strategic Defense Initiative
 
 ### Internet
+
 35,000,000 WB
 Increases population happiness +5
 
 ### Interstate System
+
 45,000,000 WB
-Decreases initial infrastructure cost -8% 
+Decreases initial infrastructure cost -8%
 Decreases infrastructure upkeep costs -8%
 
-### Manhattan Project 
+### Manhattan Project
+
 100,000,000 WB
 Allows nations with a strength less than 150,000 to develop nuclear weapons
 The Manhattan Project cannot be destroyed once it is created
 The wonder requires 3,000 infrastructure, 300 technology, and a uranium resource
 
 ### Mining Industry Consortium
+
 25,000,000 WB
 Increases population income by $2.00 for the resources Coal, Lead, Oil, Uranium that your nation has access to
 Requires 5,000 infrastructure, 3,000 land purchased, 1,000 technology.
 
-### Movie Industry 
+### Movie Industry
+
 26,000,000 WB
 Increases population happiness +3.
 
-### National Cemetery 
+### National Cemetery
+
 150,000,000 WB
-Provides +1 Happiness per 5,000,000 soldier casualties up to +5 happiness. 
+Provides +1 Happiness per 5,000,000 soldier casualties up to +5 happiness.
 Requires 5 million soldier casualties and a National War Memorial.
 
 ### National Environment Office
+
 100,000,000 WB
 The national environment office removes the penalties for Coal, Oil, and Uranium
 Improves environment by 1 point
@@ -836,17 +962,20 @@ Increases population +3%
 Reduces infrastructure upkeep -3%
 Requires 13,000 infrastructure
 
-### National Research Lab 
+### National Research Lab
+
 35,000,000 WB
-Increases population +5% 
+Increases population +5%
 Decreases technology costs -3%
 
-### National War Memorial 
-27,000,000 WB 
+### National War Memorial
+
+27,000,000 WB
 Increases population happiness +4
 Requires 50,000 casualties
 
 ### Nuclear Power Plant
+
 75,000,000 WB
 If a nation has a nuclear power plant and an active uranium trade they will get +3 happiness and an additional 1 point of happiness for every 10 tech up to 40 tech.
 The nuclear power plant by itself, even without a Uranium trade, reduces infrastructure upkeep -5%
@@ -855,53 +984,63 @@ Improvement upkeep -5%
 Requires 12,000 infrastructure, 1,000 technology, and a Uranium resource to build
 
 ### Pentagon
+
 30,000,000 WB
 Increases attacking and defending ground battle strength +20%
 
-### Political Lobbyists 
+### Political Lobbyists
+
 50,000,000 WB
 Your vote counts as two votes in your team's senate
 
 ### Scientific Development Center
+
 150,000,000 WB
 The scientific development center increases the productivity of your factories from -8% infrastructure cost to -10% infrastructure cost
 Increases the productivity of your universities from +8% citizen income to +10% citizen income
 Allows the Great University to give its technology happiness bonus up to 5,000 technology levels (+2 happiness each 1,000 technology levels)
 Requires 14,000 infrastructure, 3,000 technology, Great University, National Research Lab.
 
-### Social Security System 
+### Social Security System
+
 40,000,000 WB
 The social security system provides benefits to aging members of your nation
 Allows you to raise taxes above 28% up to 30% without additional happiness penalties
 
-### Space Program 
+### Space Program
+
 30,000,000 WB
 Increases happiness +3
 lowers technology cost -3% and lowers aircraft cost -5%
 
-### Stock Market 
+### Stock Market
+
 30,000,000 WB
 Increases citizen income +$10.00.
 
 ### Strategic Defense Initiative
+
 75,000,000 WB
 Reduces odds of a successful nuclear attack against your nation by 60%
 The SDI wonder also requires 3 satellites and 3 missile defenses and those satellites and missile defenses cannot be deleted once the wonder is developed
 
-### Superior Logistical Support 
+### Superior Logistical Support
+
 80,000,000 WB
-Reduces Aircraft and Naval upkeep by -10% 
+Reduces Aircraft and Naval upkeep by -10%
 Reduces tank ukeep by -5%
 Increases attacking and defending ground battle strength +10%
 Requires Pentagon.
 
-### Universal Health Care 
+### Universal Health Care
+
 100,000,000 WB
 Increases population +3%
 Increases population happiness +2
 Requires 11,000 infrastructure, Hospital, National Research Lab.
 
-### Weapons Research Complex 
+### Weapons Research Complex
+
 150,000,000 WB
 Increases the number of nukes that can be purchased per day to 2
 Hurts environment by +1
@@ -917,32 +1056,39 @@ Nations can offer eachother aid in the form of money reserves, soldiers and tech
 A nations environment score will measure the amount of pollution a nation produces. The higher a nations environemnt score is the less happy its people will be. AKA, the higher a nations environemnt score is the worse off a nation will be. The various parameters of a nation that affect its environment score are as follows
 
 ### Resources
+
 Coal, Oil and Uranium adversely affect a nations environment
 Water and Radiation Cleanup resources will help a nations environment
 
 ### Improvements and Wonders
+
 Boarder Walls and National Environment Offices will help a nations environment
 Munitions Factories, Red Light Districts and Weapons Research Centers will adversely affect a nations environment
 
 ### Technology
+
 Nations with tech greater than 6 will not be penalized
 
 ### Military Density
+
 A soldier to population ratio greater than 60% will adversely affect a nations environment
 
 ### Infrastructure to Land Ratio
+
 The environemnt will be adversely affected if a nation has over 200% infrastructure versus land.
 
 ### Nukes
+
 Maintaining nukes will adversely affect a nations environment. If a nation has access to the lead resource then the penalty for owning nukes is reduces by 50%
 
 ### Governemnt Type
+
 Governemnt types Anarchy, Communist, Dictatorship and Transitional will adversely affect a nations environment
 Government Types Capitalist, Democracy and Republic will positively affect a nations environment
 
 ### Global Radiaton
 
-Global radiation will affect a nations environment up to 5 points. Global radiation is based on the amount of nukes fired around the metaverse over the last 10 days. 
+Global radiation will affect a nations environment up to 5 points. Global radiation is based on the amount of nukes fired around the metaverse over the last 10 days.
 
 ## Crime
 
@@ -955,6 +1101,7 @@ A nation with 6000-8000 criminals will have three points deducted from happiness
 A nation with 8000+ criminals will have five points deducted from happiness
 
 ### Crime Prevention Score
+
 The higher a nations crime prevention score the lower the crime index and the lower a nations criminal count. Crime index will be calculated from crime prevention score according to the following calculations.
 
 CPS of less than 200 will have a crime index of 6
@@ -973,7 +1120,7 @@ The paremeters of a nation that increase a nations crime prevention score are as
 
 A nations literacy rate will affect a nations crime prevention score. Higher literacy will mean a higher CPS and less crime.
 
-Literacy is determined by a nations technology, schools and universities. All of these parameters will increase a nations literacy. 
+Literacy is determined by a nations technology, schools and universities. All of these parameters will increase a nations literacy.
 
 A nations CPS points from literacy will equal 80% of the percentage of a nation that is literate.
 
@@ -1015,14 +1162,14 @@ The higher a nations total population the more points will be subtracted from a 
 
 Taxes are available to be collected from your nation on a daily basis. A nation can go 20 days without collecting taxes. If a ruler waits more than 20 days to collect taxes then there is no additional collection benefit and any additional money will be lost.
 
-Taxes will be the product of 
-(citizens * days since last collection * income per citizen * tax rate)
+Taxes will be the product of
+(citizens _ days since last collection _ income per citizen \* tax rate)
 
 ### Citizen Income
 
-Citizen income is determined from the formula 
+Citizen income is determined from the formula
 
-35 + ((2 * happiness) * happiness multipliers) + income adjustments
+35 + ((2 _ happiness) _ happiness multipliers) + income adjustments
 
 ### Happiness
 
@@ -1032,7 +1179,7 @@ The multipliers to happiness include improvements such as banks (+7% each), fore
 
 #### Compatibility
 
-A nations people will be happier is the national government and national religion are in line with the desires of the people. 
+A nations people will be happier is the national government and national religion are in line with the desires of the people.
 
 If a nation has a great monument the people will be happy regardless of the type of government the nation is ruled by
 
@@ -1086,7 +1233,7 @@ See [Crime](#Crime) for more.
 
 Citizens can be taxed at a percentage of their income. Lets say your citizens earn 200 WB per day and your tax rate is 25% then you will be able to collect 50 WB per citizen per day.
 
-Tax rates can differ from 15% to 28% with higher tax rates adversley affecting a nations happiness. If a nation has the Social Security wonder a ruler can increase the tax rate to 30% without a penalty to happiness. 
+Tax rates can differ from 15% to 28% with higher tax rates adversley affecting a nations happiness. If a nation has the Social Security wonder a ruler can increase the tax rate to 30% without a penalty to happiness.
 
 ### Income Adjustments
 
@@ -1094,7 +1241,7 @@ Furs, Gems, Gold, Silver, Scholars, Agriculture Development Program, Mining Indu
 
 ## Bills
 
-Nations will incur bills in order to be maintained. Bills will be calulated based on a nations upkeep * days since last bill payment. A nation is allowed to go for 30 days without paying its bills until it is places into inactivity mode. When inactive, a nation will not be able to spend money, collect taxes nor will other nations be able to declare war on an them.
+Nations will incur bills in order to be maintained. Bills will be calulated based on a nations upkeep \* days since last bill payment. A nation is allowed to go for 30 days without paying its bills until it is places into inactivity mode. When inactive, a nation will not be able to spend money, collect taxes nor will other nations be able to declare war on an them.
 
 Infrastruture, improvements, wonders and military all require upkeep.
 
@@ -1173,10 +1320,10 @@ Now for the fun part
 
 Should you be compelled to attack another nation for whatever reason, you will first have to declare war on that nation. There are several requirements that need to be met in order to declare war on another nation. They are as follows:
 
-* Both nations must be in war mode and not peace mode
-* A nation you are declaring war on must be within 75% and 133% of nation strnegth
-* Both nations must be active and have collected bills within the last 30 days
-* A nation can only have 4 active offensive wars at any time (5 with a foreign army base)
+- Both nations must be in war mode and not peace mode
+- A nation you are declaring war on must be within 75% and 133% of nation strnegth
+- Both nations must be active and have collected bills within the last 30 days
+- A nation can only have 4 active offensive wars at any time (5 with a foreign army base)
 
 Wars will automatically expire after 7 days. Alternatively, one nation can declare peace. When the other nation accepts, peace will be declared and the war will be ceased. Should an attack occur from either party all pending peace offers will be canceled. You will need to recall you deployed troops from expired wars.
 
@@ -1187,21 +1334,21 @@ Once war is declared, you will have several options to attack another nation. Yo
 A nations strength will be claulated in the following way:
 
 Strength =
-Land purchased * 1.5
-Tech * 5
-Infrastructure * 3
-Soldiers * 2
-Defending tanks * 20
-Deployed tanks * 15
-Nukes ^ 2 * 10
-Aircraft strength * 5
-Naval vessel strength * 10
+Land purchased _ 1.5
+Tech _ 5
+Infrastructure _ 3
+Soldiers _ 2
+Defending tanks _ 20
+Deployed tanks _ 15
+Nukes ^ 2 _ 10
+Aircraft strength _ 5
+Naval vessel strength \* 10
 
 ### Ground Assault
 
 Ground assaults are conducted with soldiers and tanks. In order to attack another nation a ruler will need to deploy soldiers and tanks to an active war. At any time, a nations ground forces are the summation of its defensive forces and deployed forces to each war. When a nation attacks it will attack with its deployed forces against another nations defending ground forces. A nation can only deploy forces once per day per war. When a ground attack is launched it can be a conservative, planned, agressive or berzerker attack. As attacks get more agressive so do the casualties and spoils increase. A victorious attack will result in the transfer of land and infrastructiure to the attacker from the defender.
 
-The results of a ground assault will be calculated randomly based on the strengths of the two opposing forces. 
+The results of a ground assault will be calculated randomly based on the strengths of the two opposing forces.
 
 ### Soldiers
 
@@ -1241,7 +1388,7 @@ Defender soldier efficiency is modified in the following way
 
 Attacking ground forces strength will equal
 
-Soldier Efficiency + (15 * Tanks Deployed) 
+Soldier Efficiency + (15 \* Tanks Deployed)
 +20% with a pentagon
 +10% with Superior Logistical Support
 +1% / 100 Tanks Deployed up to 75%
@@ -1251,16 +1398,16 @@ Soldier Efficiency + (15 * Tanks Deployed)
 
 Defending ground forces strength will equal
 
-Soldier Efficiency + (17 * Tanks Defending)
+Soldier Efficiency + (17 _ Tanks Defending)
 +20% with a pentagon
 +10% with Superior Logistical Support
 +1% / 100 Infrastructure levels up to 75%
 +(5 - DEFCON)%
--5% * attacker Office of Propaganda count
+-5% _ attacker Office of Propaganda count
 
 ### Tanks
 
-Attacking tanks are worth 15 strength and defending tanks are worth 17 strength in battle. 
+Attacking tanks are worth 15 strength and defending tanks are worth 17 strength in battle.
 
 The maximum tanks a nation can own is 10% of soldier efficiengy or 8% of total citizens, whichever is less.
 
@@ -1273,7 +1420,7 @@ Tanks cost 40 times the soldier cost with the following modifiers:
 
 When you are at war with a nation you will also have the option to launch a bombing campaign against that nation. Bombing campaigns have the potential to destroy up to 20 tanks, 20 infrastructure or 5 cruise missiles.
 
-The game consists of 18 different types of aircraft. There are 9 types of bombers and 9 types of fighters. The 9 bombers and 9 fighters have different strengths increasing from 1 to 9. See below for the details on each type of aircraft. 
+The game consists of 18 different types of aircraft. There are 9 types of bombers and 9 types of fighters. The 9 bombers and 9 fighters have different strengths increasing from 1 to 9. See below for the details on each type of aircraft.
 
 The maximum amount of aircraft a nation can develop is 50. There are certain parameters that can increase the maximum aircraft count of a nation. They include:
 
@@ -1423,7 +1570,7 @@ If you are at war with a nation you can also launch a cruise missile strike agai
 
 When a cruise missile is launched there is a 75% chance it strikes the defending nation. A defender interceptor missile system will reduce the odds of a successful cruise missile strike -25%. Defender missile defenses will ceach reduce the odds of a sucessful cruise missile strike -5%. Attacker satellites will each increase the odds of a successful cruise missile strile +5%.
 
-A successful cruise missile strike will either destroy tanks, tech or infrastructure. 
+A successful cruise missile strike will either destroy tanks, tech or infrastructure.
 
 The base amount of tanks that will be lost in a successful cruise missile strike will be a random number between 10 and 15. This number will go up if the attacker has munitions factories and down if the defender has bunkers.
 
@@ -1433,32 +1580,35 @@ The base amount of infrastructure that can be lost in a cruise missile attack is
 
 ### Nukes
 
-In order for a nation to purchase nukes they must have 75 tech, access to uranium and at least 150,000 strength. If a nation does not have 150,000 strength they can purchase nukes with a manhattan project wonder. A nation can only purchase one nuke per day (2 with weapons research center). Nukes cost 50,000 WB to purchase, and 20% less with access to lead. Nukes cost 5,000 WB per day to maintain. This upkeep cost is reduced by 20% with access to lead and doubled if a nation does not have access to uranium. 
+In order for a nation to purchase nukes they must have 75 tech, access to uranium and at least 150,000 strength. If a nation does not have 150,000 strength they can purchase nukes with a manhattan project wonder. A nation can only purchase one nuke per day (2 with weapons research center). Nukes cost 50,000 WB to purchase, and 20% less with access to lead. Nukes cost 5,000 WB per day to maintain. This upkeep cost is reduced by 20% with access to lead and doubled if a nation does not have access to uranium.
 
-The default odd of a successful nuke attack are 50%. If a defender has a strategic defense initiative the odds go down 20%. These odds also go down 5% foe each defender missile defense a nations owns. Attacker satellites will increase the odds of a succesful nuke attack 5%. 
+The default odd of a successful nuke attack are 50%. If a defender has a strategic defense initiative the odds go down 20%. These odds also go down 5% foe each defender missile defense a nations owns. Attacker satellites will increase the odds of a succesful nuke attack 5%.
 
 The standard dmaage from a nuke attack is as follows:
-* Defnding soldiers will be reduced to 0 (-50% with fallout shelter system)
-* Defending tanks will be reduced 35% (-25% with fallout shelter system)
-* Corvettes, Landing ships, Cruisers and Frigates will be reduced 40% (20% with fallout shelter system)
-* Land will be reduced 35% up to a total of 150 miles
-* Infrastructure will be reduced up to a total of 150 levels
-* Tech will be reduced 25% up to a total of 50 levels
 
+- Defnding soldiers will be reduced to 0 (-50% with fallout shelter system)
+- Defending tanks will be reduced 35% (-25% with fallout shelter system)
+- Corvettes, Landing ships, Cruisers and Frigates will be reduced 40% (20% with fallout shelter system)
+- Land will be reduced 35% up to a total of 150 miles
+- Infrastructure will be reduced up to a total of 150 levels
+- Tech will be reduced 25% up to a total of 50 levels
 
 An EMP wonder allows an attacking nation to choose what the target of a nuke strike is. A nuke can tarket land, tech or infrasturcture. The differences between the attacks are as follows:
 
-In a infrastructure targeted nuclear attack the base damage is 
-* infrastructure is 45% (limit 200)
-* land and technology is 25% each (limit 100 land 30 tech)
+In a infrastructure targeted nuclear attack the base damage is
+
+- infrastructure is 45% (limit 200)
+- land and technology is 25% each (limit 100 land 30 tech)
 
 In a land targeted nuclear attack the base damage is
-* land is 45% (limit 200)
-* infrastructure and technology is 25% (limit 100 infrasturcture and 30 tech)
+
+- land is 45% (limit 200)
+- infrastructure and technology is 25% (limit 100 infrasturcture and 30 tech)
 
 In a technology targeted nuclear attack the base damage is
-* technology is 45% (limit 70%)
-* infrastructure and land is 25% each (limit 100 infrastructure and 100 land)
+
+- technology is 45% (limit 70%)
+- infrastructure and land is 25% each (limit 100 infrastructure and 100 land)
 
 ### Navy
 
@@ -1555,7 +1705,7 @@ Cannot be destroyed in nuckear attacks
 
 ### Naval Actions
 
-A ruler can engage in 3 naval actions per day across all wars. 
+A ruler can engage in 3 naval actions per day across all wars.
 
 There A ruler can use their navy to do one of the following:
 
@@ -1565,9 +1715,9 @@ In a naval attack, the entirety of one nations navy will attack the entirety of 
 
 #### Blockade
 
-A nation can also blockade another nation. An active blockade will reduce a nations tax collection percentage 1-5%. A nation can only be blockaded once per day. An attacker must have at least 5 blockade capable ships in order to blockade another nation. The defender muist have zero break blockade capable ships. 
+A nation can also blockade another nation. An active blockade will reduce a nations tax collection percentage 1-5%. A nation can only be blockaded once per day. An attacker must have at least 5 blockade capable ships in order to blockade another nation. The defender muist have zero break blockade capable ships.
 
-In the even that a naval battle reduces a nations blockade capable ships to zero, all active blockades will be lifted. A blockaded nation can also collect taxes to end the blockades against them. 
+In the even that a naval battle reduces a nations blockade capable ships to zero, all active blockades will be lifted. A blockaded nation can also collect taxes to end the blockades against them.
 
 Blockade capable navy ships include Battleships, Cruisers, Frigates and Submarines.
 
@@ -1579,9 +1729,9 @@ Break blockade capable ships include Battleships, Cruisers, Frigates and Destroy
 
 ### Spies
 
-Nations can conduct spy operations against other nations. The gmae employes ZK technology that will allow one nation to attack another nation without revealing to the defender who the attacker was. In order to do this a nation will first need to train a spy for the attack and in another function call the attack should be executed. The attack will be paid for when they spy is trained. Trained spies will be trained for a specific attack type and defender nation. An attack needs to be executed within 5 days of training a spy. Nations do not need to be at war in order to conduct spy operations on eachother. 
+Nations can conduct spy operations against other nations. The gmae employes ZK technology that will allow one nation to attack another nation without revealing to the defender who the attacker was. In order to do this a nation will first need to train a spy for the attack and in another function call the attack should be executed. The attack will be paid for when they spy is trained. Trained spies will be trained for a specific attack type and defender nation. An attack needs to be executed within 5 days of training a spy. Nations do not need to be at war in order to conduct spy operations on eachother.
 
-Spy attack strength is equal to a nations spy count + (technology / 15). If an attacker has a CIA wonder strength is increased by 10%. IF a nation has a governemtn type of Communist, Republic or Transitional attack strength is increased by 10%. 
+Spy attack strength is equal to a nations spy count + (technology / 15). If an attacker has a CIA wonder strength is increased by 10%. IF a nation has a governemtn type of Communist, Republic or Transitional attack strength is increased by 10%.
 
 The strength to thwart a spy attack is equal to a nations spy count + (technology / 20) + (land / 70). If a spy attack is thwarted the attacker wil be revealed. A nations defense strength against a spy attack is also adjusted by its threat level according to the following metrics:
 
@@ -1601,13 +1751,13 @@ There are 13 different types of spy operations nations can conduct on eachother.
 
 A successful cruise missile spy attack will result in the destruction of 1-5 cruise missiles.
 
-A spy attack to destroy cruise missiles costs 100,000WB * defender strength
+A spy attack to destroy cruise missiles costs 100,000WB \* defender strength
 
 #### 2. Destroy Defending Tanks
 
 A successful spy attack on tanks will result in 5-10 tanks being destroyed.
 
-A spy attack to destroy tanks costs 100,000WB + (defender stregth * 2)
+A spy attack to destroy tanks costs 100,000WB + (defender stregth \* 2)
 
 #### 3. Capture Land
 
@@ -1615,19 +1765,19 @@ A successful spy attack on a defenders land will result in 10-15 miles of land b
 
 A defender must have 15 miles of land in order for an attacker to conduct a land attack.
 
-A spy attack to destroy tanks costs 100,000WB + (defender stregth * 3)
+A spy attack to destroy tanks costs 100,000WB + (defender stregth \* 3)
 
 #### 4. Change Desired Governemnt
 
 A successful spy attack to change a nations desired governement will result in a nations desired governemnt being changed.
 
-A spy attack to destroy tanks costs 100,000WB + (defender stregth * 3)
+A spy attack to destroy tanks costs 100,000WB + (defender stregth \* 3)
 
 #### 5. Change Desired Religion
 
 A successful spy attack to change a nations desired religion will result in a nations desired religion being changed
 
-A spy attack to destroy tanks costs 100,000WB + (defender stregth * 5)
+A spy attack to destroy tanks costs 100,000WB + (defender stregth \* 5)
 
 #### 6. Change Threat Level
 
@@ -1639,13 +1789,13 @@ A spy attack to destroy tanks costs 150,000WB + defender stregth
 
 A spy attack on a nations DEFCON will result in a nations DEFCON being changed.
 
-A spy attack to destroy tanks costs 150,000WB + (defender stregth * 5)
+A spy attack to destroy tanks costs 150,000WB + (defender stregth \* 5)
 
 #### 8. Destroy Spies
 
 A successful spy attack to destroy a nations opposing spies will result in 1-20 spies being destroyed.
 
-A spy attack to destroy tanks costs 250,000WB + (defender stregth * 2)
+A spy attack to destroy tanks costs 250,000WB + (defender stregth \* 2)
 
 #### 9. Capture Tech
 
@@ -1653,19 +1803,19 @@ A successful spy attack on a nations tech will reuslt in a a nation losing 10-15
 
 A defender must have 15 tech in order for an attacker to conduct a tech attack.
 
-A spy attack to destroy tanks costs 300,000WB + (defender stregth * 2)
+A spy attack to destroy tanks costs 300,000WB + (defender stregth \* 2)
 
 #### 10. Sabatoge Taxes
 
 A successful spy attack on a nations taxes will reuslt in a nations tax rate being reset to 20-24%. Collection will be required to change the tax rate.
 
-A spy attack to sabotage taxes costs 100,000WB + (defender stregth * 20)
+A spy attack to sabotage taxes costs 100,000WB + (defender stregth \* 20)
 
 #### 11. Destroy Money Reserves
 
 A successful attack on a nations money reserves will result in a nation losing 5% of their money reserves up to 1,000,000 WB.
 
-A spy attack to destroy money reserves costs 300,000WB + (defender stregth * 15)
+A spy attack to destroy money reserves costs 300,000WB + (defender stregth \* 15)
 
 #### 12. Capture Infrastructure
 
@@ -1673,7 +1823,7 @@ A successful attack on a nations infrastructure will result in a nation losing 1
 
 A defender must have 15 infrastructure levels in order for an attacker to conduct an infrastructrue attack.
 
-A spy attack to capture infrastructure costs 500,000WB + (defender stregth * 5)
+A spy attack to capture infrastructure costs 500,000WB + (defender stregth \* 5)
 
 #### 13. Destroy Nukes
 
@@ -1681,5 +1831,4 @@ A successful spy attack on a nations nukes will result in 1 nuke being destroyed
 
 A defender must have at least 1 nuke for an attacker to conduct a destroy nuke operation.
 
-A spy attack to destroy nukes costs 500,000WB + (defender stregth * 15)
-
+A spy attack to destroy nukes costs 500,000WB + (defender stregth \* 15)

@@ -2,12 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
-
+import { useRouter, useSearchParams } from "next/navigation";
+import { NationSearchBar } from "../../../components/NationSearch";
+import ActiveWars from "./ActiveWars";
+import AllianceManagement from "./AllianceManagement";
+import BuyBombers from "./BuyBombers";
 import BuyCruiseMissiles from "./BuyCruiseMissiles";
+import BuyFighters from "./BuyFighters";
 import BuyImprovement from "./BuyImprovements";
 import BuyInfrastructure from "./BuyInfrastructure";
 import BuyLand from "./BuyLand";
+import BuyNavy from "./BuyNavy";
 import BuyNukes from "./BuyNukes";
 import BuySoldiers from "./BuySoldiers";
 import BuySpies from "./BuySpies";
@@ -15,30 +20,27 @@ import BuyTanks from "./BuyTanks";
 import BuyTechnology from "./BuyTechnology";
 import BuyWonder from "./BuyWonder";
 import CollectTaxes from "./CollectTaxes";
+import ManageWars from "./DeclareWar";
+import TransferDeleteNation from "./DeleteTransfer";
 import DepositWithdraw from "./DepositWithdraw";
 import GovernmentDetails from "./GovernmentDetails";
+import ManageTrades from "./ManageTrades";
+import Messages from "./Messages";
 import MilitarySettings from "./MilitarySettings";
 import NationDetailsPage from "./NationDetailsPage";
-import BuyFighters from "./BuyFighters";
-import BuyBombers from "./BuyBombers";
-import BuyNavy from "./BuyNavy";
 import PayBills from "./PayBills";
-import ManageTrades from "./ManageTrades";
-import SendAid from "./SendAid";
-import ManageWars from "./DeclareWar";
-import ActiveWars from "./ActiveWars";
 import Senate from "./Senate";
-import TransferDeleteNation from "./DeleteTransfer";
-import Messages from "./Messages";
-import AllianceManagement from "./AllianceManagement";
-import { NationSearchBar } from "../../../components/NationSearch";
+import SendAid from "./SendAid";
 import SpyAttackCard from "./SpyAttack";
 import { useAccount, usePublicClient } from "wagmi";
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
 
 const menuItems = [
   { category: "SEARCH NATIONS", options: ["Search"] },
-  { category: "NATION SETTINGS", options: ["Government Settings", "Military Settings", "Manage Trades", "Send Aid", "Senate", "Alliance"] },
+  {
+    category: "NATION SETTINGS",
+    options: ["Government Settings", "Military Settings", "Manage Trades", "Send Aid", "Senate", "Alliance"],
+  },
   { category: "MANAGE WARS", options: ["Declare War", "Active Wars", "Spy Attack"] },
   { category: "TREASURY", options: ["Collect Taxes", "Pay Bills", "Deposit and Withdraw"] },
   { category: "MUNICIPAL PURCHASES", options: ["Infrastructure", "Technology", "Land"] },
@@ -73,9 +75,9 @@ const Nation = () => {
   useEffect(() => {
     const fetchNationName = async () => {
       if (!nationId) return;
-      let name = await getSelectedNationName(nationId);
+      const name = await getSelectedNationName(nationId);
       setSelectedNationId(name as string);
-      let wbxBalance = await getWarBucksBalance(nationId);
+      const wbxBalance = await getWarBucksBalance(nationId);
       setSelectedNationBalance(wbxBalance as string);
     };
     fetchNationName();
@@ -85,7 +87,7 @@ const Nation = () => {
     if (!publicClient) {
       throw new Error("publicClient is not defined");
     }
-    let nationName = await publicClient.readContract({
+    const nationName = await publicClient.readContract({
       abi: countryParametersContract.abi,
       address: countryParametersContract.address,
       functionName: "getNationName",
@@ -98,14 +100,14 @@ const Nation = () => {
     if (!publicClient) {
       throw new Error("publicClient is not defined");
     }
-    let warBucks = await publicClient.readContract({
+    const warBucks = await publicClient.readContract({
       abi: treasuryContract.abi,
       address: treasuryContract.address,
       functionName: "checkBalance",
       args: [tokenIdString],
     });
     return warBucks;
-  }
+  };
 
   const formatBalance = (balance: string) => {
     const warbucksFormatted = Number(balance) / 1e18;
@@ -156,20 +158,20 @@ const Nation = () => {
   };
 
   const handleNationSelect = (nationId: string, nationName: string) => {
-    playClickSound()
+    playClickSound();
     setSelectedMenuItem(nationName);
     localStorage.setItem("selectedMenuItem", nationName); // Save selection
     setSelectedComponent(<NationDetailsPage nationId={nationId} onPropeseTrade={handlePropeseTrade} />);
     setIsDropdownOpen(false); // Close dropdown
-  
+
     // Update the query string in the URL
     router.push(`/nations?id=${nationId}`, { scroll: false });
   };
 
   // Function to handle trade proposals
   const handlePropeseTrade = () => {
-    setSelectedMenuItem("Manage Trades")
-    setSelectedComponent(<ManageTrades />)
+    setSelectedMenuItem("Manage Trades");
+    setSelectedComponent(<ManageTrades />);
   };
 
   // Load last selected menu item from localStorage when the page loads
@@ -219,23 +221,23 @@ const Nation = () => {
       } else if (savedMenuItem === "Navy") {
         setSelectedComponent(<BuyNavy />);
       } else if (savedMenuItem === "Manage Trades") {
-        setSelectedComponent(<ManageTrades/>)
+        setSelectedComponent(<ManageTrades />);
       } else if (savedMenuItem === "Send Aid") {
         setSelectedComponent(<SendAid />);
       } else if (savedMenuItem === "Declare War") {
         setSelectedComponent(<ManageWars />);
       } else if (savedMenuItem === "Active Wars") {
-        setSelectedComponent(<ActiveWars />)
+        setSelectedComponent(<ActiveWars />);
       } else if (savedMenuItem === "Senate") {
         setSelectedComponent(<Senate />);
       } else if (savedMenuItem === "Alliance") {
         setSelectedComponent(<AllianceManagement />);
       } else if (savedMenuItem === "Transfer or Delete") {
         setSelectedComponent(<TransferDeleteNation />);
-      }else if (savedMenuItem === "Messages") {
+      } else if (savedMenuItem === "Messages") {
         setSelectedComponent(<Messages />);
       } else if (savedMenuItem === "Search") {
-        setSelectedComponent(<NationSearchBar/>);
+        setSelectedComponent(<NationSearchBar />);
       } else if (savedMenuItem === "Spy Attack") {
         setSelectedComponent(<SpyAttackCard />);
       } else {
@@ -251,7 +253,7 @@ const Nation = () => {
   const handleMenuClick = (option: string) => {
     setSelectedMenuItem(option);
     localStorage.setItem("selectedMenuItem", option); // Save selected menu item
-    playClickSound()
+    playClickSound();
     if (option === "Collect Taxes") {
       setSelectedComponent(<CollectTaxes />);
     } else if (option === "Government Settings") {
@@ -283,19 +285,19 @@ const Nation = () => {
     } else if (option === "Spies") {
       setSelectedComponent(<BuySpies />);
     } else if (option === "Fighters") {
-      setSelectedComponent(<BuyFighters />)
+      setSelectedComponent(<BuyFighters />);
     } else if (option === "Bombers") {
-      setSelectedComponent(<BuyBombers />)
+      setSelectedComponent(<BuyBombers />);
     } else if (option === "Navy") {
-      setSelectedComponent(<BuyNavy />)
+      setSelectedComponent(<BuyNavy />);
     } else if (option === "Manage Trades") {
-      setSelectedComponent(<ManageTrades/>)
+      setSelectedComponent(<ManageTrades />);
     } else if (option === "Send Aid") {
       setSelectedComponent(<SendAid />);
     } else if (option === "Declare War") {
       setSelectedComponent(<ManageWars />);
     } else if (option === "Active Wars") {
-      setSelectedComponent(<ActiveWars />)
+      setSelectedComponent(<ActiveWars />);
     } else if (option === "Senate") {
       setSelectedComponent(<Senate />);
     } else if (option === "Alliance") {
@@ -305,7 +307,7 @@ const Nation = () => {
     } else if (option === "Messages") {
       setSelectedComponent(<Messages />);
     } else if (option === "Search") {
-      setSelectedComponent(<NationSearchBar/>);
+      setSelectedComponent(<NationSearchBar />);
     } else if (option === "Spy Attack") {
       setSelectedComponent(<SpyAttackCard />);
     } else {
@@ -326,9 +328,13 @@ const Nation = () => {
           minHeight: "calc(100vh + 250px)",
         }}
       >
-        <h2 className="font-special text-lg text-black mb-4">{nationId}: {selectedNationName}</h2>
-        <h3 className="font-special text-lg text-black mb-4">{selectedNationBalance ? `${formatBalance(selectedNationBalance)} WBX`: "Balance not available"}</h3>
-  
+        <h2 className="font-special text-lg text-black mb-4">
+          {nationId}: {selectedNationName}
+        </h2>
+        <h3 className="font-special text-lg text-black mb-4">
+          {selectedNationBalance ? `${formatBalance(selectedNationBalance)} WBX` : "Balance not available"}
+        </h3>
+
         {/* My Nations Dropdown */}
         {walletAddress && mintedNations.length > 0 && (
           <div className="relative">
@@ -338,7 +344,7 @@ const Nation = () => {
             >
               My Nations
             </button>
-  
+
             {isDropdownOpen && (
               <ul className="font-special absolute left-0 mt-2 p-2 shadow bg-primary text-white rounded-box w-52">
                 {mintedNations.map(nation => (
@@ -354,7 +360,7 @@ const Nation = () => {
             )}
           </div>
         )}
-  
+
         {/* Other Menu Items */}
         {menuItems.map(section => (
           <div key={section.category} className="mt-4">
@@ -376,13 +382,11 @@ const Nation = () => {
           </div>
         ))}
       </div>
-  
+
       {/* Main Content - Right 85% */}
       <div className="w-5/6 p-1">{selectedComponent}</div>
     </div>
   );
-  };
-  
-  export default Nation;
-  
-  
+};
+
+export default Nation;

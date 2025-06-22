@@ -187,7 +187,11 @@ const config = {
   },
   sourcify: {
     enabled: true
-  }
+  },
+  typechain: {
+    outDir: "typechain-types",
+    target: "ethers-v6",
+  },
 }
 
 export default config;

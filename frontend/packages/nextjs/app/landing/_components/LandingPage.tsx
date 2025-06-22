@@ -19,7 +19,7 @@ const LandingPage = () => {
           <p className="text-lg mb-6">THE FATE OF YOUR NATION IS IN YOUR HANDS</p>
           <button
             className="px-6 py-3 bg-red-600 hover:bg-red-700 font-semibold rounded-lg text-xl"
-            onClick={() => window.location.href = "/"}
+            onClick={() => (window.location.href = "/")}
           >
             Initiate Protocol
           </button>

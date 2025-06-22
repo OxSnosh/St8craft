@@ -32,16 +32,15 @@ p {
 }
 
 @font-face {
-  font-family: 'Orbitron';
-  src: url('/fonts/orbitron.ttf') format('truetype');
+  font-family: "Orbitron";
+  src: url("/fonts/orbitron.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'SpecialElite';
-  src: url('/fonts/specialElite.ttf') format('truetype');
+  font-family: "SpecialElite";
+  src: url("/fonts/specialElite.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
-

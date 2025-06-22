@@ -1,18 +1,13 @@
-'use client';
+"use client";
 
-import { gql, useLazyQuery } from '@apollo/client';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import debounce from 'lodash.debounce';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { gql, useLazyQuery } from "@apollo/client";
+import debounce from "lodash.debounce";
 
 const SEARCH_NATIONS = gql`
   query SearchNations($where: Nation_filter) {
-    nations(
-      first: 10
-      where: $where
-      orderBy: createdAt
-      orderDirection: desc
-    ) {
+    nations(first: 10, where: $where, orderBy: createdAt, orderDirection: desc) {
       id
       name
       nationId
@@ -23,9 +18,9 @@ const SEARCH_NATIONS = gql`
 `;
 
 const FILTER_OPTIONS = [
-  { label: 'Nation Name', value: 'name' },
-  { label: 'Ruler Name', value: 'ruler' },
-  { label: 'Nation ID', value: 'nationId' },
+  { label: "Nation Name", value: "name" },
+  { label: "Ruler Name", value: "ruler" },
+  { label: "Nation ID", value: "nationId" },
 ];
 
 type Nation = {
@@ -38,16 +33,16 @@ type Nation = {
 
 export function NationSearchBar({
   onSelect,
-  placeholder = 'Search...',
+  placeholder = "Search...",
 }: {
   onSelect?: (nation: Nation) => void;
   placeholder?: string;
 }) {
-  const [filterBy, setFilterBy] = useState<'name' | 'ruler' | 'nationId'>('name');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filterBy, setFilterBy] = useState<"name" | "ruler" | "nationId">("name");
+  const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<Nation[]>([]);
   const [searchNations, { loading }] = useLazyQuery(SEARCH_NATIONS, {
-    onCompleted: (data) => setResults(data.nations),
+    onCompleted: data => setResults(data.nations),
   });
 
   const router = useRouter();
@@ -58,10 +53,7 @@ export function NationSearchBar({
       return;
     }
 
-    const whereClause =
-      filterBy === 'nationId'
-        ? { nationId: value }
-        : { [`${filterBy}_contains_nocase`]: value };
+    const whereClause = filterBy === "nationId" ? { nationId: value } : { [`${filterBy}_contains_nocase`]: value };
 
     searchNations({ variables: { where: whereClause } });
   }, 300);
@@ -76,12 +68,12 @@ export function NationSearchBar({
     if (onSelect) {
       onSelect(nation);
     } else {
-      localStorage.setItem('selectedMenuItem', `Nation ${nation.nationId}`);
+      localStorage.setItem("selectedMenuItem", `Nation ${nation.nationId}`);
       router.push(`/nations?id=${nation.nationId}`);
     }
 
     // Clear input & results
-    setSearchTerm('');
+    setSearchTerm("");
     setResults([]);
     setTimeout(() => {
       const input = document.querySelector<HTMLInputElement>('input[type="text"]');
@@ -94,10 +86,10 @@ export function NationSearchBar({
       <div className="flex gap-2">
         <select
           value={filterBy}
-          onChange={(e) => setFilterBy(e.target.value as 'name' | 'ruler' | 'nationId')}
+          onChange={e => setFilterBy(e.target.value as "name" | "ruler" | "nationId")}
           className="select select-bordered dark:bg-gray-800 dark:text-white"
         >
-          {FILTER_OPTIONS.map((opt) => (
+          {FILTER_OPTIONS.map(opt => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
@@ -121,7 +113,7 @@ export function NationSearchBar({
 
       {results.length > 0 && (
         <ul className="absolute z-50 bg-white dark:bg-gray-900 text-black dark:text-white border dark:border-gray-600 w-full mt-1 rounded shadow">
-          {results.map((nation) => (
+          {results.map(nation => (
             <li
               key={nation.id}
               className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"

@@ -1,19 +1,23 @@
 import React from "react";
 import Link from "next/link";
-import NationsTable from "./_components/NationsTable";
-import type { NextPage } from "next";
-import { MagnifyingGlassIcon, PlusIcon, PowerIcon, RocketLaunchIcon } from "@heroicons/react/24/outline";
-import WarsTable from "./_components/WarsTable";
-import GroundBattleTable from "./_components/GroundBattle";
+import AirBattleTable from "./_components/AirBattle";
+import BlockadeTable from "./_components/Blockades";
+import BreakBlockadeTable from "./_components/BreakBlockades";
 import CruiseMissileAttackTable from "./_components/CruiseMissileAttack";
+import GroundBattleTable from "./_components/GroundBattle";
+import NationsTable from "./_components/NationsTable";
 import NukeAttackTable from "./_components/NukeAttackTable";
 import SpyOperationsTable from "./_components/SpyOperations";
-import AirBattleTable from "./_components/AirBattle";
-import BreakBlockadeTable from "./_components/BreakBlockades";
-import BlockadeTable from "./_components/Blockades";
-import PostTable from "./_components/Posts";
-import {RecievedMessagesTable} from "./_components/Messages";
-import {SentMessagesTable} from "./_components/Messages";
+import WarsTable from "./_components/WarsTable";
+import type { NextPage } from "next";
+// import PostSubmissionClient from "./_components/PostSubmissionClient";
+// import PostTableServer from "./_components/PostTableServer";
+// import {RecievedMessagesTable} from "./_components/Messages";
+// import {SentMessagesTable} from "./_components/Messages";
+import { useAccount } from "wagmi";
+import { MagnifyingGlassIcon, PlusIcon, PowerIcon, RocketLaunchIcon } from "@heroicons/react/24/outline";
+
+// import { Post } from '../../.graphclient/sources/YourContract/types';
 
 const Subgraph: NextPage = () => {
   return (
@@ -47,12 +51,15 @@ const Subgraph: NextPage = () => {
             </code>
           </p>
         </div>
-        
+
         {/* GIF Section */}
         <div className="flex justify-center mt-8">
-          <img src="/tenorgif.gif" alt="Animated GIF" className="w-[1500px] h-[1500px] rounded-lg shadow-lg object-cover" />
+          <img
+            src="/tenorgif.gif"
+            alt="Animated GIF"
+            className="w-[1500px] h-[1500px] rounded-lg shadow-lg object-cover"
+          />
         </div>
-
 
         <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
           <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
@@ -85,7 +92,7 @@ const Subgraph: NextPage = () => {
             </div>
           </div>
         </div>
-        
+
         <NationsTable />
         <WarsTable />
         <GroundBattleTable />
@@ -93,12 +100,13 @@ const Subgraph: NextPage = () => {
         <NukeAttackTable />
         <SpyOperationsTable />
         <AirBattleTable />
-        <BlockadeTable/>
+        <BlockadeTable />
         <BreakBlockadeTable />
-        
-        <PostTable />
-        <RecievedMessagesTable />
-        <SentMessagesTable />
+
+        {/* <PostTableServer nationId={searchParams.get("id") ?? ""} />
+        <PostSubmissionClient />
+        <RecievedMessagesTable walletAddress={walletAddress ?? ""} />
+        <SentMessagesTable walletAddress={walletAddress ?? ""} /> */}
       </div>
     </>
   );

@@ -1,34 +1,15 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { GetBreakBlockadesDocument, execute } from "~~/.graphclient";
-import { breakBlockade } from '../../../utils/attacks';
 
-const BreakBlockadeTable = () => {
-  const [breakBlockadeData, setBreakBlockadeData] = useState<any>(null);
-  const [error, setError] = useState<any>(null);
+export default async function BreakBlockadeTable() {
+  let breakBlockades = [];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!execute || !GetBreakBlockadesDocument) {
-        return;
-      }
-      try {
-        const { data: result } = await execute(GetBreakBlockadesDocument, {});
-        console.log(result.breakBlockades);
-        setBreakBlockadeData(result);
-        console.log(result);
-      } catch (err) {
-        setError(err);
-      } finally {
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (error) {
-    return null;
+  try {
+    const { data } = await execute(GetBreakBlockadesDocument, {});
+    breakBlockades = data?.breakBlockades ?? [];
+    console.log("BreakBlockades:", breakBlockades);
+  } catch (err) {
+    console.error("Failed to fetch break blockades:", err);
+    return <div className="text-red-500 text-center mt-5">Failed to load break blockade data.</div>;
   }
 
   return (
@@ -43,12 +24,11 @@ const BreakBlockadeTable = () => {
             </tr>
           </thead>
           <tbody>
-            {breakBlockadeData?.breakBlockades?.map((breakBlockade: any, index: number) => (
-                <tr key={breakBlockade.battleId}>
-                <th>{breakBlockade.battleId}</th>
-                <th>{breakBlockade.attackerLosses}</th>
-                <th>{breakBlockade.defenderLosses}</th>
-
+            {breakBlockades.map((breakBlockade: any) => (
+              <tr key={breakBlockade.battleId}>
+                <td>{breakBlockade.battleId}</td>
+                <td>{breakBlockade.attackerLosses}</td>
+                <td>{breakBlockade.defenderLosses}</td>
               </tr>
             ))}
           </tbody>
@@ -56,6 +36,4 @@ const BreakBlockadeTable = () => {
       </div>
     </div>
   );
-};
-
-export default BreakBlockadeTable;
+}
