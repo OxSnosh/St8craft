@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAccount, usePublicClient, useWriteContract } from "wagmi";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { useAccount, useWriteContract, usePublicClient } from "wagmi";
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
 
-const PostSubmissionClient = ({ nationId }: { nationId: string }) => {
+const PostSubmissionClient = () => {
   const { address: walletAddress } = useAccount();
+  const searchParams = useSearchParams();
+  const nationId = searchParams.get("id");
   const [newPost, setNewPost] = useState("");
   const [isOwner, setIsOwner] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +66,7 @@ const PostSubmissionClient = ({ nationId }: { nationId: string }) => {
       {error && <p className="text-red-500">{error}</p>}
       <textarea
         value={newPost}
-        onChange={e => setNewPost(e.target.value)}
+        onChange={(e) => setNewPost(e.target.value)}
         className="textarea textarea-bordered w-full"
         placeholder="Write your post..."
       />

@@ -1,11 +1,34 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { GetNukeAttacksDocument, execute } from "~~/.graphclient";
+import { Address } from "~~/components/scaffold-eth";
 
-const NukeAttackTable = async () => {
-  const { data, errors } = await execute(GetNukeAttacksDocument, {});
-  const nukeAttacks = data?.nukeAttacks ?? [];
+const NukeAttackTable = () => {
+  const [nukeAttacks, setNukeAttackData] = useState<any>(null);
+  const [error, setError] = useState<any>(null);
 
-  if (errors) {
-    return <div className="text-red-500 text-center mt-5">Failed to load nuke attacks.</div>;
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!execute || !GetNukeAttacksDocument) {
+        return;
+      }
+      try {
+        const { data: result } = await execute(GetNukeAttacksDocument, {});
+        console.log(result.cruiseMissileAttacks);
+        setNukeAttackData(result);
+        console.log(result);
+      } catch (err) {
+        setError(err);
+      } finally {
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (error) {
+    return null;
   }
 
   return (
@@ -21,12 +44,12 @@ const NukeAttackTable = async () => {
             </tr>
           </thead>
           <tbody>
-            {nukeAttacks.map((nukeAttack: any) => (
-              <tr key={nukeAttack.attackId}>
+            {nukeAttacks?.nukeAttacks?.map((nukeAttack: any, index: number) => (
+                <tr key={nukeAttack.attackId}>
                 <th>{nukeAttack.warId}</th>
-                <td>{nukeAttack.attackerId}</td>
-                <td>{nukeAttack.defenderId}</td>
-                <td>{nukeAttack.landed.toString()}</td>
+                <th>{nukeAttack.attackerId}</th>
+                <th>{nukeAttack.defenderId}</th>
+                <th>{nukeAttack.landed.toString()}</th>
               </tr>
             ))}
           </tbody>

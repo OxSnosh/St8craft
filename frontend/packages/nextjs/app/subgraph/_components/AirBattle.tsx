@@ -1,13 +1,33 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { GetAirBattlesDocument, execute } from "~~/.graphclient";
 
-export default async function AirBattleTable() {
-  let airBattles = [];
+const AirBattleTable = () => {
+  const [airBattleData, setAirBattleData] = useState<any>(null);
+  const [error, setError] = useState<any>(null);
 
-  try {
-    const { data } = await execute(GetAirBattlesDocument, {});
-    airBattles = data?.airBattles ?? [];
-  } catch (err) {
-    console.error("Failed to fetch air battles:", err);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!execute || !GetAirBattlesDocument) {
+        return;
+      }
+      try {
+        const { data: result } = await execute(GetAirBattlesDocument, {});
+        console.log(result.airBattles);
+        setAirBattleData(result);
+        console.log(result);
+      } catch (err) {
+        setError(err);
+      } finally {
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (error) {
+    return null;
   }
 
   return (
@@ -28,17 +48,16 @@ export default async function AirBattleTable() {
             </tr>
           </thead>
           <tbody>
-            {airBattles.map((battle: any) => (
-              <tr key={battle.battleId}>
-                <td>{battle.battleId}</td>
-                <td>{battle.attackerId}</td>
-                <td>{battle.defenderId}</td>
-                <td>{battle.attackerFighterLosses}</td>
-                <td>{battle.attackerBomberLosses}</td>
-                <td>{battle.defenderFighterLosses}</td>
-                <td>{battle.infrastructureDamage}</td>
-                <td>{battle.tankDamage}</td>
-                <td>{battle.cruiseMissileDamage}</td>
+            {airBattleData?.airBattles?.map((airBattle: any, index: number) => (
+                <tr key={airBattle.battleId}>
+                <th>{airBattle.attackerId}</th>
+                <th>{airBattle.defenderId}</th>
+                <th>{airBattle.attackerFighterLosses}</th>
+                <th>{airBattle.attackerBomberLosses}</th>
+                <th>{airBattle.defenderFighterLosses}</th>
+                <th>{airBattle.infrastructureDamage}</th>
+                <th>{airBattle.tankDamage}</th>
+                <th>{airBattle.cruiseMissileDamage}</th>
               </tr>
             ))}
           </tbody>
@@ -46,4 +65,6 @@ export default async function AirBattleTable() {
       </div>
     </div>
   );
-}
+};
+
+export default AirBattleTable;

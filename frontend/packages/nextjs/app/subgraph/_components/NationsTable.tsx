@@ -1,10 +1,36 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { GetNationsDocument, execute } from "~~/.graphclient";
 import { Address } from "~~/components/scaffold-eth";
 
-const NationsTable = async () => {
-  const { data, errors } = await execute(GetNationsDocument, {});
-  const nations = data?.nations ?? [];
+const NationsTable = () => {
+  const [nationsMinted, setNationsData] = useState<any>(null);
+  const [error, setError] = useState<any>(null);
+  const router = useRouter(); // Initialize Next.js router
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!execute || !GetNationsDocument) {
+        return;
+      }
+      try {
+        const { data: result, errors } = await execute(GetNationsDocument, {});
+        console.log("Fetched nations data errors:", errors);
+        console.log("Fetched nations data:", result);
+        setNationsData(result);
+      } catch (err) {
+        setError(err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (error) {
+    return <div className="text-red-500 text-center mt-5">Failed to load nations.</div>;
+  }
 
   return (
     <div className="font-special flex justify-center items-center">
@@ -19,13 +45,16 @@ const NationsTable = async () => {
             </tr>
           </thead>
           <tbody>
-            {nations.slice(0, 5).map((nation: any) => (
-              <tr key={nation.nationId} className="cursor-pointer group transition duration-200">
-                <th className="group-hover:bg-gray-400">
-                  <Link href={`/nations?id=${nation.nationId}`} className="block w-full h-full" prefetch={false}>
-                    {nation.nationId}
-                  </Link>
-                </th>
+            {nationsMinted?.nations?.slice(0, 5).map((nation: any, index: number) => (
+                <tr
+                key={nation.nationId}
+                onClick={() => {
+                  localStorage.setItem("selectedMenuItem", `Nation ${nation.nationId}`);
+                  router.push(`/nations?id=${nation.nationId}`);
+                }}
+                className="cursor-pointer group transition duration-200"
+              >
+                <th className="group-hover:bg-gray-400">{nation.nationId}</th>
                 <td className="group-hover:bg-gray-400">
                   <Address address={nation.owner} />
                 </td>

@@ -1,15 +1,33 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { GetBlockadesDocument, execute } from "~~/.graphclient";
 
-export default async function BlockadeTable() {
-  let blockades = [];
+const BlockadeTable = () => {
+  const [blockadeData, setBlockadeData] = useState<any>(null);
+  const [error, setError] = useState<any>(null);
 
-  try {
-    const { data } = await execute(GetBlockadesDocument, {});
-    blockades = data?.blockades ?? [];
-    console.log("Blockades:", blockades);
-  } catch (err) {
-    console.error("Failed to fetch blockades:", err);
-    return <div className="text-red-500 text-center mt-5">Failed to load blockades.</div>;
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!execute || !GetBlockadesDocument) {
+        return;
+      }
+      try {
+        const { data: result } = await execute(GetBlockadesDocument, {});
+        console.log(result.blockades);
+        console.log("Blockade", result);
+        setBlockadeData(result);
+      } catch (err) {
+        setError(err);
+      } finally {
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (error) {
+    return null;
   }
 
   return (
@@ -25,12 +43,12 @@ export default async function BlockadeTable() {
             </tr>
           </thead>
           <tbody>
-            {blockades.map((blockade: any) => (
-              <tr key={blockade.battleId}>
-                <td>{blockade.battleId}</td>
-                <td>{blockade.blockaderId}</td>
-                <td>{blockade.blockadedId}</td>
-                <td>{blockade.percentageReduction}</td>
+            {blockadeData?.blockades?.map((blockade: any, index: number) => (
+                <tr key={blockade.battleId}>
+                <th>{blockade.battleId}</th>
+                <th>{blockade.blockaderId}</th>
+                <th>{blockade.blockadedId}</th>
+                <th>{blockade.percentageReduction}</th>
               </tr>
             ))}
           </tbody>
@@ -38,4 +56,6 @@ export default async function BlockadeTable() {
       </div>
     </div>
   );
-}
+};
+
+export default BlockadeTable;

@@ -1,8 +1,9 @@
-// "use client";
+"use client";
+
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { GetPostsDocument, execute } from "~~/.graphclient";
+import { useAccount, useWriteContract, usePublicClient } from 'wagmi';
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
 
 interface Post {
@@ -32,16 +33,17 @@ const PostsTable = () => {
         console.warn("Missing dependencies: execute or GetPostsDocument");
         return;
       }
-
+  
       try {
+  
         console.log("Fetching posts for nationId:", nationId);
-
-        const { data: result, errors } = await execute(GetPostsDocument, { sender: nationId });
-
+        
+        const { data: result, errors } = await execute(GetPostsDocument, {sender : nationId});
+    
         if (errors) {
           console.error("GraphQL Error:", errors);
         }
-
+  
         console.log("Fetched posts:", result);
 
         if (result?.posts?.length > 0) {
@@ -54,8 +56,10 @@ const PostsTable = () => {
         setError(String(err));
       }
     };
+  
 
-    fetchAllPosts();
+      fetchAllPosts();
+    
   }, [execute, nationId]);
 
   /** ✅ Check if the connected wallet owns the nation */
@@ -81,6 +85,7 @@ const PostsTable = () => {
     checkOwnership();
   }, [walletAddress, nationId, countryMinter, publicClient]);
 
+
   /** ✅ Handle post submission (FIXED) */
   const handlePostSubmit = async () => {
     if (!newPost.trim() || !nationId || !messenger) return;
@@ -95,6 +100,7 @@ const PostsTable = () => {
 
       alert("Post submitted successfully!");
       setNewPost("");
+
     } catch (error) {
       console.error("Error submitting post:", error);
       setError("Failed to submit post.");
@@ -116,7 +122,7 @@ const PostsTable = () => {
           </thead>
           <tbody>
             {postData.length > 0 ? (
-              postData.map(post => (
+              postData.map((post) => (
                 <tr key={post.id}>
                   <td>{post.post}</td>
                 </tr>

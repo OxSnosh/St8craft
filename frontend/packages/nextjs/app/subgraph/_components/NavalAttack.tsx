@@ -1,11 +1,33 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { GetNavalAttacksDocument, execute } from "~~/.graphclient";
 
-const NavalAttackTable = async () => {
-  const { data, errors } = await execute(GetNavalAttacksDocument, {});
-  const navalAttacks = data?.navalAttacks ?? [];
+const NavalAttackTable = () => {
+  const [navalBattleData, setAirBattleData] = useState<any>(null);
+  const [error, setError] = useState<any>(null);
 
-  if (errors) {
-    return <div className="text-red-500 text-center mt-5">Failed to load naval battles.</div>;
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!execute || !GetNavalAttacksDocument) {
+        return;
+      }
+      try {
+        const { data: result } = await execute(GetNavalAttacksDocument, {});
+        console.log(result.navalAttacks);
+        setAirBattleData(result);
+        console.log(result);
+      } catch (err) {
+        setError(err);
+      } finally {
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (error) {
+    return null;
   }
 
   return (
@@ -20,11 +42,12 @@ const NavalAttackTable = async () => {
             </tr>
           </thead>
           <tbody>
-            {navalAttacks.map((navalAttack: any) => (
-              <tr key={navalAttack.battleId}>
+            {navalBattleData?.navalAttacks?.map((navalAttack: any, index: number) => (
+                <tr key={navalAttack.battleId}>
                 <th>{navalAttack.battleId}</th>
-                <td>{navalAttack.attackerLosses}</td>
-                <td>{navalAttack.defenderLosses}</td>
+                <th>{navalAttack.attackerLosses}</th>
+                <th>{navalAttack.defenderLosses}</th>
+   
               </tr>
             ))}
           </tbody>

@@ -52,7 +52,7 @@ export async function relaySpyOperation(data: Input, contractsData: any) {
   const attackerSuccessScore = await spyoperations.getAttackerSuccessScore(data.callerNationId);
   const defenderSuccessScore = await spyoperations.getDefenseSuccessScore(data.defenderNationId);
 
-  const strengthTotal = attackerSuccessScore.add(defenderSuccessScore).toNumber();
+  const strengthTotal = Number(attackerSuccessScore + defenderSuccessScore);
   const randomNumber = Math.floor(Math.random() * strengthTotal);
 
   console.log("Random Number:", randomNumber);
@@ -73,7 +73,7 @@ export async function relaySpyOperation(data: Input, contractsData: any) {
   ) as unknown as NationStrengthContract;
 
   const defenderStrengthRaw = await nationStrengthContract.getNationStrength(defenderId);
-  const defenderStrength = defenderStrengthRaw.toNumber();
+  const defenderStrength = Number(defenderStrengthRaw);
 
   const cost: number = calculateSpyOperationCost(attackType, defenderStrength);
 
@@ -90,7 +90,7 @@ export async function relaySpyOperation(data: Input, contractsData: any) {
     throw new Error("Not enough funds to conduct spy operation");
   }
 
-  if (randomNumber < attackerSuccessScore.toNumber()) {
+  if (randomNumber < Number(attackerSuccessScore)) {
     console.log("Attack Successful");
     success = true;
     attackerId = 0;
