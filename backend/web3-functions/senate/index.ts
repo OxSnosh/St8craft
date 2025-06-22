@@ -1,64 +1,79 @@
 import { Web3Function, Web3FunctionContext } from "@gelatonetwork/web3-functions-sdk";
-import { Contract, Interface, id } from "ethers";
+import { Contract, Interface, id , JsonRpcProvider} from "ethers";
 
 const ORACLE_ABI = [
-  "function completeElection(uint256 orderId, uint256[] winners) external"
+  "function completeElection(uint256 orderId, uint256[][] winners) external"
 ];
 
 Web3Function.onRun(async (context: Web3FunctionContext) => {
   const { multiChainProvider } = context;
-  const provider = multiChainProvider.default();
+  const provider = new JsonRpcProvider("https://sepolia.base.org")
 
-  const senateAddress = "0x71b9b0f6c999cbbb0fef9c92b80d54e4973214da"; // update if needed
-  const senate = new Contract(senateAddress, ORACLE_ABI);
+  const senateAddress = "0x71b9b0f6c999cbbb0fef9c92b80d54e4973214da";
+  const senate = new Contract(senateAddress, ORACLE_ABI, provider);
 
   const EVENT_ABI = [
-    "event ElectionStarted(uint256 team, uint256 epoch, uint256[] teamVotes, uint256 orderId)"
+    "event ElectionStarted(uint256 epoch, uint256[] team1Votes, uint256[] team2Votes, uint256[] team3Votes, uint256[] team4Votes, uint256[] team5Votes, uint256[] team6Votes, uint256[] team7Votes, uint256[] team8Votes, uint256 orderId)"
   ];
 
   const iface = new Interface(EVENT_ABI);
-  const eventTopic = id("ElectionStarted(uint256,uint256,uint256[],uint256)");
-
   const latestBlock = await provider.getBlockNumber();
+  
   const logs = await provider.getLogs({
     address: senateAddress,
-    topics: [eventTopic],
-    fromBlock: latestBlock - 15,
-    toBlock: "latest"
+    fromBlock: latestBlock - 100,
+    toBlock: "latest",
   });
 
-  if (logs.length === 0) {
+  console.log(`Fetched ${logs.length} logs from last 100 blocks`);
+
+  const parsedEvents = logs
+    .map((log) => {
+      try {
+        return iface.parseLog(log);
+      } catch {
+        return null;
+      }
+    })
+    .filter((e) => e?.name === "ElectionStarted");
+
+  if (parsedEvents.length === 0) {
     return { canExec: false, message: "No ElectionStarted events found" };
   }
 
-  const event = iface.parseLog(logs[logs.length - 1]);
+  const event = parsedEvents[parsedEvents.length - 1];
 
-  if (!event) {
-    return { canExec: false, message: "Failed to parse ElectionStarted event log" };
+  if (!event || !event.args) {
+    return { canExec: false, message: "No valid ElectionStarted event found" };
   }
 
-  // Extract args
-  const team = Number(event.args.team);
   const epoch = Number(event.args.epoch);
-  const teamVotes = event.args.teamVotes.map((n: bigint) => Number(n));
   const orderId = Number(event.args.orderId);
 
-  const freqs: Record<number, number> = {};
-  for (const vote of teamVotes) {
-    freqs[vote] = (freqs[vote] || 0) + 1;
+  const winnersByTeam: number[][] = [];
+
+  for (let i = 1; i <= 8; i++) {
+    const teamVotes: bigint[] = event.args[`team${i}Votes`];
+    const freqs: Record<number, number> = {};
+
+    for (const vote of teamVotes) {
+      const n = Number(vote);
+      freqs[n] = (freqs[n] || 0) + 1;
+    }
+
+    const sorted = Object.entries(freqs)
+      .map(([key, val]) => [val, Number(key)])
+      .sort((a, b) => b[0] - a[0]);
+
+    const top5: number[] = sorted.slice(0, 5).map(([, id]) => id);
+    winnersByTeam.push(top5);
   }
-
-  const frequencyArray = Object.entries(freqs)
-    .map(([key, val]) => [val, Number(key)])
-    .sort((a, b) => b[0] - a[0]);
-
-  const winners: number[] = frequencyArray.slice(0, 5).map(item => item[1]);
 
   return {
     canExec: true,
     callData: [{
       to: senateAddress,
-      data: senate.interface.encodeFunctionData("completeElection", [orderId, winners]),
+      data: senate.interface.encodeFunctionData("completeElection", [orderId, winnersByTeam]),
     }],
   };
 });

@@ -225,9 +225,7 @@ contract SenateContract is Ownable {
         uint256 gameDay = keep.getGameDay();
         require((gameDay - dayOfLastElection) > interval, "Upkeep not needed");
 
-        for (uint256 i = 0; i <= 8; i++) {
-            runElections(i, epoch);
-        }
+        runElections(epoch);
 
         epoch++;
         dayOfLastElection = gameDay;
@@ -243,38 +241,52 @@ contract SenateContract is Ownable {
         bool completed;
     }
 
-    mapping (uint256 => Election) public elections;
+    mapping(uint256 => mapping(uint256 => Election)) public elections;
 
     event ElectionStarted(
-        uint256 team,
         uint256 epoch,
-        uint256[] teamVotes,
+        uint256[] team0Votes,
+        uint256[] team1Votes,
+        uint256[] team2Votes,
+        uint256[] team3Votes,
+        uint256[] team4Votes,
+        uint256[] team5Votes,
+        uint256[] team6Votes,
+        uint256[] team7Votes,
+        uint256[] team8Votes,
         uint256 orderId
     );
 
-    ///@dev this is a public function that will be called from an off chain source
-    ///@notice this function is only callable from the keeper performUpkeep()
-    ///@notice this function will make the nations who won the team 7 election senators
-    ///@param team this is the team for which the election is being conducted
-    ///@param _epoch this is the epoch for which the election is occuring
-    function runElections(
-        uint256 team,
-        uint256 _epoch
-    ) internal {
-       uint256[] memory teamVotes = epochToTeamToSenatorVotes[_epoch][team];
-       elections[orderId] = Election({
-            team: team,
-            epoch: _epoch,
-            teamVotes: teamVotes,
-            winners: new uint256[](0),
-            completed: false
-        });
+    function runElections(uint256 _epoch) internal {
+        uint256[][] memory allVotes = new uint256[][](8);
+
+        for (uint256 t = 1; t <= 8; t++) {
+            uint256[] memory votes = epochToTeamToSenatorVotes[_epoch][t];
+            allVotes[t - 1] = votes;
+
+            elections[t][orderId] = Election({
+                team: t,
+                epoch: _epoch,
+                teamVotes: votes,
+                winners: new uint256[](0),
+                completed: false
+            });
+        }
+
         emit ElectionStarted(
-            team,
             _epoch,
-            teamVotes,
+            allVotes[0],
+            allVotes[1],
+            allVotes[2],
+            allVotes[3],
+            allVotes[4],
+            allVotes[5],
+            allVotes[6],
+            allVotes[7],
+            allVotes[8],
             orderId
         );
+
         orderId++;
     }
 
@@ -289,32 +301,52 @@ contract SenateContract is Ownable {
         oracle = _oracle;
     }
 
-    ///@dev this is a public function that will be called from an off chain source
-    ///@notice this function is only callable from the keeper performUpkeep()
-    ///@notice this function will be called when the election is complete
-    ///@param _orderId is the request id of the election
-    ///@param _winners is the winners of the election
-    ///@notice this function will set the winners of the election as senators
-    ///@notice this function will set the previous senators to false
+    // function completeElection(
+    //     uint256 _orderId,
+    //     uint256[] memory _winners
+    // ) public onlyOracle {
+    //     require(
+    //         elections[_orderId].completed == false, "election already completed"
+    //     );
+    //     uint256 team = elections[_orderId].team;
+    //     uint256 _epoch = elections[_orderId].epoch;
+    //     elections[_orderId].winners = _winners;
+    //     elections[_orderId].completed = true;
+    //     uint256[] memory currentSenators = epochToTeamToWinners[_epoch - 1][team];
+    //     for (uint i = 0; i < currentSenators.length; i++) {
+    //         idToVoter[currentSenators[i]].senator = false;
+    //     }
+    //     for (uint256 i = 0; i < _winners.length; i++) {
+    //         idToVoter[_winners[i]].senator = true;
+    //     }
+    //     epochToTeamToWinners[_epoch][team] = _winners;
+    // }
     function completeElection(
         uint256 _orderId,
-        uint256[] memory _winners
+        uint256[][] memory _allWinners
     ) public onlyOracle {
-        require(
-            elections[_orderId].completed == false, "election already completed"
-        );
-        uint256 team = elections[_orderId].team;
-        uint256 _epoch = elections[_orderId].epoch;
-        elections[_orderId].winners = _winners;
-        elections[_orderId].completed = true;
-        uint256[] memory currentSenators = epochToTeamToWinners[_epoch - 1][team];
-        for (uint i = 0; i < currentSenators.length; i++) {
-            idToVoter[currentSenators[i]].senator = false;
+        require(_allWinners.length == 8, "Must provide winners for 8 teams");
+
+        for (uint256 team = 1; team <= 8; team++) {
+            Election storage election = elections[team][_orderId];
+            require(!election.completed, "Election already completed for team");
+
+            uint256 _epoch = election.epoch;
+            uint256[] memory newWinners = _allWinners[team - 1];
+            uint256[] memory previousWinners = epochToTeamToWinners[_epoch - 1][team];
+
+            for (uint256 i = 0; i < previousWinners.length; i++) {
+                idToVoter[previousWinners[i]].senator = false;
+            }
+
+            for (uint256 i = 0; i < newWinners.length; i++) {
+                idToVoter[newWinners[i]].senator = true;
+            }
+
+            election.winners = newWinners;
+            election.completed = true;
+            epochToTeamToWinners[epoch][team] = newWinners;
         }
-        for (uint256 i = 0; i < _winners.length; i++) {
-            idToVoter[_winners[i]].senator = true;
-        }
-        epochToTeamToWinners[_epoch][team] = _winners;
     }
 
     ///@dev this is a public function that can only be called by the contract owner
