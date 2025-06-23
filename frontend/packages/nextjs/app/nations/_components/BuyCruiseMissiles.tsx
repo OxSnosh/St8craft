@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { parseRevertReason } from "../../../utils/errorHandling";
-import { ethers } from "ethers";
+// import { ethers } from "ethers";
 import { useTheme } from "next-themes";
 import { usePublicClient, useWriteContract } from "wagmi";
 import { useAccount } from "wagmi";
@@ -12,9 +12,10 @@ import { buyCruiseMissiles, getCruiseMissileCost, getCruiseMissileCount } from "
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
 import { checkBalance } from "~~/utils/treasury";
 
+const publicClient = usePublicClient();
+
 const BuyCruiseMissiles = () => {
   const { theme } = useTheme();
-  const publicClient = usePublicClient();
   const contractsData = useAllContracts();
   const { address: walletAddress } = useAccount();
   const searchParams = useSearchParams();
@@ -104,60 +105,65 @@ const BuyCruiseMissiles = () => {
   // };
 
   const handleBuyCruiseMissiles = async (amount: any) => {
-    if (!nationId || !publicClient || !MissilesContract || !walletAddress || !cost) {
-      setErrorMessage("Missing required information to proceed with the purchase.");
-      return;
-    }
+      
+      if (!nationId || !publicClient || !MissilesContract || !walletAddress || !cost) {
+        setErrorMessage("Missing required information to proceed with the purchase.");
+        return;
+      }
 
-    const contractData = contractsData.MissilesContract;
-    const abi = contractData.abi;
+      const contractData = contractsData.MissilesContract;
 
-    if (!contractData.address || !abi) {
-      console.error("Contract address or ABI is missing");
-      return;
-    }
+      // Ensure contract data and ABI are available
+      if (!contractData.address || !contractData.abi) {
+        console.error("Contract address or ABI is missing");
+        return;
+      }
 
-    try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
-
-      const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-      const data = contract.interface.encodeFunctionData("buyCruiseMissiles", [Number(amount), nationId]);
 
       try {
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
+        // Simulate the transaction (readContract) using Wagmi's publicClient
+        const data = await publicClient.readContract({
+          abi: contractData.abi,
+          address: contractData.address,
+          functionName: "buyCruiseMissiles",
+          args: [Number(amount), nationId],
+        });
+
+        // Simulate the transaction call
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
         });
 
         console.log("Transaction Simulation Result:", result);
 
-        if (result.startsWith("0x08c379a0")) {
+        // Check for revert reason in the result
+        if (String(result).startsWith("0x08c379a0")) {
           const errorMessage = parseRevertReason({ data: result });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
+
+        // Send the transaction using Wagmi's writeContractAsync
+        const tx = await writeContractAsync({
+          address: contractData.address,
+          abi: contractData.abi,
+          functionName: "buyCruiseMissiles",
+          args: [Number(amount), nationId],
+        });
+
+        console.log("Transaction Sent:", tx);
+
+        // Refresh and reset the state after a successful transaction
+        setRefreshTrigger(!refreshTrigger);
+        setErrorMessage("");
+        alert("Cruise Missiles purchased successfully!");
       } catch (error: any) {
         const errorMessage = parseRevertReason(error);
-        console.error("Transaction simulation failed:", errorMessage);
+        console.error("Transaction failed:", errorMessage);
         alert(`Transaction failed: ${errorMessage}`);
-        return;
       }
-
-      await buyCruiseMissiles(Number(amount), nationId, publicClient, MissilesContract, writeContractAsync);
-      setRefreshTrigger(!refreshTrigger);
-      setErrorMessage("");
-      alert("Cruise Missiles purchased successfully!");
-    } catch (error: any) {
-      const errorMessage = parseRevertReason(error);
-      console.error("Transaction failed:", errorMessage);
-      alert(`Transaction failed: ${errorMessage}`);
-    }
-  };
+    };
 
   return (
     <div className="font-special w-5/6 p-6 bg-aged-paper text-base-content rounded-lg shadow-lg border border-primary">

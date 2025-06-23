@@ -3,7 +3,7 @@
     {
       "slug": "microscopic-portugal-sparse",
       "distDir": "out",
-      "buildCommand": "yarn build"
+      "buildCommand": "yarn & yarn build"
     }
   ]
 }

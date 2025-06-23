@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Web3Provider } from "@ethersproject/providers";
-import { ethers } from "ethers";
+// import { ethers } from "ethers";
 import { AbiCoder } from "ethers/lib/utils";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { groundAttack } from "~~/utils/attacks";
@@ -228,48 +228,70 @@ const ActiveWars = () => {
       buttonText = "Declare Peace";
     }
 
-    const handleOfferPeace = async () => {
-      if (!selectedWar || !selectedNation || !defendingNationId) return;
+  const handleOfferPeace = async () => {
+    if (!selectedWar || !selectedNation || !defendingNationId) return;
 
-      const contractData = contractsData.WarContract;
-      const abi = contractData.abi;
+    const { address: walletAddress } = useAccount();
+    const publicClient = usePublicClient();
+    const { writeContractAsync } = useWriteContract();
+    //import war contract from all contract
+    const warContract = contractsData.WarContract
 
-      if (!contractData.address || !abi) {
-        console.error("Contract address or ABI is missing");
+    if (!publicClient) {
+      console.error("publicClient is undefined.");
+      return;
+    }
+
+    try {
+      // Fetch the contract data (CountryMinter) and ABI
+      if (!warContract) {
+        console.error("Missing required data: CountryMinter.");
         return;
       }
 
-      try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
-
-        const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-        const data = contract.interface.encodeFunctionData("offerPeace", [selectedNation, selectedWar]);
-
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
-        });
-
-        console.log("Transaction Simulation Result:", result);
-
-        if (result.startsWith("0x08c379a0")) {
-          const errorMessage = parseRevertReason({ data: result });
-          alert(`Transaction failed: ${errorMessage}`);
-          return;
-        }
-
-        const tx = await offerPeace(selectedNation, selectedWar, contractsData.WarContract, writeContractAsync);
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
-        console.error("Transaction failed:", errorMessage);
-        alert(`Transaction failed: ${errorMessage}`);
+      // Encode the function call
+      if (!publicClient) {
+        console.error("publicClient is undefined.");
+        return;
       }
-    };
+      const data = await publicClient.readContract({
+        abi: warContract.abi,
+        address: warContract.address,
+        functionName: "offerPeace",
+        args: [selectedNation, selectedWar],  // Pass necessary arguments
+      });
+
+      // Simulate the transaction (call)
+      const result = await publicClient.call({
+        to: warContract.address,
+        data: data as `0x${string}`,
+      });
+
+      console.log("Transaction Simulation Result:", result);
+
+      // If it starts with "0x08c379a0", it’s a revert message
+      if (String(result).startsWith("0x08c379a0")) {
+        const errorMessage = parseRevertReason({ data: String(result) });
+        alert(`Transaction failed: ${errorMessage}`);
+        return;
+      }
+
+      // Send the actual transaction using wagmi's writeContractAsync
+      const tx = await writeContractAsync({
+        address: warContract.address,
+        abi: warContract.abi,
+        functionName: "offerPeace",
+        args: [selectedNation, selectedWar], // Again, pass necessary arguments
+      });
+
+      console.log("Transaction Sent:", tx);
+      // Optionally handle the transaction receipt or hash
+    } catch (error: any) {
+      const errorMessage = parseRevertReason(error);
+      console.error("Transaction failed:", errorMessage);
+      alert(`Transaction failed: ${errorMessage}`);
+    }
+  };
 
     if (!selectedWar || !selectedNation || !defendingNationId) return null;
 
@@ -354,80 +376,78 @@ const ActiveWars = () => {
       fetchForces();
     }, [selectedWar, selectedNation, defendingNationId]);
 
-    const handleDeployForces = async () => {
-      if (deploySoldiers <= 0 && deployTanks <= 0) return;
-      if (!selectedWar || !selectedNation) return;
+  const handleDeployForces = async () => {
+    if (deploySoldiers <= 0 && deployTanks <= 0) return;
+    if (!selectedWar || !selectedNation) return;
 
-      const contractData = contractsData.ForcesContract;
-      const abi = contractData.abi;
+    const contractData = contractsData.ForcesContract;
+    const { writeContractAsync } = useWriteContract();
+    const publicClient = usePublicClient();
 
-      if (!contractData.address || !abi) {
-        console.error("Contract address or ABI is missing");
+    // Ensure contract data and ABI are available
+    if (!contractData.address || !contractData.abi) {
+      console.error("Contract address or ABI is missing");
+      return;
+    }
+
+    if (!publicClient) {
+      console.error("publicClient is undefined.");
+      return;
+    }
+
+    try {
+      // Call the contract with wagmi's readContract to simulate the transaction
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "deployForces",
+        args: [deploySoldiers, deployTanks, selectedNation, selectedWar],
+      });
+
+      // Simulate the transaction (call)
+      const result = await publicClient.call({
+        to: contractData.address,
+        data: data as `0x${string}`,
+      });
+
+      console.log("Transaction Simulation Result:", result);
+
+      // Check for revert reason (if any)
+      if (String(result).startsWith("0x08c379a0")) {
+        const errorMessage = parseRevertReason({ data: String(result) });
+        alert(`Transaction failed: ${errorMessage}`);
         return;
       }
 
-      try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
+      // Deploy forces by writing the transaction using wagmi's writeContractAsync
+      const tx = await writeContractAsync({
+        address: contractData.address,
+        abi: contractData.abi,
+        functionName: "deployForces",
+        args: [deploySoldiers, deployTanks, selectedNation, selectedWar],
+      });
 
-        const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+      console.log("Transaction Sent:", tx);
 
-        const data = contract.interface.encodeFunctionData("deployForces", [
-          deploySoldiers,
-          deployTanks,
-          selectedNation,
-          selectedWar,
-        ]);
+      // Fetch deployed forces after the transaction
+      const deployedForces = await getDeployedGroundForces(
+        selectedWar,
+        selectedNation,
+        contractsData.WarContract,
+        publicClient
+      );
+      setDeployedSoldiers(deployedForces[0]);
+      setDeployedTanks(deployedForces[1]);
 
-        try {
-          const result = await provider.call({
-            to: contract.address,
-            data: data,
-            from: userAddress,
-          });
-
-          console.log("Transaction Simulation Result:", result);
-
-          if (result.startsWith("0x08c379a0")) {
-            const errorMessage = parseRevertReason({ data: result });
-            alert(`Transaction failed: ${errorMessage}`);
-            return;
-          }
-        } catch (error: any) {
-          const errorMessage = parseRevertReason(error);
-          console.error("Transaction simulation failed:", errorMessage);
-          alert(`Transaction failed: ${errorMessage}`);
-          return;
-        }
-
-        const tx = await deployForcesToWar(
-          selectedNation,
-          selectedWar,
-          deploySoldiers,
-          deployTanks,
-          contractsData.ForcesContract,
-          writeContractAsync,
-        );
-
-        const deployedForces = await getDeployedGroundForces(
-          selectedWar,
-          selectedNation,
-          contractsData.WarContract,
-          publicClient,
-        );
-        setDeployedSoldiers(deployedForces[0]);
-        setDeployedTanks(deployedForces[1]);
-
-        setDeploySoldiers(0);
-        setDeployTanks(0);
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
-        console.error("Transaction failed:", errorMessage);
-        alert(`Transaction failed: ${errorMessage}`);
-      }
-    };
+      // Reset deployment inputs
+      setDeploySoldiers(0);
+      setDeployTanks(0);
+    } catch (error: any) {
+      const errorMessage = parseRevertReason(error);
+      console.error("Transaction failed:", errorMessage);
+      alert(`Transaction failed: ${errorMessage}`);
+    }
+  };
 
     if (!selectedWar || !selectedNation || !defendingNationId) return null;
 
@@ -522,62 +542,61 @@ const ActiveWars = () => {
         return;
       }
 
+      const { writeContractAsync } = useWriteContract();
+      const publicClient = usePublicClient();
+      const contractData = contractsData.GroundBattleContract;
+
+      // Ensure contract data and ABI are available
+      if (!contractData.address || !contractData.abi) {
+        console.error("Contract address or ABI is missing");
+        return;
+      }
+
+
+      if (!publicClient) {
+        console.error("publicClient is undefined.");
+        return;
+      }
+
       try {
-        const contractData = contractsData.GroundBattleContract;
-        const abi = contractData.abi;
+        // Simulate the transaction (readContract) using Wagmi's publicClient
+        const data = await publicClient.readContract({
+          abi: contractData.abi,
+          address: contractData.address,
+          functionName: "groundAttack",
+          args: [selectedWar, selectedNation, defendingNationId, attackType.toString()],
+        });
 
-        if (!contractData.address || !abi) {
-          console.error("Contract address or ABI is missing");
-          return;
-        }
+        // Call the contract with Wagmi to simulate the transaction
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
+        });
 
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
+        console.log("Transaction Simulation Result:", result);
 
-        const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-        const data = contract.interface.encodeFunctionData("groundAttack", [
-          selectedWar,
-          selectedNation,
-          defendingNationId,
-          attackType.toString(),
-        ]);
-
-        try {
-          const result = await provider.call({
-            to: contract.address,
-            data: data,
-            from: userAddress,
-          });
-
-          console.log("Transaction Simulation Result:", result);
-
-          if (result.startsWith("0x08c379a0")) {
-            const errorMessage = parseRevertReason({ data: result });
-            alert(`Transaction failed: ${errorMessage}`);
-            return;
-          }
-        } catch (error: any) {
-          const errorMessage = parseRevertReason(error);
-          console.error("Transaction simulation failed:", errorMessage);
+        // Check for revert reason in the result
+        if (String(result).startsWith("0x08c379a0")) {
+          const errorMessage = parseRevertReason({ data: String(result) });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
 
-        const tx = await groundAttack(
-          selectedWar,
-          selectedNation,
-          defendingNationId,
-          attackType.toString(),
-          contractsData.GroundBattleContract,
-          writeContractAsync,
-        );
+        // Execute the transaction (send) using Wagmi's writeContractAsync
+        const tx = await writeContractAsync({
+          address: contractData.address,
+          abi: contractData.abi,
+          functionName: "groundAttack",
+          args: [selectedWar, selectedNation, defendingNationId, attackType.toString()],
+        });
+
+        console.log("Transaction Sent:", tx);
+
+        // Optionally, you can add logic here for handling transaction receipt or hash
       } catch (error: any) {
         const errorMessage = parseRevertReason(error);
-        console.error("Error declaring war:", errorMessage);
-        alert(`Failed to declare war: ${errorMessage}`);
+        console.error("Transaction failed:", errorMessage);
+        alert(`Transaction failed: ${errorMessage}`);
       }
     };
 
@@ -648,72 +667,68 @@ const ActiveWars = () => {
 
     const handleLaunchCruiseMissile = async () => {
       if (!selectedNation || !defendingNationId || !selectedWar || cruiseMissileCount <= 0) {
-        // Check if all required fields are filled
         alert("Please select both an attacking and defending nation.");
         return;
       }
 
+      const { writeContractAsync } = useWriteContract();
+      const publicClient = usePublicClient();
+      const contractData = contractsData.CruiseMissileContract;
+
+      // Ensure contract data and ABI are available
+      if (!contractData.address || !contractData.abi) {
+        console.error("Contract address or ABI is missing");
+        return;
+      }
+
+      if (!publicClient) {
+        console.error("publicClient is undefined.");
+        return;
+      }
+
       try {
-        const contractData = contractsData.CruiseMissileContract; // Update Contract
-        const abi = contractData.abi;
+        // Simulate the transaction (readContract) using Wagmi's publicClient
+        const data = await publicClient.readContract({
+          abi: contractData.abi,
+          address: contractData.address,
+          functionName: "launchCruiseMissileAttack",
+          args: [selectedNation, defendingNationId, selectedWar],
+        });
 
-        if (!contractData.address || !abi) {
-          console.error("Contract address or ABI is missing");
-          return;
-        }
+        // Call the contract to simulate the transaction
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
+        });
 
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
+        console.log("Transaction Simulation Result:", result);
 
-        const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-        const data = contract.interface.encodeFunctionData("launchCruiseMissileAttack", [
-          //// update function and args
-          selectedNation,
-          defendingNationId,
-          selectedWar,
-        ]);
-
-        try {
-          const result = await provider.call({
-            to: contract.address,
-            data: data,
-            from: userAddress,
-          });
-
-          console.log("Transaction Simulation Result:", result);
-
-          if (result.startsWith("0x08c379a0")) {
-            const errorMessage = parseRevertReason({ data: result });
-            alert(`Transaction failed: ${errorMessage}`);
-            return;
-          }
-        } catch (error: any) {
-          const errorMessage = parseRevertReason(error);
-          console.error("Transaction simulation failed:", errorMessage);
+        // Check for revert reason in the result
+        if (String(result).startsWith("0x08c379a0")) {
+          const errorMessage = parseRevertReason({ data: String(result) });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
 
-        const tx = await await launchCruiseMissileAttack(
-          selectedNation,
-          defendingNationId,
-          selectedWar,
-          contractsData.CruiseMissileContract,
-          writeContractAsync,
-        ); //// update function call
+        // Send the transaction using Wagmi's writeContractAsync
+        const tx = await writeContractAsync({
+          address: contractData.address,
+          abi: contractData.abi,
+          functionName: "launchCruiseMissileAttack",
+          args: [selectedNation, defendingNationId, selectedWar],
+        });
 
-        alert(`Cruise missile launched at ${defendingNationId}!`);
+        console.log("Transaction Sent:", tx);
 
         // Refresh the missile count after launch
         const updatedMissileCount = await getCruiseMissileCount(
           selectedNation,
           publicClient,
-          contractsData.MissilesContract,
+          contractsData.MissilesContract
         );
         setCruiseMissileCount(updatedMissileCount);
+
+        alert(`Cruise missile launched at ${defendingNationId}!`);
       } catch (error: any) {
         const errorMessage = parseRevertReason(error);
         console.error("Error declaring war:", errorMessage);
@@ -776,72 +791,69 @@ const ActiveWars = () => {
     // };
 
     const handleLaunchNuke = async () => {
-      ////update function name
       if (!selectedNation || !defendingNationId || !selectedWar || nukeCount <= 0) {
-        // Check if all required fields are filled
         alert("Please select both an attacking and defending nation.");
         return;
       }
 
+      const { writeContractAsync } = useWriteContract();
+      const publicClient = usePublicClient();
+      const contractData = contractsData.NukeContract;
+
+      // Ensure contract data and ABI are available
+      if (!contractData.address || !contractData.abi) {
+        console.error("Contract address or ABI is missing");
+        return;
+      }
+
+      if (!publicClient) {
+        console.error("publicClient is undefined.");
+        return;
+      }
+
       try {
-        const contractData = contractsData.NukeContract; // Update Contract
-        const abi = contractData.abi;
+        // Simulate the transaction (readContract) using Wagmi's publicClient
+        const data = await publicClient.readContract({
+          abi: contractData.abi,
+          address: contractData.address,
+          functionName: "launchNuke",
+          args: [selectedWar, selectedNation, defendingNationId, attackType.toString()],
+        });
 
-        if (!contractData.address || !abi) {
-          console.error("Contract address or ABI is missing");
-          return;
-        }
+        // Simulate the transaction call
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
+        });
 
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
+        console.log("Transaction Simulation Result:", result);
 
-        const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-        const data = contract.interface.encodeFunctionData("launchNuke", [
-          //// update function and args
-          selectedWar,
-          selectedNation,
-          defendingNationId,
-          attackType.toString(),
-        ]);
-
-        try {
-          const result = await provider.call({
-            to: contract.address,
-            data: data,
-            from: userAddress,
-          });
-
-          console.log("Transaction Simulation Result:", result);
-
-          if (result.startsWith("0x08c379a0")) {
-            const errorMessage = parseRevertReason({ data: result });
-            alert(`Transaction failed: ${errorMessage}`);
-            return;
-          }
-        } catch (error: any) {
-          const errorMessage = parseRevertReason(error);
-          console.error("Transaction simulation failed:", errorMessage);
+        // Check for revert reason in the result
+        if (String(result).startsWith("0x08c379a0")) {
+          const errorMessage = parseRevertReason({ data: String(result) });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
 
-        const tx = await launchNuke(
-          selectedWar,
-          selectedNation,
-          defendingNationId,
-          attackType.toString(),
-          contractsData.NukeContract,
-          writeContractAsync,
-        ); //// update function call
+        // Send the transaction using Wagmi's writeContractAsync
+        const tx = await writeContractAsync({
+          address: contractData.address,
+          abi: contractData.abi,
+          functionName: "launchNuke",
+          args: [selectedWar, selectedNation, defendingNationId, attackType.toString()],
+        });
 
-        alert(`Nuclear missile launched at ${defendingNationId} with attack type ${attackType}!`);
+        console.log("Transaction Sent:", tx);
 
         // Refresh the nuke count after launch
-        const updatedNukeCount = await getNukeCount(selectedNation, publicClient, contractsData.MissilesContract);
+        const updatedNukeCount = await getNukeCount(
+          selectedNation,
+          publicClient,
+          contractsData.MissilesContract
+        );
         setNukeCount(updatedNukeCount);
+
+        alert(`Nuclear missile launched at ${defendingNationId} with attack type ${attackType}!`);
       } catch (error: any) {
         const errorMessage = parseRevertReason(error);
         console.error("Error declaring war:", errorMessage);
@@ -992,60 +1004,54 @@ const ActiveWars = () => {
         return;
       }
 
+      const { writeContractAsync } = useWriteContract();
+      const publicClient = usePublicClient();
+      const contractData = contractsData.AirBattleContract;
+
+      // Ensure contract data and ABI are available
+      if (!contractData.address || !contractData.abi) {
+        console.error("Contract address or ABI is missing");
+        return;
+      }
+
+      if (!publicClient) {
+        console.error("publicClient is undefined.");
+        return;
+      }
+
       try {
-        const contractData = contractsData.AirBattleContract;
-        const abi = contractData.abi;
-
-        if (!contractData.address || !abi) {
-          console.error("Contract address or ABI is missing");
-          return;
-        }
-
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
-
-        const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-        const data = contract.interface.encodeFunctionData("airBattle", [
-          selectedWar,
-          selectedNation,
-          defendingNationId,
-          attackingFighters,
-          attackingBombers,
-        ]);
-
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
+        // Simulate the transaction (readContract) using Wagmi's publicClient
+        const data = await publicClient.readContract({
+          abi: contractData.abi,
+          address: contractData.address,
+          functionName: "airBattle",
+          args: [selectedWar, selectedNation, defendingNationId, attackingFighters, attackingBombers],
         });
 
-        if (result.startsWith("0x08c379a0")) {
-          const errorMessage = parseRevertReason({ data: result });
+        // Simulate the transaction call
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
+        });
+
+        console.log("Transaction Simulation Result:", result);
+
+        // Check for revert reason in the result
+        if (String(result).startsWith("0x08c379a0")) {
+          const errorMessage = parseRevertReason({ data: String(result) });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
 
-        console.log("Transaction Simulation Result:", result);
-        console.log("selectedWar:", selectedWar);
-        console.log("selectedNation:", selectedNation);
-        console.log("defendingNationId:", defendingNationId);
-        console.log("attackingFighters:", attackingFighters);
-        console.log("attackingBombers:", attackingBombers);
-        console.log("contract:", contract);
-        console.log("writeContractAsync:", writeContractAsync);
+        // Send the transaction using Wagmi's writeContractAsync
+        const tx = await writeContractAsync({
+          address: contractData.address,
+          abi: contractData.abi,
+          functionName: "airBattle",
+          args: [selectedWar, selectedNation, defendingNationId, attackingFighters, attackingBombers],
+        });
 
-        await launchAirBattle(
-          selectedWar,
-          selectedNation,
-          defendingNationId,
-          attackingFighters,
-          attackingBombers,
-          contract,
-          writeContractAsync,
-        );
+        console.log("Transaction Sent:", tx);
 
         alert(`Air Strike launched at ${defendingNationId}!`);
       } catch (error: any) {
@@ -1168,64 +1174,59 @@ const ActiveWars = () => {
     // };
 
     const handleNavalAttack = async () => {
-      ////update function name
       if (!selectedNation || !defendingNationId || !selectedWar) {
-        // Check if all required fields are filled
         alert("Please select both an attacking and defending nation.");
         return;
       }
 
+      const { writeContractAsync } = useWriteContract();
+      const publicClient = usePublicClient();
+      const contractData = contractsData.NavalAttackContract;
+
+      // Ensure contract data and ABI are available
+      if (!contractData.address || !contractData.abi) {
+        console.error("Contract address or ABI is missing");
+        return;
+      }
+
+      if (!publicClient) {
+        console.error("publicClient is undefined.");
+        return;
+      }
+
       try {
-        const contractData = contractsData.NavalAttackContract; // Update Contract
-        const abi = contractData.abi;
+        // Simulate the transaction (readContract) using Wagmi's publicClient
+        const data = await publicClient.readContract({
+          abi: contractData.abi,
+          address: contractData.address,
+          functionName: "navalAttack",
+          args: [selectedWar, selectedNation, defendingNationId],
+        });
 
-        if (!contractData.address || !abi) {
-          console.error("Contract address or ABI is missing");
-          return;
-        }
+        // Simulate the transaction call
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
+        });
 
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
+        console.log("Transaction Simulation Result:", result);
 
-        const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-        const data = contract.interface.encodeFunctionData("navalAttack", [
-          //// update function and args
-          selectedWar,
-          selectedNation,
-          defendingNationId,
-        ]);
-
-        try {
-          const result = await provider.call({
-            to: contract.address,
-            data: data,
-            from: userAddress,
-          });
-
-          console.log("Transaction Simulation Result:", result);
-
-          if (result.startsWith("0x08c379a0")) {
-            const errorMessage = parseRevertReason({ data: result });
-            alert(`Transaction failed: ${errorMessage}`);
-            return;
-          }
-        } catch (error: any) {
-          const errorMessage = parseRevertReason(error);
-          console.error("Transaction simulation failed:", errorMessage);
+        // Check for revert reason in the result
+        if (String(result).startsWith("0x08c379a0")) {
+          const errorMessage = parseRevertReason({ data: String(result) });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
 
-        const tx = await navalAttack(
-          selectedWar,
-          selectedNation,
-          defendingNationId,
-          contractsData.NavalAttackContract,
-          writeContractAsync,
-        ); //// update function call
+        // Send the transaction using Wagmi's writeContractAsync
+        const tx = await writeContractAsync({
+          address: contractData.address,
+          abi: contractData.abi,
+          functionName: "navalAttack",
+          args: [selectedWar, selectedNation, defendingNationId],
+        });
+
+        console.log("Transaction Sent:", tx);
 
         alert(`Naval attack launched against ${defendingNationId}!`);
       } catch (error: any) {
@@ -1242,64 +1243,59 @@ const ActiveWars = () => {
     // };
 
     const handleBlockade = async () => {
-      ////update function name
       if (!selectedNation || !defendingNationId || !selectedWar) {
-        // Check if all required fields are filled
         alert("Please select both an attacking and defending nation.");
         return;
       }
 
+      const { writeContractAsync } = useWriteContract();
+      const publicClient = usePublicClient();
+      const contractData = contractsData.NavalBlockadeContract;
+
+      // Ensure contract data and ABI are available
+      if (!contractData.address || !contractData.abi) {
+        console.error("Contract address or ABI is missing");
+        return;
+      }
+
+      if (!publicClient) {
+        console.error("publicClient is undefined.");
+        return;
+      }
+
       try {
-        const contractData = contractsData.NavalBlockadeContract; // Update Contract
-        const abi = contractData.abi;
+        // Simulate the transaction (readContract) using Wagmi's publicClient
+        const data = await publicClient.readContract({
+          abi: contractData.abi,
+          address: contractData.address,
+          functionName: "blockade",
+          args: [selectedNation, defendingNationId, selectedWar],
+        });
 
-        if (!contractData.address || !abi) {
-          console.error("Contract address or ABI is missing");
-          return;
-        }
+        // Simulate the transaction call
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
+        });
 
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
+        console.log("Transaction Simulation Result:", result);
 
-        const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-        const data = contract.interface.encodeFunctionData("blockade", [
-          //// update function and args
-          selectedNation,
-          defendingNationId,
-          selectedWar,
-        ]);
-
-        try {
-          const result = await provider.call({
-            to: contract.address,
-            data: data,
-            from: userAddress,
-          });
-
-          console.log("Transaction Simulation Result:", result);
-
-          if (result.startsWith("0x08c379a0")) {
-            const errorMessage = parseRevertReason({ data: result });
-            alert(`Transaction failed: ${errorMessage}`);
-            return;
-          }
-        } catch (error: any) {
-          const errorMessage = parseRevertReason(error);
-          console.error("Transaction simulation failed:", errorMessage);
+        // Check for revert reason in the result
+        if (String(result).startsWith("0x08c379a0")) {
+          const errorMessage = parseRevertReason({ data: String(result) });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
 
-        const tx = await blockade(
-          selectedNation,
-          defendingNationId,
-          selectedWar,
-          contractsData.NavalBlockadeContract,
-          writeContractAsync,
-        ); //// update function call
+        // Send the transaction using Wagmi's writeContractAsync
+        const tx = await writeContractAsync({
+          address: contractData.address,
+          abi: contractData.abi,
+          functionName: "blockade",
+          args: [selectedNation, defendingNationId, selectedWar],
+        });
+
+        console.log("Transaction Sent:", tx);
 
         alert(`Blockade launched against ${defendingNationId}!`);
       } catch (error: any) {
@@ -1308,7 +1304,6 @@ const ActiveWars = () => {
         alert(`Failed to declare war: ${errorMessage}`);
       }
     };
-
     // const handleBreakBlockade = async () => {
     //     if (!selectedWar || !selectedNation || !defendingNationId) return;
     //     await breakBlockade(selectedWar, selectedNation, defendingNationId, contractsData.BreakBlockadeContract, writeContractAsync);
@@ -1316,64 +1311,59 @@ const ActiveWars = () => {
     // };
 
     const handleBreakBlockade = async () => {
-      ////update function name
       if (!selectedNation || !defendingNationId || !selectedWar) {
-        // Check if all required fields are filled
         alert("Please select both an attacking and defending nation.");
         return;
       }
 
+      const { writeContractAsync } = useWriteContract();
+      const publicClient = usePublicClient();
+      const contractData = contractsData.BreakBlockadeContract;
+
+      // Ensure contract data and ABI are available
+      if (!contractData.address || !contractData.abi) {
+        console.error("Contract address or ABI is missing");
+        return;
+      }
+
+      if (!publicClient) {
+        console.error("publicClient is undefined.");
+        return;
+      }
+
       try {
-        const contractData = contractsData.BreakBlockadeContract; // Update Contract
-        const abi = contractData.abi;
+        // Simulate the transaction (readContract) using Wagmi's publicClient
+        const data = await publicClient.readContract({
+          abi: contractData.abi,
+          address: contractData.address,
+          functionName: "breakBlockade",
+          args: [selectedWar, selectedNation, defendingNationId],
+        });
 
-        if (!contractData.address || !abi) {
-          console.error("Contract address or ABI is missing");
-          return;
-        }
+        // Simulate the transaction call
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
+        });
 
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
+        console.log("Transaction Simulation Result:", result);
 
-        const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-        const data = contract.interface.encodeFunctionData("breakBlockade", [
-          //// update function and args
-          selectedWar,
-          selectedNation,
-          defendingNationId,
-        ]);
-
-        try {
-          const result = await provider.call({
-            to: contract.address,
-            data: data,
-            from: userAddress,
-          });
-
-          console.log("Transaction Simulation Result:", result);
-
-          if (result.startsWith("0x08c379a0")) {
-            const errorMessage = parseRevertReason({ data: result });
-            alert(`Transaction failed: ${errorMessage}`);
-            return;
-          }
-        } catch (error: any) {
-          const errorMessage = parseRevertReason(error);
-          console.error("Transaction simulation failed:", errorMessage);
+        // Check for revert reason in the result
+        if (String(result).startsWith("0x08c379a0")) {
+          const errorMessage = parseRevertReason({ data: String(result) });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
 
-        const tx = await breakBlockade(
-          selectedWar,
-          selectedNation,
-          defendingNationId,
-          contractsData.BreakBlockadeContract,
-          writeContractAsync,
-        );
+        // Send the transaction using Wagmi's writeContractAsync
+        const tx = await writeContractAsync({
+          address: contractData.address,
+          abi: contractData.abi,
+          functionName: "breakBlockade",
+          args: [selectedWar, selectedNation, defendingNationId],
+        });
+
+        console.log("Transaction Sent:", tx);
 
         alert(`Break Blockade attack launched against ${defendingNationId}!`);
       } catch (error: any) {
