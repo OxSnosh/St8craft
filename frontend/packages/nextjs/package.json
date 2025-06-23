@@ -18,7 +18,16 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
+    "@babel/core": "^7.27.4",
     "@ethersproject/bignumber": "^5.8.0",
+    "@graphql-mesh/cache-localforage": "^0.105.7",
+    "@graphql-mesh/http": "^0.106.6",
+    "@graphql-mesh/merger-bare": "^0.105.6",
+    "@graphql-mesh/runtime": "^0.106.6",
+    "@graphql-mesh/store": "^0.104.6",
+    "@graphql-mesh/types": "^0.104.6",
+    "@graphql-mesh/utils": "^0.104.6",
+    "@graphql-tools/delegate": "^10.2.19",
     "@heroicons/react": "~2.1.5",
     "@radix-ui/react-tooltip": "^1.2.4",
     "@rainbow-me/rainbowkit": "2.1.6",
@@ -31,6 +40,7 @@
     "daisyui": "4.12.10",
     "dotenv": "^16.5.0",
     "graphql": "^16.8.1",
+    "graphql-tag": "^2.12.6",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.475.0",
     "next": "~14.2.11",
@@ -55,8 +65,9 @@
   "devDependencies": {
     "@graphprotocol/client-cli": "^3.0.4",
     "@trivago/prettier-plugin-sort-imports": "~4.3.0",
+    "@types/babel__core": "^7",
     "@types/lodash.debounce": "^4",
-    "@types/node": "~18.19.50",
+    "@types/node": "^24.0.3",
     "@types/nprogress": "^0",
     "@types/react": "~18.3.5",
     "@types/react-copy-to-clipboard": "^5.0.4",
@@ -71,8 +82,13 @@
     "prettier": "~3.3.3",
     "tailwindcss": "~3.4.11",
     "type-fest": "~4.26.1",
-    "typescript": "<5.6.0",
+    "typescript": "^5.8.3",
     "vercel": "~39.1.3"
   },
-  "packageManager": "yarn@3.2.3"
+  "packageManager": "yarn@3.2.3",
+  "resolutions": {
+    "@babel/core": "7.15.0",
+    "@graphql-tools/delegate": "^8.0.0",
+    "@types/node": "^16.0.0"
+  }
 }
