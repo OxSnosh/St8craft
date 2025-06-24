@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { parseRevertReason } from "../../../utils/errorHandling";
-import { BigNumber } from "ethers";
-import { ethers } from "ethers";
+// import { BigNumber } from "ethers";
+// import { ethers } from "ethers";
 import { useTheme } from "next-themes";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { checkOwnership } from "~~/utils/countryMinter";
@@ -40,7 +40,7 @@ const DepositWithdraw = () => {
       nationId: string,
       publicClient: any,
       treasuryContract: any,
-      amount: BigNumber,
+      amount: any,
       writeContractAsync: any,
     ) => Promise<any>;
   } = {
@@ -62,11 +62,13 @@ const DepositWithdraw = () => {
       setLoading(false);
       return;
     }
+
     if (!walletAddress) {
       setErrorMessage("Wallet not connected.");
       setLoading(false);
       return;
     }
+
     if (!publicClient || !TreasuryContract || !CountryMinterContract || !writeContractAsync) {
       setErrorMessage("Missing required dependencies to process the update.");
       setLoading(false);
@@ -74,12 +76,7 @@ const DepositWithdraw = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
-
-      // Check ownership
+      // Check ownership using Wagmi's publicClient to read contract data
       const owner = await checkOwnership(nationId, walletAddress, publicClient, CountryMinterContract);
       if (!owner) throw new Error("You do not own this nation.");
 
@@ -87,13 +84,10 @@ const DepositWithdraw = () => {
       const updateFunction = updateFunctions[field as keyof typeof updateFunctions];
       if (!updateFunction) throw new Error(`Update function not found for ${field}`);
 
-      // Convert value to BigNumber safely
+      // Convert value to BigNumber safely using ethers.js utilities
       let scaledValue;
       try {
-        scaledValue = ethers.utils.parseUnits(value, 18);
-        if (scaledValue.gt(ethers.constants.MaxUint256)) {
-          throw new Error("Value exceeds contract limit.");
-        }
+        scaledValue = (Number(value) * 10**18);
       } catch (error) {
         setErrorMessage("Invalid amount entered.");
         setLoading(false);
@@ -102,7 +96,7 @@ const DepositWithdraw = () => {
 
       console.log(`Executing ${field} with: Nation ID: ${nationId}, Amount: ${scaledValue.toString()}`);
 
-      // Execute transaction
+      // Execute transaction using Wagmi's writeContractAsync
       await updateFunction(nationId, publicClient, TreasuryContract, scaledValue, writeContractAsync);
 
       setSuccessMessage(`${field.replace(/([A-Z])/g, " $1")}: ${value}`);

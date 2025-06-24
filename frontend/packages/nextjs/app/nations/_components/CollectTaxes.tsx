@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ethers } from "ethers";
-import { AbiCoder } from "ethers/lib/utils";
+// import { ethers } from "ethers";
+// import { AbiCoder } from "ethers/lib/utils";
 import { useTheme } from "next-themes";
 import { usePublicClient, useWriteContract } from "wagmi";
 import { useAccount } from "wagmi";
@@ -76,8 +76,7 @@ const CollectTaxes = () => {
     if (error?.data) {
       try {
         if (error.data.startsWith("0x08c379a0")) {
-          const decoded = new AbiCoder().decode(["string"], "0x" + error.data.slice(10));
-          return decoded[0]; // Extract revert message
+          console.log("Revert reason data:", error.data)
         }
       } catch (decodeError) {
         return "Unknown revert reason";
@@ -94,48 +93,49 @@ const CollectTaxes = () => {
     }
 
     const contractData = contractsData.TaxesContract;
-    const abi = contractData.abi;
 
-    if (!contractData.address || !abi) {
+    // Ensure contract data and ABI are available
+    if (!contractData.address || !contractData.abi) {
       console.error("Contract address or ABI is missing");
       return;
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
+      // Simulate the transaction (readContract) using Wagmi's publicClient
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "collectTaxes",
+        args: [nationId],
+      });
 
-      const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+      // Simulate the transaction call
+      const result = await publicClient.call({
+        to: contractData.address,
+        data: data as `0x${string}`,
+      });
 
-      const data = contract.interface.encodeFunctionData("collectTaxes", [nationId]);
+      console.log("Transaction Simulation Result:", result);
 
-      try {
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
-        });
-
-        console.log("Transaction Simulation Result:", result);
-
-        if (result.startsWith("0x08c379a0")) {
-          const errorMessage = parseRevertReason({ data: result });
-          alert(`Transaction failed: ${errorMessage}`);
-          return;
-        }
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
-        console.error("Transaction simulation failed:", errorMessage);
+      // Check for revert reason in the result
+      if (String(result).startsWith("0x08c379a0")) {
+        const errorMessage = parseRevertReason({ data: result });
         alert(`Transaction failed: ${errorMessage}`);
         return;
       }
 
-      await collectTaxes(nationId, publicClient, TaxesContract, writeContractAsync);
+      // Send the transaction using Wagmi's writeContractAsync
+      const tx = await writeContractAsync({
+        address: contractData.address,
+        abi: contractData.abi,
+        functionName: "collectTaxes",
+        args: [nationId],
+      });
 
+      console.log("Transaction Sent:", tx);
+
+      // Refresh state and show success message
       fetchTaxDetails();
-
       alert("Taxes Collected!");
     } catch (error: any) {
       const errorMessage = parseRevertReason(error);

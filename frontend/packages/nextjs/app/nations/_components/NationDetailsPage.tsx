@@ -24,7 +24,7 @@ import { getWonders } from "../../../utils/wonders";
 import PostSubmissionClient from "../../subgraph/_components//PostSubmissionClient";
 import PostsTableServer from "../../subgraph/_components/PostTableServer";
 import PostsTable from "../../subgraph/_components/Posts";
-import { ethers } from "ethers";
+// import { ethers } from "ethers";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { getNationAllianceAndPlatoon } from "~~/utils/alliance";
 import { checkOwnership } from "~~/utils/countryMinter";
@@ -270,22 +270,38 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
+      const publicClient = usePublicClient();
+      const { writeContractAsync } = useWriteContract();
 
-      const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+      // Ensure the public client and writeContractAsync are available
+      if (!publicClient || !writeContractAsync) {
+        console.error("Public client or writeContractAsync is not available.");
+        alert("Public client or writeContractAsync is not available.");
+        return;
+      }
 
-      console.log("nationId", nationId);
-      console.log("message", post);
+      // Simulating the transaction using Wagmi's public client
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "postMessage",
+        args: [nationId, post],
+      });
 
+      // Simulate the transaction
       try {
-        // Simulating the transaction using callStatic
-        await contract.callStatic.postMessage(nationId, post, {
-          from: userAddress,
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
         });
-        console.log("Simulation successful — proceeding to transaction.");
+
+        console.log("Transaction Simulation Result:", result);
+
+        if (String(result).startsWith("0x08c379a0")) {
+          const errorMessage = parseRevertReason({ data: result });
+          alert(`Simulation failed: ${errorMessage}`);
+          return;
+        }
       } catch (simulationError: any) {
         const errorMessage = parseRevertReason(simulationError);
         console.error("Simulation failed:", errorMessage);
@@ -293,7 +309,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
         return;
       }
 
-      // Sending the actual transaction
+      // Sending the actual transaction if simulation is successful
       await writeContractAsync({
         abi: contractData.abi,
         address: contractData.address,

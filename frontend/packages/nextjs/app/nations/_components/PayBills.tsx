@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ethers } from "ethers";
-import { AbiCoder } from "ethers/lib/utils";
+// import { ethers } from "ethers";
+// import { AbiCoder } from "ethers/lib/utils";
 import { useTheme } from "next-themes";
 import { usePublicClient, useWriteContract } from "wagmi";
 import { useAccount } from "wagmi";
@@ -76,8 +76,7 @@ const PayBills = () => {
     if (error?.data) {
       try {
         if (error.data.startsWith("0x08c379a0")) {
-          const decoded = new AbiCoder().decode(["string"], "0x" + error.data.slice(10));
-          return decoded[0]; // Extract revert message
+          console.log("Revert reason data:", error.data);
         }
       } catch (decodeError) {
         return "Unknown revert reason";
@@ -141,40 +140,56 @@ const PayBills = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
+      const publicClient = usePublicClient();
+      const { writeContractAsync } = useWriteContract();
 
-      const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+      if(!nationId || !publicClient || !BillsContract || !writeContractAsync) {
+        console.error("Missing required parameters for payBills");
+        setErrorMessage("Missing required parameters.");
+        return;
+      }
 
-      const data = contract.interface.encodeFunctionData("payBills", [nationId]);
+      // Simulate transaction using Wagmi's publicClient
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "payBills",
+        args: [nationId],
+      });
 
+      // Simulate the transaction
       try {
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
         });
 
         console.log("Transaction Simulation Result:", result);
 
-        if (result.startsWith("0x08c379a0")) {
+        if (String(result).startsWith("0x08c379a0")) {
           const errorMessage = parseRevertReason({ data: result });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
+      } catch (simulationError: any) {
+        const errorMessage = parseRevertReason(simulationError);
         console.error("Transaction simulation failed:", errorMessage);
         alert(`Transaction failed: ${errorMessage}`);
         return;
       }
 
+      // Fetch old bills payable before executing the transaction
       const oldBillsPayable = await getBillsPayable(nationId, publicClient, BillsContract);
 
-      await payBills(nationId, publicClient, BillsContract, writeContractAsync);
+      // Execute the transaction to pay the bills
+      await writeContractAsync({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "payBills",
+        args: [nationId],
+      });
 
+      // Fetch new bills payable after executing the transaction
       const newBillsPayable = await getBillsPayable(nationId, publicClient, BillsContract);
 
       if (oldBillsPayable.toString() !== newBillsPayable.toString()) {

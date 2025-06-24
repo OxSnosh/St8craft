@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ethers } from "ethers";
-import { AbiCoder } from "ethers/lib/utils";
+// import { ethers } from "ethers";
+// import { AbiCoder } from "ethers/lib/utils";
 import { useTheme } from "next-themes";
 import { usePublicClient, useWriteContract } from "wagmi";
 import { useAccount } from "wagmi";
@@ -110,8 +110,7 @@ const Senate = () => {
     if (error?.data) {
       try {
         if (error.data.startsWith("0x08c379a0")) {
-          const decoded = new AbiCoder().decode(["string"], "0x" + error.data.slice(10));
-          return decoded[0]; // Extract revert message
+          console.log("Revert reason data:", error.data);
         }
       } catch (decodeError) {
         return "Unknown revert reason";
@@ -132,37 +131,50 @@ const Senate = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
+      const publicClient = usePublicClient();
+      const { writeContractAsync } = useWriteContract();
 
-      const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+      if (!publicClient || !writeContractAsync) {
+        console.error("Public client or write contract function is not available");
+        return;
+      }
+      
+      // Simulate the transaction using Wagmi's public client
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "voteForSenator",
+        args: [nationId, senatorId],
+      });
 
-      const data = contract.interface.encodeFunctionData("voteForSenator", [nationId, senatorId]);
-
+      // Simulate the transaction
       try {
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
         });
 
         console.log("Transaction Simulation Result:", result);
 
-        if (result.startsWith("0x08c379a0")) {
+        if (String(result).startsWith("0x08c379a0")) {
           const errorMessage = parseRevertReason({ data: result });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
+      } catch (simulationError: any) {
+        const errorMessage = parseRevertReason(simulationError);
         console.error("Transaction simulation failed:", errorMessage);
         alert(`Transaction failed: ${errorMessage}`);
         return;
       }
 
-      const tx = await voteForSenator(nationId, senatorId, allContractsData.SenateContract, writeContractAsync);
+      // Execute the transaction if the simulation is successful
+      await writeContractAsync({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "voteForSenator",
+        args: [nationId, senatorId],
+      });
 
       alert("Vote submitted!");
     } catch (error: any) {
@@ -184,24 +196,55 @@ const Senate = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
+      const publicClient = usePublicClient();
+      const { writeContractAsync } = useWriteContract();
 
-      console.log("🚀 Sending Transaction to Sanction Team Member:", nationId, teamMemberId);
-      console.log("📜 Contract Data:", contractData);
-
-      const tx = await writeContractAsync({
-        ...contractData,
+      if (!publicClient || !writeContractAsync) {
+        console.error("Public client or write contract function is not available");
+        return;
+      }
+      // Simulate the transaction using Wagmi's public client
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
         functionName: "sanctionTeamMember",
         args: [nationId, teamMemberId],
       });
-      await sanctionTeamMember(nationId, teamMemberId, contractData, writeContractAsync);
 
-      console.log("✅ Transaction Sent");
+      // Simulate the transaction
+      try {
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
+        });
+
+        console.log("Transaction Simulation Result:", result);
+
+        if (String(result).startsWith("0x08c379a0")) {
+          const errorMessage = parseRevertReason({ data: result });
+          alert(`Transaction failed: ${errorMessage}`);
+          return;
+        }
+      } catch (simulationError: any) {
+        const errorMessage = parseRevertReason(simulationError);
+        console.error("Transaction simulation failed:", errorMessage);
+        alert(`Transaction failed: ${errorMessage}`);
+        return;
+      }
+
+      // Execute the transaction if the simulation is successful
+      await writeContractAsync({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "sanctionTeamMember",
+        args: [nationId, teamMemberId],
+      });
+
+      alert("Sanctioned team member successfully!");
     } catch (error: any) {
-      console.error("❌ Transaction failed:", error);
-      alert(`Transaction failed: ${error.message}`);
+      const errorMessage = parseRevertReason(error);
+      console.error("Transaction failed:", errorMessage);
+      alert(`Transaction failed: ${errorMessage}`);
     }
   };
 
@@ -217,37 +260,51 @@ const Senate = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
+      const publicClient = usePublicClient();
+      const { writeContractAsync } = useWriteContract();
 
-      const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+      if (!publicClient || !writeContractAsync) {
+        console.error("Public client or write contract function is not available");
+        return;
+      }
 
-      const data = contract.interface.encodeFunctionData("liftSanctionVote", [nationId, teamMemberId]);
+      // Simulate the transaction using Wagmi's public client
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "liftSanctionVote",
+        args: [nationId, teamMemberId],
+      });
 
+      // Simulate the transaction
       try {
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
         });
 
         console.log("Transaction Simulation Result:", result);
 
-        if (result.startsWith("0x08c379a0")) {
+        if (String(result).startsWith("0x08c379a0")) {
           const errorMessage = parseRevertReason({ data: result });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
+      } catch (simulationError: any) {
+        const errorMessage = parseRevertReason(simulationError);
         console.error("Transaction simulation failed:", errorMessage);
         alert(`Transaction failed: ${errorMessage}`);
         return;
       }
 
-      const tx = await liftSanctionVote(nationId, teamMemberId, allContractsData.SenateContract, writeContractAsync);
+      // Execute the transaction if simulation is successful
+      await writeContractAsync({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "liftSanctionVote",
+        args: [nationId, teamMemberId],
+      });
+
       alert("Sanction lifted!");
     } catch (error: any) {
       const errorMessage = parseRevertReason(error);

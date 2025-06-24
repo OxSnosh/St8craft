@@ -1,8 +1,8 @@
 import React, { use, useEffect, useState } from "react";
 import { NationSearchBar } from "../../../components/NationSearch";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import { ContractInterface as ABI, ethers, providers, utils } from "ethers";
-import { AbiCoder } from "ethers/lib/utils";
+// import { ContractInterface as ABI, ethers, providers, utils } from "ethers";
+// import { AbiCoder } from "ethers/lib/utils";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { useSignMessage } from "wagmi";
 import { blockade, groundAttack } from "~~/utils/attacks";
@@ -327,8 +327,7 @@ const DeclareWar = () => {
     if (error?.data) {
       try {
         if (error.data.startsWith("0x08c379a0")) {
-          const decoded = new AbiCoder().decode(["string"], "0x" + error.data.slice(10));
-          return decoded[0]; // Extract revert message
+          console.log("Revert reason data:", error.data);   
         }
       } catch (decodeError) {
         return "Unknown revert reason";
@@ -343,47 +342,51 @@ const DeclareWar = () => {
       return;
     }
 
+    const { writeContractAsync } = useWriteContract();
+    const publicClient = usePublicClient();
+    const contractData = contractsData.WarContract;
+
+    // Ensure contract data, ABI, and publicClient are available
+    if (!contractData.address || !contractData.abi || !publicClient) {
+      console.error("Contract address, ABI, or publicClient is missing");
+      return;
+    }
+
     try {
-      const contractData = contractsData.WarContract;
-      const abi = contractData.abi;
+      // Simulate the transaction (readContract) using Wagmi's publicClient
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "declareWar",
+        args: [selectedNation, defendingNation],
+      });
 
-      if (!contractData.address || !abi) {
-        console.error("Contract address or ABI is missing");
-        return;
-      }
+      // Simulate the transaction call
+      const result = await publicClient.call({
+        to: contractData.address,
+        data: data as `0x${string}`,
+      });
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
+      console.log("Transaction Simulation Result:", result);
 
-      const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
-
-      const data = contract.interface.encodeFunctionData("declareWar", [selectedNation, defendingNation]);
-
-      try {
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
-        });
-
-        console.log("Transaction Simulation Result:", result);
-
-        if (result.startsWith("0x08c379a0")) {
-          const errorMessage = parseRevertReason({ data: result });
-          alert(`Transaction failed: ${errorMessage}`);
-          return;
-        }
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
-        console.error("Transaction simulation failed:", errorMessage);
+      // Check for revert reason in the result
+      if (String(result).startsWith("0x08c379a0")) {
+        const errorMessage = parseRevertReason({ data: result });
         alert(`Transaction failed: ${errorMessage}`);
         return;
       }
 
-      const tx = await contract.declareWar(selectedNation, defendingNation);
+      // Send the transaction using Wagmi's writeContractAsync
+      const tx = await writeContractAsync({
+        address: contractData.address,
+        abi: contractData.abi,
+        functionName: "declareWar",
+        args: [selectedNation, defendingNation],
+      });
 
+      console.log("Transaction Sent:", tx);
+
+      // Show success message after the transaction
       alert(`War declared between Nation ${selectedNation} and Nation ${defendingNation}`);
     } catch (error: any) {
       const errorMessage = parseRevertReason(error);

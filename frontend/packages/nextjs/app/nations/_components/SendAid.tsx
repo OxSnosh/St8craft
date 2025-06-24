@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import { ethers } from "ethers";
-import { AbiCoder } from "ethers/lib/utils";
+// import { ethers } from "ethers";
+// import { AbiCoder } from "ethers/lib/utils";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import {
   acceptProposal,
@@ -83,8 +83,7 @@ const ManageAid = () => {
     if (error?.data) {
       try {
         if (error.data.startsWith("0x08c379a0")) {
-          const decoded = new AbiCoder().decode(["string"], "0x" + error.data.slice(10));
-          return decoded[0]; // Extract revert message
+          console.log("Parsing revert reason from data:", error.data);
         }
       } catch (decodeError) {
         return "Unknown revert reason";
@@ -107,53 +106,65 @@ const ManageAid = () => {
     const adjustedBalanceAid = BigInt(balanceAid) * WEI_IN_ETH;
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
+      const publicClient = usePublicClient();
+      const { writeContractAsync } = useWriteContract();
 
-      const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+      if (!publicClient || !writeContractAsync) {
+        console.error("Public client or write contract function is not available");
+        return;
+      }
+      // Simulate the transaction using Wagmi's public client
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "proposeAid",
+        args: [
+          selectedNationId,
+          aidPartnerId,
+          techAid,
+          adjustedBalanceAid,
+          soldierAid
+        ]
+      });
 
-      const data = contract.interface.encodeFunctionData("proposeAid", [
-        selectedNationId,
-        aidPartnerId,
-        techAid,
-        adjustedBalanceAid,
-        soldierAid,
-      ]);
-
+      // Simulate the transaction
       try {
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
         });
 
         console.log("Transaction Simulation Result:", result);
 
-        if (result.startsWith("0x08c379a0")) {
+        if (String(result).startsWith("0x08c379a0")) {
           const errorMessage = parseRevertReason({ data: result });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
+      } catch (simulationError: any) {
+        const errorMessage = parseRevertReason(simulationError);
         console.error("Transaction simulation failed:", errorMessage);
         alert(`Transaction failed: ${errorMessage}`);
         return;
       }
 
-      const tx = await proposeAid(
-        selectedNationId,
-        aidPartnerId,
-        techAid,
-        adjustedBalanceAid,
-        soldierAid,
-        AidContract,
-        writeContractAsync,
-      );
+      // Execute the transaction if simulation is successful
+      await writeContractAsync({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "proposeAid",
+        args: [
+          selectedNationId,
+          aidPartnerId,
+          techAid,
+          adjustedBalanceAid,
+          soldierAid
+        ]
+      });
 
       handleNationChange(selectedNationId);
+      alert("Aid proposal sent successfully!");
+
     } catch (error: any) {
       const errorMessage = parseRevertReason(error);
       console.error("Transaction failed:", errorMessage);
@@ -161,7 +172,8 @@ const ManageAid = () => {
     }
   };
 
-  const handleAcceptAid = async (proposalId: string) => {
+
+const handleAcceptAid = async (proposalId: string) => {
     if (!selectedNationId) return;
 
     const contractData = contractsData.AidContract;
@@ -173,39 +185,53 @@ const ManageAid = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
+      const publicClient = usePublicClient();
+      const { writeContractAsync } = useWriteContract();
 
-      const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+      if (!publicClient || !writeContractAsync) {
+        console.error("Public client or write contract function is not available");
+        return;
+      }
 
-      const data = contract.interface.encodeFunctionData("acceptProposal", [proposalId]);
+      // Simulate the transaction using Wagmi's public client
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "acceptProposal",
+        args: [proposalId],
+      });
 
+      // Simulate the transaction
       try {
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
         });
 
         console.log("Transaction Simulation Result:", result);
 
-        if (result.startsWith("0x08c379a0")) {
+        if (String(result).startsWith("0x08c379a0")) {
           const errorMessage = parseRevertReason({ data: result });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
+      } catch (simulationError: any) {
+        const errorMessage = parseRevertReason(simulationError);
         console.error("Transaction simulation failed:", errorMessage);
         alert(`Transaction failed: ${errorMessage}`);
         return;
       }
 
-      const tx = await acceptProposal(proposalId, AidContract, writeContractAsync);
+      // Execute the transaction if simulation is successful
+      await writeContractAsync({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "acceptProposal",
+        args: [proposalId],
+      });
 
-      handleNationChange(selectedNationId);
+    handleNationChange(selectedNationId);
+      alert("Aid proposal accepted successfully!");
     } catch (error: any) {
       const errorMessage = parseRevertReason(error);
       console.error("Transaction failed:", errorMessage);
@@ -225,39 +251,53 @@ const ManageAid = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
+      const publicClient = usePublicClient();
+      const { writeContractAsync } = useWriteContract();
 
-      const contract = new ethers.Contract(contractData.address, abi as ethers.ContractInterface, signer);
+      if (!publicClient || !writeContractAsync) {
+        console.error("Public client or write contract function is not available");
+        return;
+      }
 
-      const data = contract.interface.encodeFunctionData("cancelAid", [proposalId]);
+      // Simulate the transaction using Wagmi's public client
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "cancelAid",
+        args: [proposalId],
+      });
 
+      // Simulate the transaction
       try {
-        const result = await provider.call({
-          to: contract.address,
-          data: data,
-          from: userAddress,
+        const result = await publicClient.call({
+          to: contractData.address,
+          data: data as `0x${string}`,
         });
 
         console.log("Transaction Simulation Result:", result);
 
-        if (result.startsWith("0x08c379a0")) {
+        if (String(result).startsWith("0x08c379a0")) {
           const errorMessage = parseRevertReason({ data: result });
           alert(`Transaction failed: ${errorMessage}`);
           return;
         }
-      } catch (error: any) {
-        const errorMessage = parseRevertReason(error);
+      } catch (simulationError: any) {
+        const errorMessage = parseRevertReason(simulationError);
         console.error("Transaction simulation failed:", errorMessage);
         alert(`Transaction failed: ${errorMessage}`);
         return;
       }
 
-      const tx = await cancelAid(proposalId, AidContract, writeContractAsync);
+      // Execute the transaction if simulation is successful
+      await writeContractAsync({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "cancelAid",
+        args: [proposalId],
+      });
 
       handleNationChange(selectedNationId);
+      alert("Aid proposal canceled successfully!");
     } catch (error: any) {
       const errorMessage = parseRevertReason(error);
       console.error("Transaction failed:", errorMessage);

@@ -14,7 +14,7 @@ import {
   proposeTrade,
   removeTradingPartner,
 } from "../../../utils/resources";
-import { ethers } from "ethers";
+// import { ethers } from "ethers";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { tokensOfOwner } from "~~/utils/countryMinter";
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
@@ -160,43 +160,45 @@ const ManageTrades = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(
-        ResourcesContract.address,
-        ResourcesContract.abi as ethers.ContractInterface,
-        signer,
-      );
+      if (!publicClient) {
+        setErrorMessage("Public client is not available.");
+        setLoading(false);
+        return;
+      }
+      const contractData = ResourcesContract;
 
-      // Encode transaction data
-      const data = contract.interface.encodeFunctionData("proposeTrade", [selectedNationId, tradingPartnerId]);
+      // Simulate transaction using Wagmi's publicClient
+      const data = await publicClient.readContract({
+        abi: contractData.abi,
+        address: contractData.address,
+        functionName: "proposeTrade",
+        args: [selectedNationId, tradingPartnerId],
+      });
 
       // Simulate transaction
-      try {
-        const result = await provider.call({
-          to: ResourcesContract.address,
-          data: data,
-          from: await signer.getAddress(),
-        });
+      const result = await publicClient.call({
+        to: contractData.address,
+        data: data as `0x${string}`,
+      });
 
-        console.log("Transaction Simulation Result:", result);
+      console.log("Transaction Simulation Result:", result);
 
-        if (result.startsWith("0x08c379a0")) {
-          const errorMessage = parseRevertReason({ data: result });
-          setErrorMessage(`Transaction failed: ${errorMessage}`);
-          setLoading(false);
-          return;
-        }
-      } catch (simulationError: any) {
-        const errorMessage = parseRevertReason(simulationError);
-        setErrorMessage(`Transaction simulation failed: ${errorMessage}`);
+      if (String(result).startsWith("0x08c379a0")) {
+        const errorMessage = parseRevertReason({ data: result });
+        setErrorMessage(`Transaction failed: ${errorMessage}`);
         setLoading(false);
         return;
       }
 
       // Execute transaction if simulation passes
-      await proposeTrade(selectedNationId, tradingPartnerId, ResourcesContract, writeContractAsync);
+      await writeContractAsync({
+        address: contractData.address,
+        abi: contractData.abi,
+        functionName: "proposeTrade",
+        args: [selectedNationId, tradingPartnerId],
+      });
+
+      // Refresh the state and show success message
       fetchProposedTrades();
       setSuccessMessage("Trade proposal sent successfully.");
     } catch (error: any) {

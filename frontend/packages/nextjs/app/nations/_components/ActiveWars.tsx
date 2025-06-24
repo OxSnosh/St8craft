@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Web3Provider } from "@ethersproject/providers";
 // import { ethers } from "ethers";
-import { AbiCoder } from "ethers/lib/utils";
+// import { AbiCoder } from "ethers/lib/utils";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { groundAttack } from "~~/utils/attacks";
 import { blockade, breakBlockade, launchAirBattle, navalAttack } from "~~/utils/attacks";
@@ -312,8 +312,7 @@ const ActiveWars = () => {
     if (error?.data) {
       try {
         if (error.data.startsWith("0x08c379a0")) {
-          const decoded = new AbiCoder().decode(["string"], "0x" + error.data.slice(10));
-          return decoded[0]; // Extract revert message
+          return error.data.slice(10).replace(/0+$/, "").replace(/0x/g, "");
         }
       } catch (decodeError) {
         return "Unknown revert reason";

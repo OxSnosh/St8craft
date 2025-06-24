@@ -29,7 +29,7 @@ import {
   scrapSubmarine,
 } from "../../../utils/navy";
 import { useAllContracts } from "../../../utils/scaffold-eth/contractsData";
-import { ethers } from "ethers";
+// import { ethers } from "ethers";
 import { useTheme } from "next-themes";
 import { usePublicClient, useWriteContract } from "wagmi";
 import { useAccount } from "wagmi";

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { parseRevertReason } from "../../../utils/errorHandling";
-import { ethers } from "ethers";
+// import { ethers } from "ethers";
 import { useTheme } from "next-themes";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { checkOwnership } from "~~/utils/countryMinter";
@@ -92,7 +92,7 @@ const GovernmentDetails = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (field: keyof typeof formData, value: string) => {
+ const handleSubmit = async (field: keyof typeof formData, value: string) => {
     setLoading(true);
     setSuccessMessage("");
     setErrorMessage("");
@@ -102,16 +102,19 @@ const GovernmentDetails = () => {
       setLoading(false);
       return;
     }
+
     if (!walletAddress) {
       setErrorMessage("Wallet not connected.");
       setLoading(false);
       return;
     }
+
     if (!countryParametersContract || !publicClient || !writeContractAsync) {
       setErrorMessage("Missing required dependencies to update nation details.");
       setLoading(false);
       return;
     }
+
     if (!value.trim()) {
       setErrorMessage(`${field.replace(/([A-Z])/g, " $1")} cannot be empty.`);
       setLoading(false);
@@ -119,10 +122,6 @@ const GovernmentDetails = () => {
     }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
 
       // **Check ownership**
       const owner = await checkOwnership(nationId, walletAddress, publicClient, CountryMinterContract);
@@ -142,10 +141,7 @@ const GovernmentDetails = () => {
       console.log("Parsed Nation ID:", parsedNationId);
       const balance = await checkBalance(nationId, publicClient, TreasuryContract);
       console.log("Balance:", balance.toString());
-      console.log("Nation ID:", nationId);
-      console.log("Wallet Address:", walletAddress);
-      console.log("Public Client:", publicClient);
-      console.log("Country Parameters Contract:", countryParametersContract);
+      
       if (balance < 20000000 && (field === "rulerName" || field === "nationName")) {
         setErrorMessage("Insufficient balance to update " + field.replace(/([A-Z])/g, " $1"));
         setLoading(false);
@@ -172,7 +168,7 @@ const GovernmentDetails = () => {
 
       console.log(`Executing function: ${field} with params:`, formattedArgs);
 
-      // ✅ Call the correct update function
+      // ✅ Call the correct update function using Wagmi's `writeContractAsync`
       await updateFunctions[field](
         parsedNationId.toString(),
         publicClient,

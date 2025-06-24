@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 // <- You need to make sure you have a spyAttacks.ts helper calling your relaySpyOperation function properly.
 import { CountryMinter } from "../../../../../../backend/typechain-types/contracts/CountryMinter";
-import { Web3Provider } from "@ethersproject/providers";
-import { ethers } from "ethers";
+// import { Web3Provider } from "@ethersproject/providers";
+// import { ethers } from "ethers";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { tokensOfOwner } from "~~/utils/countryMinter";
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
@@ -20,59 +20,101 @@ const SpyAttackCard = () => {
   const [targetNationId, setTargetNationId] = useState<string>("");
   const [attackType, setAttackType] = useState<number>(1);
 
-  useEffect(() => {
-    const fetchMintedNations = async () => {
-      if (!walletAddress || !contractsData?.CountryMinter) return;
-      const nations = await tokensOfOwner(walletAddress, publicClient, contractsData.CountryMinter);
-      setMintedNations(nations.map((id: string) => ({ id, name: `Nation ${id}` })));
-      if (nations.length > 0) setSelectedNation(nations[0].id);
-    };
+  const hashMessage = async (message: string) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
 
-    fetchMintedNations();
-  }, [walletAddress, contractsData, publicClient]);
+  // Using Web Crypto API to hash the message with SHA-256
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = new Uint8Array(hashBuffer);
+  const hashHex = Array.from(hashArray).map(byte => byte.toString(16).padStart(2, '0')).join('');
+  
+  return hashHex;
+};
+
+const message = "Your message here";
+hashMessage(message).then((messageHash) => {
+  console.log('Message Hash (SHA-256):', messageHash);
+});
+
+useEffect(() => {
+  const fetchMintedNations = async () => {
+    if (!walletAddress || !contractsData?.CountryMinter) return;
+    const nations = await tokensOfOwner(walletAddress, publicClient, contractsData.CountryMinter);
+    setMintedNations(nations.map((id: string) => ({ id, name: `Nation ${id}` })));
+    if (nations.length > 0) setSelectedNation(nations[0].id);
+  };
+
+  fetchMintedNations();
+}, [walletAddress, contractsData, publicClient]);
 
   const handleSpyAttack = async () => {
-    console.log("handleSpyAttack", selectedNation, targetNationId, attackType);
+  console.log("handleSpyAttack", selectedNation, targetNationId, attackType);
 
-    if (typeof window === "undefined" || !window.ethereum || !window.ethereum.isMetaMask) {
-      alert("Metamask is not installed or not detected. Please install Metamask.");
-      return;
+  // Early check for MetaMask presence
+  if (!window.ethereum || !window.ethereum.isMetaMask) {
+    alert("Metamask is not installed or not detected. Please install Metamask.");
+    return;
+  }
+
+  if (!selectedNation || !targetNationId || attackType < 1 || attackType > 13) {
+    alert("Please fill in all fields correctly.");
+    return;
+  }
+
+  try {
+    const { address: walletAddress } = useAccount();
+    const publicClient = usePublicClient();
+    
+    if (!walletAddress || !publicClient) {
+      throw new Error("Wallet address or public client not available");
     }
 
-    if (!selectedNation || !targetNationId || attackType < 1 || attackType > 13) {
-      alert("Please fill in all fields correctly.");
-      return;
+    // Get the provider (metamask or injected provider)
+    const provider = window.ethereum;
+
+    // Request account access (MetaMask)
+    const accounts = await provider.request({ method: "eth_requestAccounts" });
+    const userAddress = accounts[0];
+
+    if (!userAddress) {
+      throw new Error("User is not connected to MetaMask");
     }
 
-    try {
-      const provider = new Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
+    // Sign the message using window.ethereum
+    const message = "Spy Operation Authorization";
+    const signature = await provider.request({
+      method: "personal_sign",
+      params: [message, userAddress],
+    });
 
-      const message = "Spy Operation Authorization";
-      const signature = await signer.signMessage(message);
-      const messageHash = ethers.utils.hashMessage(message);
+    // Get the message hash (eth_hashMessage)
+    const messageHash = await provider.request({
+      method: "eth_hashMessage",
+      params: [message],
+    });
 
-      const payload = {
-        signature,
-        messageHash,
-        callerNationId: Number(selectedNation),
-        defenderNationId: Number(targetNationId),
-        attackType,
-      };
+    const payload = {
+      signature,
+      messageHash,
+      callerNationId: Number(selectedNation),
+      defenderNationId: Number(targetNationId),
+      attackType,
+    };
 
-      console.log("Spy Attack Payload:", payload);
+    console.log("Spy Attack Payload:", payload);
 
-      await relaySpyOperation(payload, contractsData);
+    // You can call the relay function here
+    await relaySpyOperation(payload, contractsData);
 
-      alert(
-        `Spy Attack launched from Nation ${selectedNation} to Nation ${targetNationId} using attack type ${attackType}!`,
-      );
-    } catch (error: any) {
-      console.error("Spy attack failed:", error);
-      alert(`Spy attack failed: ${error.message || "Unknown error"}`);
-    }
-  };
+    alert(
+      `Spy Attack launched from Nation ${selectedNation} to Nation ${targetNationId} using attack type ${attackType}!`
+    );
+  } catch (error: any) {
+    console.error("Spy attack failed:", error);
+    alert(`Spy attack failed: ${error.message || "Unknown error"}`);
+  }
+};
 
   return (
     <div className="border border-purple-500 p-4 rounded-lg shadow-md mt-4">
