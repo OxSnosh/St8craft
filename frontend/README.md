@@ -81,7 +81,6 @@ Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob
 
 
 
-
 specVersion: 0.0.4
 description: CountryMinter
 repository: https://github.com/scaffold-eth/se-2/packages/subgraph/

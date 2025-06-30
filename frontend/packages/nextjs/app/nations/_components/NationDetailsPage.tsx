@@ -21,8 +21,6 @@ import { getNavy } from "../../../utils/navy";
 import { getBonusResources, getResources, getTradingPartners } from "../../../utils/resources";
 import { getNationStrength } from "../../../utils/strength";
 import { getWonders } from "../../../utils/wonders";
-import PostSubmissionClient from "../../subgraph/_components//PostSubmissionClient";
-import PostsTableServer from "../../subgraph/_components/PostTableServer";
 import PostsTable from "../../subgraph/_components/Posts";
 // import { ethers } from "ethers";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";

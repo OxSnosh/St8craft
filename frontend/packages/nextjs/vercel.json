@@ -1,3 +1,6 @@
 {
-  "installCommand": "yarn install"
+  "installCommand": "yarn install",
+  "env": {
+    "VERCEL_DEBUG": "true"
+  }
 }

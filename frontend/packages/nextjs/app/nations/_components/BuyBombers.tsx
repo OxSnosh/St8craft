@@ -31,7 +31,7 @@ import {
   scrapBristolBlenheim,
   scrapTupolevTu160,
 } from "../../../utils/bombers";
-import { parseRevertReason } from "../../../utils/errorHandling";
+import { parseRevertReason } from "../../../utils/errorHandling"
 import { useAllContracts } from "../../../utils/scaffold-eth/contractsData";
 import { useTheme } from "next-themes";
 import { usePublicClient, useWriteContract } from "wagmi";

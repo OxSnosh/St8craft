@@ -85,45 +85,6 @@ const PayBills = () => {
     return error?.message || "Transaction failed";
   }
 
-  // const handlePayBills = async () => {
-  //     if (!nationId || !publicClient || !BillsContract || !writeContractAsync) {
-  //         console.error("Missing required parameters for payBills");
-  //         setErrorMessage("Missing required parameters.");
-  //         return;
-  //     }
-
-  //     try {
-  //         const oldBillsPayable = await getBillsPayable(nationId, publicClient, BillsContract);
-
-  //         await payBills(nationId, publicClient, BillsContract, writeContractAsync);
-
-  //         const newBillsPayable = await getBillsPayable(nationId, publicClient, BillsContract);
-
-  //         if (oldBillsPayable.toString() !== newBillsPayable.toString()) {
-  //             setRefreshTrigger(prev => !prev);
-  //         }
-
-  //         setErrorMessage("");
-  //     } catch (error) {
-  //         if (!nationId) {
-  //             throw new Error("Nation ID is undefined");
-  //         }
-  //         if (!walletAddress) {
-  //             throw new Error("Wallet Address is undefined");
-  //         }
-  //         let owner = await checkOwnership(nationId, walletAddress, publicClient, CountryMinterContract);
-  //         if (!owner) {
-  //             setErrorMessage("You are not the ruler of this nation");
-  //         } else {
-  //             setErrorMessage("Error paying bills");
-  //         }
-
-  //         setTimeout(() => {
-  //             setErrorMessage("");
-  //         }, 6000);
-  //     }
-  // };
-
   const handlePayBills = async () => {
     if (!nationId || !publicClient || !BillsContract || !writeContractAsync) {
       console.error("Missing required parameters for payBills");

@@ -193,6 +193,16 @@
         "internalType": "address",
         "name": "_airBattle",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_wonder1",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_missiles",
+        "type": "address"
       }
     ],
     "name": "settings",

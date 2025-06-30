@@ -668,6 +668,11 @@
         "internalType": "address",
         "name": "_countryMinter",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_navalBlockade",
+        "type": "address"
       }
     ],
     "name": "settings",
