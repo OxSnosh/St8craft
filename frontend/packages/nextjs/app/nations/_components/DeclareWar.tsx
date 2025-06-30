@@ -1,3 +1,5 @@
+"use client";
+
 import React, { use, useEffect, useState } from "react";
 import { NationSearchBar } from "../../../components/NationSearch";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";

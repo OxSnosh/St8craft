@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useEffect, useState } from "react";
 // <- You need to make sure you have a spyAttacks.ts helper calling your relaySpyOperation function properly.
 import { CountryMinter } from "../../../../../../backend/typechain-types/contracts/CountryMinter";

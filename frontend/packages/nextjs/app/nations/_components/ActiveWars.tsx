@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useEffect, useState } from "react";
 import { Web3Provider } from "@ethersproject/providers";
 // import { ethers } from "ethers";
