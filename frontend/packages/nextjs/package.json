@@ -78,8 +78,5 @@
     "typescript": "^5.8.3",
     "vercel": "latest"
   },
-  "packageManager": "yarn@3.2.3",
-  "engines": {
-    "node": "20.18.1"
-  }
+  "packageManager": "yarn@3.2.3"
 }

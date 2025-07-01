@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+// import { BigNumber } from "ethers";
 
 export const checkBalance = async (nationId: string, publicClient: any, treasuryContract: any) => {
   if (!publicClient || !treasuryContract || !nationId) {
@@ -32,7 +32,7 @@ export const addFunds = async (
   nationId: string,
   publicClient: any,
   treasuryContract: any,
-  amount: BigNumber,
+  amount: any,
   writeContractAsync: any,
 ) => {
   console.log("addFunds", nationId, amount);
@@ -56,7 +56,7 @@ export const withdrawFunds = async (
   nationId: string,
   publicClient: any,
   treasuryContract: any,
-  amount: BigNumber, // Change `number` to `BigNumber`
+  amount: any,
   writeContractAsync: any,
 ) => {
   console.log("addFunds", nationId, amount);
@@ -72,6 +72,6 @@ export const withdrawFunds = async (
     abi: treasuryContract.abi,
     address: treasuryContract.address,
     functionName: "withdrawFunds",
-    args: [amount, nationId], // Ensure amount is passed as BigNumber
+    args: [amount, nationId],
   });
 };

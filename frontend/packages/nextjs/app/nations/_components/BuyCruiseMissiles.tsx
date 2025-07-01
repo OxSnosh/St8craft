@@ -12,9 +12,9 @@ import { buyCruiseMissiles, getCruiseMissileCost, getCruiseMissileCount } from "
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
 import { checkBalance } from "~~/utils/treasury";
 
-const publicClient = usePublicClient();
 
 const BuyCruiseMissiles = () => {
+  const publicClient = usePublicClient();
   const { theme } = useTheme();
   const contractsData = useAllContracts();
   const { address: walletAddress } = useAccount();
