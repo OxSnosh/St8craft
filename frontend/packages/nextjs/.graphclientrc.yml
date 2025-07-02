@@ -3,6 +3,6 @@ sources:
   - name: YourContract
     handler:
       graphql:
-        endpoint: http://localhost:8000/subgraphs/name/scaffold-eth/your-contract
+        endpoint: https://api.thegraph.com/ipfs/oxsnosh/st8craft
 documents:
   - ./graphql/GetNations.gql

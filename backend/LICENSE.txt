@@ -15,7 +15,7 @@ Licensed Work:        St8Craft
 Additional Use Grant: Any uses listed and defined at
                       st8craft.gg
 
-Change Date:          The earlier of 2030-01-01 or a date specified at
+Change Date:          The earlier of 2040-01-01 or a date specified at
                       st8craft.gg
 
 Change License:       GNU General Public License v2.0 or later

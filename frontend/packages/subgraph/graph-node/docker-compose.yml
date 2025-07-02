@@ -18,7 +18,8 @@ services:
       postgres_db: graph-node
       ipfs: "ipfs:5001"
       # ethereum: "localhost:http://host.docker.internal:8545"
-      ethereum: "base_sepolia:https://sepolia.base.org"
+      # ethereum: "base_sepolia:https://sepolia.base.org"
+      ethereum: "base:https://mainnet.base.org"
       GRAPH_LOG: info
     extra_hosts:
       - "host.docker.internal:host-gateway"

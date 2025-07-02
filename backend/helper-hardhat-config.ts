@@ -43,6 +43,14 @@ const networkConfig: any = {
       callbackGasLimit: "2500000", // 2,500,000 gas
       vrfCoordinatorV2: "0x5C210eF41CD1a72de73bF76eC39637bB0d3d7BEE",
   },
+  8453: {
+      name: "base",
+      subscriptionId: "24802783192322697201261566732783929045615788778639507776573378755552146781710",
+      gasLane: "0xdc2f87677b01473c763cb0aee938ed3341512f6057324a584e5944e786144d70", // 30 gwei
+      keepersUpdateInterval: "30",
+      callbackGasLimit: "2500000", // 2,500,000 gas
+      vrfCoordinatorV2: "0xd5D517aBE5cF79B7e95eC98dB0f0277788aFF634",
+  },
   1: {
       name: "mainnet",
       keepersUpdateInterval: "30",

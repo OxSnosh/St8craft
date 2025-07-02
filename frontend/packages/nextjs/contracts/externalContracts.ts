@@ -53,6 +53,61 @@ import WondersContract1 from "../deployments/base_sepolia/WondersContract1.json"
 import WondersContract2 from "../deployments/base_sepolia/WondersContract2.json";
 import WondersContract3 from "../deployments/base_sepolia/WondersContract3.json";
 import WondersContract4 from "../deployments/base_sepolia/WondersContract4.json";
+import AdditionalAirBattle_base from "../deployments/base/AdditionalAirBattle.json";
+import AdditionalNavyContract_base from "../deployments/base/AdditionalNavyContract.json";
+import AdditionalTaxesContract_base from "../deployments/base/AdditionalTaxesContract.json";
+import AidContract_base from "../deployments/base/AidContract.json";
+import AirBattleContract_base from "../deployments/base/AirBattleContract.json";
+import AllianceManager_base from "../deployments/base/AllianceManager.json";
+import BillsContract_base from "../deployments/base/BillsContract.json";
+import BombersContract_base from "../deployments/base/BombersContract.json";
+import BombersMarketplace1_base from "../deployments/base/BombersMarketplace1.json";
+import BombersMarketplace2_base from "../deployments/base/BombersMarketplace2.json";
+import BonusResourcesContract_base from "../deployments/base/BonusResourcesContract.json";
+import BreakBlockadeContract_base from "../deployments/base/BreakBlocadeContract.json";
+import CountryMinter_base from "../deployments/base/CountryMinter.json";
+import CountryParametersContract_base from "../deployments/base/CountryParametersContract.json";
+import CrimeContract_base from "../deployments/base/CrimeContract.json";
+import CruiseMissileContract_base from "../deployments/base/CruiseMissileContract.json";
+import EnvironmentContract_base from "../deployments/base/EnvironmentContract.json";
+import FighterLosses_base from "../deployments/base/FighterLosses.json";
+import FightersContract_base from "../deployments/base/FightersContract.json";
+import FightersMarketplace1_base from "../deployments/base/FightersMarketplace1.json";
+import FightersMarketplace2_base from "../deployments/base/FightersMarketplace2.json";
+import ForcesContract_base from "../deployments/base/ForcesContract.json";
+import GroundBattleContract_base from "../deployments/base/GroundBattleContract.json";
+import ImprovementsContract1_base from "../deployments/base/ImprovementsContract1.json";
+import ImprovementsContract2_base from "../deployments/base/ImprovementsContract2.json";
+import ImprovementsContract3_base from "../deployments/base/ImprovementsContract3.json";
+import ImprovementsContract4_base from "../deployments/base/ImprovementsContract4.json";
+import InfrastructureContract_base from "../deployments/base/InfrastructureContract.json";
+import InfrastructureMarketContract_base from "../deployments/base/InfrastructureMarketContract.json";
+import KeeperContract_base from "../deployments/base/KeeperContract.json";
+import LandMarketContract_base from "../deployments/base/LandMarketContract.json";
+import Messenger_base from "../deployments/base/Messenger.json";
+import MilitaryContract_base from "../deployments/base/MilitaryContract.json";
+import MissilesContract_base from "../deployments/base/MissilesContract.json";
+import NationStrengthContract_base from "../deployments/base/NationStrengthContract.json";
+import NavalActionsContract_base from "../deployments/base/NavalActionsContract.json";
+import NavalAttackContract_base from "../deployments/base/NavalAttackContract.json";
+import NavalBlockadeContract_base from "../deployments/base/NavalBlockadeContract.json";
+import NavyContract2_base from "../deployments/base/NavyContract2.json";
+import NavyContract_base from "../deployments/base/NavyContract.json";
+import NukeContract_base from "../deployments/base/NukeContract.json";
+import ResourcesContract_base from "../deployments/base/ResourcesContract.json";
+import SenateContract_base from "../deployments/base/SenateContract.json";
+import SpyContract_base from "../deployments/base/SpyContract.json";
+import SpyOperationsContract_base from "../deployments/base/SpyOperationsContract.json";
+import St8craftGovToken_base from "../deployments/base/St8craftGovToken.json";
+import TaxesContract_base from "../deployments/base/TaxesContract.json";
+import TechnologyMarketContract_base from "../deployments/base/TechnologyMarketContract.json";
+import TreasuryContract_base from "../deployments/base/TreasuryContract.json";
+import WarBucks_base from "../deployments/base/WarBucks.json";
+import WarContract_base from "../deployments/base/WarContract.json";
+import WondersContract1_base from "../deployments/base/WondersContract1.json";
+import WondersContract2_base from "../deployments/base/WondersContract2.json";
+import WondersContract3_base from "../deployments/base/WondersContract3.json";
+import WondersContract4_base from "../deployments/base/WondersContract4.json";
 import AdditionalAirBattle_local from "../deployments/localhost/AdditionalAirBattle.json";
 import AdditionalNavyContract_local from "../deployments/localhost/AdditionalNavyContract.json";
 import AdditionalTaxesContract_local from "../deployments/localhost/AdditionalTaxesContract.json";
@@ -567,6 +622,228 @@ const externalContracts: GenericContractsDeclaration = {
     AllianceManager: {
       address: AllianceManager.address as Address,
       abi: fixAbi(AllianceManager.abi),
+    },
+  },
+  8453: {
+    CountryMinter: {
+      address: CountryMinter_base.address as Address,
+      abi: fixAbi(CountryMinter_base.abi),
+    },
+    WarBucks: {
+      address: WarBucks_base.address as Address,
+      abi: fixAbi(WarBucks_base.abi),
+    },
+    St8craftGovToken: {
+      address: St8craftGovToken_base.address as Address,
+      abi: fixAbi(St8craftGovToken_base.abi),
+    },
+    AidContract: {
+      address: AidContract_base.address as Address,
+      abi: fixAbi(AidContract_base.abi),
+    },
+    AirBattleContract: {
+      address: AirBattleContract_base.address as Address,
+      abi: fixAbi(AirBattleContract_base.abi),
+    },
+    AdditionalAirBattle: {
+      address: AdditionalAirBattle_base.address as Address,
+      abi: fixAbi(AdditionalAirBattle_base.abi),
+    },
+    BillsContract: {
+      address: BillsContract_base.address as Address,
+      abi: fixAbi(BillsContract_base.abi),
+    },
+    BombersContract: {
+      address: BombersContract_base.address as Address,
+      abi: fixAbi(BombersContract_base.abi),
+    },
+    BombersMarketplace1: {
+      address: BombersMarketplace1_base.address as Address,
+      abi: fixAbi(BombersMarketplace1_base.abi),
+    },
+    BombersMarketplace2: {
+      address: BombersMarketplace2_base.address as Address,
+      abi: fixAbi(BombersMarketplace2_base.abi),
+    },
+    CountryParametersContract: {
+      address: CountryParametersContract_base.address as Address,
+      abi: fixAbi(CountryParametersContract_base.abi),
+    },
+    CrimeContract: {
+      address: CrimeContract_base.address as Address,
+      abi: fixAbi(CrimeContract_base.abi),
+    },
+    CruiseMissileContract: {
+      address: CruiseMissileContract_base.address as Address,
+      abi: fixAbi(CruiseMissileContract_base.abi),
+    },
+    EnvironmentContract: {
+      address: EnvironmentContract_base.address as Address,
+      abi: fixAbi(EnvironmentContract_base.abi),
+    },
+    FightersContract: {
+      address: FightersContract_base.address as Address,
+      abi: fixAbi(FightersContract_base.abi),
+    },
+    FighterLosses: {
+      address: FighterLosses_base.address as Address,
+      abi: fixAbi(FighterLosses_base.abi),
+    },
+    FightersMarketplace1: {
+      address: FightersMarketplace1_base.address as Address,
+      abi: fixAbi(FightersMarketplace1_base.abi),
+    },
+    FightersMarketplace2: {
+      address: FightersMarketplace2_base.address as Address,
+      abi: fixAbi(FightersMarketplace2_base.abi),
+    },
+    ForcesContract: {
+      address: ForcesContract_base.address as Address,
+      abi: fixAbi(ForcesContract_base.abi),
+    },
+    MissilesContract: {
+      address: MissilesContract_base.address as Address,
+      abi: fixAbi(MissilesContract_base.abi),
+    },
+    GroundBattleContract: {
+      address: GroundBattleContract_base.address as Address,
+      abi: fixAbi(GroundBattleContract_base.abi),
+    },
+    ImprovementsContract1: {
+      address: ImprovementsContract1_base.address as Address,
+      abi: fixAbi(ImprovementsContract1_base.abi),
+    },
+    ImprovementsContract2: {
+      address: ImprovementsContract2_base.address as Address,
+      abi: fixAbi(ImprovementsContract2_base.abi),
+    },
+    ImprovementsContract3: {
+      address: ImprovementsContract3_base.address as Address,
+      abi: fixAbi(ImprovementsContract3_base.abi),
+    },
+    ImprovementsContract4: {
+      address: ImprovementsContract4_base.address as Address,
+      abi: fixAbi(ImprovementsContract4_base.abi),
+    },
+    InfrastructureContract: {
+      address: InfrastructureContract_base.address as Address,
+      abi: fixAbi(InfrastructureContract_base.abi),
+    },
+    InfrastructureMarketContract: {
+      address: InfrastructureMarketContract_base.address as Address,
+      abi: fixAbi(InfrastructureMarketContract_base.abi),
+    },
+    KeeperContract: {
+      address: KeeperContract_base.address as Address,
+      abi: fixAbi(KeeperContract_base.abi),
+    },
+    LandMarketContract: {
+      address: LandMarketContract_base.address as Address,
+      abi: fixAbi(LandMarketContract_base.abi),
+    },
+    MilitaryContract: {
+      address: MilitaryContract_base.address as Address,
+      abi: fixAbi(MilitaryContract_base.abi),
+    },
+    NationStrengthContract: {
+      address: NationStrengthContract_base.address as Address,
+      abi: fixAbi(NationStrengthContract_base.abi),
+    },
+    NavyContract: {
+      address: NavyContract_base.address as Address,
+      abi: fixAbi(NavyContract_base.abi),
+    },
+    NavyContract2: {
+      address: NavyContract2_base.address as Address,
+      abi: fixAbi(NavyContract2_base.abi),
+    },
+    AdditionalNavyContract: {
+      address: AdditionalNavyContract_base.address as Address,
+      abi: fixAbi(AdditionalNavyContract_base.abi),
+    },
+    NavalActionsContract: {
+      address: NavalActionsContract_base.address as Address,
+      abi: fixAbi(NavalActionsContract_base.abi),
+    },
+    NavalBlockadeContract: {
+      address: NavalBlockadeContract_base.address as Address,
+      abi: fixAbi(NavalBlockadeContract_base.abi),
+    },
+    BreakBlockadeContract: {
+      address: BreakBlockadeContract_base.address as Address,
+      abi: fixAbi(BreakBlockadeContract_base.abi),
+    },
+    NavalAttackContract: {
+      address: NavalAttackContract_base.address as Address,
+      abi: fixAbi(NavalAttackContract_base.abi),
+    },
+    NukeContract: {
+      address: NukeContract_base.address as Address,
+      abi: fixAbi(NukeContract_base.abi),
+    },
+    ResourcesContract: {
+      address: ResourcesContract_base.address as Address,
+      abi: fixAbi(ResourcesContract_base.abi),
+    },
+    BonusResourcesContract: {
+      address: BonusResourcesContract_base.address as Address,
+      abi: fixAbi(BonusResourcesContract_base.abi),
+    },
+    SenateContract: {
+      address: SenateContract_base.address as Address,
+      abi: fixAbi(SenateContract_base.abi),
+    },
+    SpyContract: {
+      address: SpyContract_base.address as Address,
+      abi: fixAbi(SpyContract_base.abi),
+    },
+    SpyOperationsContract: {
+      address: SpyOperationsContract_base.address as Address,
+      abi: fixAbi(SpyOperationsContract_base.abi),
+    },
+    TaxesContract: {
+      address: TaxesContract_base.address as Address,
+      abi: fixAbi(TaxesContract_base.abi),
+    },
+    AdditionalTaxesContract: {
+      address: AdditionalTaxesContract_base.address as Address,
+      abi: fixAbi(AdditionalTaxesContract_base.abi),
+    },
+    TechnologyMarketContract: {
+      address: TechnologyMarketContract_base.address as Address,
+      abi: fixAbi(TechnologyMarketContract_base.abi),
+    },
+    TreasuryContract: {
+      address: TreasuryContract_base.address as Address,
+      abi: fixAbi(TreasuryContract_base.abi),
+    },
+    WarContract: {
+      address: WarContract_base.address as Address,
+      abi: fixAbi(WarContract_base.abi),
+    },
+    WondersContract1: {
+      address: WondersContract1_base.address as Address,
+      abi: fixAbi(WondersContract1_base.abi),
+    },
+    WondersContract2: {
+      address: WondersContract2_base.address as Address,
+      abi: fixAbi(WondersContract2_base.abi),
+    },
+    WondersContract3: {
+      address: WondersContract3_base.address as Address,
+      abi: fixAbi(WondersContract3_base.abi),
+    },
+    WondersContract4: {
+      address: WondersContract4_base.address as Address,
+      abi: fixAbi(WondersContract4_base.abi),
+    },
+    Messenger: {
+      address: Messenger_base.address as Address,
+      abi: fixAbi(Messenger_base.abi),
+    },
+    AllianceManager: {
+      address: AllianceManager_base.address as Address,
+      abi: fixAbi(AllianceManager_base.abi),
     },
   },
 };

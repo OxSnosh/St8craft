@@ -14,7 +14,8 @@ import "./tasks/set_religion_and_govt";
 import "./tasks/set_resources";
 import "@gelatonetwork/web3-functions-sdk/hardhat-plugin";
 import "@nomicfoundation/hardhat-ethers";
-import "@nomicfoundation/hardhat-verify";
+// import "@nomicfoundation/hardhat-verify";
+import "@nomiclabs/hardhat-etherscan"
 
 
 /**
@@ -99,7 +100,11 @@ const config = {
       url: "https://sepolia.base.org",
       chainId: 84532,
       accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
-
+    },
+    base: {
+      url: "https://mainnet.base.org",
+      chainId: 8453,
+      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
     },
     kovan: {
       url: KOVAN_RPC_URL,
@@ -158,6 +163,16 @@ const config = {
       polygon: POLYGONSCAN_API_KEY,
       baseSepolia: process.env.BASESCAN_API_KEY,
     },
+    customChains: [
+      {
+        network: "baseSepolia",
+        chainId: 84532,
+        urls: {
+          apiURL: "https://api-sepolia.basescan.org/api",
+          browserURL: "https://sepolia.basescan.org"
+        }
+      }
+    ]
   },
   gasReporter: {
     enabled: true,

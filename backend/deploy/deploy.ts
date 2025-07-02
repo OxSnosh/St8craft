@@ -87,6 +87,23 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         console.log("base_sepolia")
 
     }
+
+    else if (chainId == 8453) {
+        vrfCoordinatorV2Address = networkConfig[chainId]["vrfCoordinatorV2"]
+        subscriptionId = networkConfig[chainId]["subscriptionId"]
+        gasLane = networkConfig[chainId]["gasLane"]
+        callbackGasLimit = networkConfig[chainId]["callbackGasLimit"]
+
+        signer = await ethers.getSigner(deployer) as HardhatEthersSigner;
+
+        provider = new JsonRpcProvider("https://mainnet.base.org");
+
+        console.log("base")
+
+    } else {
+      throw new Error(`Unsupported chain ID: ${chainId}`);
+    }
+
     console.log("Deploying contracts with the account:", deployer);
 
     const INITIAL_SUPPLY_ST8CRAFT = ethers.parseEther("200000000"); 
@@ -1333,7 +1350,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     
         console.log("settings initiated");
     
-        if(chainId == 31337 || chainId == 1337) {
+        if(chainId == 31337) {
             if (!vrfCoordinatorV2Mock) {
                 throw new Error("vrfCoordinatorV2Mock is undefined.");
             }
