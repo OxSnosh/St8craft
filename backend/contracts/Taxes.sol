@@ -45,6 +45,8 @@ contract TaxesContract is Ownable, ReentrancyGuard {
     address public environment;
     address public blockade;
 
+    uint16 public taxModifierBP = 10000;
+
     InfrastructureContract inf;
     TreasuryContract tsy;
     ImprovementsContract1 imp1;
@@ -68,6 +70,7 @@ contract TaxesContract is Ownable, ReentrancyGuard {
     NavalBlockadeContract blk;
 
     event TaxesCollected(uint256 indexed id, uint256 indexed amount);
+    event TaxModifierUpdated(uint16 newValue);
 
     ///@dev this function is only callable by the contract owner
     ///@dev this function will be called immediately after contract deployment in order to set contract pointers
@@ -144,6 +147,11 @@ contract TaxesContract is Ownable, ReentrancyGuard {
         blk = NavalBlockadeContract(_blockade);
     }
 
+    function setTaxModifierBP(uint16 newBP) external onlyOwner {
+       taxModifierBP = newBP;
+       emit TaxModifierUpdated(newBP);
+   }
+
     ///@dev this is a public function callable only by the nation owner collecting taxes
     ///@notice this function will allow a nation owner to collect taxes from their citizens
     ///@param id this is the nation id of the nation collecting taxes
@@ -185,6 +193,7 @@ contract TaxesContract is Ownable, ReentrancyGuard {
         }
         mod = mod - percentageReductionForBlockades;
         taxesCollectible = ((taxesCollectible * mod) / 100);
+        taxesCollectible = (taxesCollectible * taxModifierBP) / 10000;
         return (dailyTaxesCollectiblePerCitizen, taxesCollectible);
     }
 

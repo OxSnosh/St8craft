@@ -1,64 +1,196 @@
-//SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.17;
 
-import "./Infrastructure.sol";
-import "./Forces.sol";
-import "./Military.sol";
-import "./NationStrength.sol";
-import "./Treasury.sol";
-import "./CountryParameters.sol";
-import "./Wonders.sol";
-import "./CountryMinter.sol";
-import "./KeeperFile.sol";
-import "./Spies.sol";
-import "./Missiles.sol";
+interface IInfrastructure {
+    function getInfrastructureCount(uint256 countryId) external view returns (uint256);
+    function getTechnologyCount(uint256 countryId) external view returns (uint256);
+    function getLandCount(uint256 countryId) external view returns (uint256);
+
+    // Spy effect hooks
+    function decreaseLandCountFromSpyContract(uint256 defenderId, uint256 amount) external;
+    function decreaseTechCountFromSpyContract(uint256 defenderId, uint256 amount) external;
+    function decreaseInfrastructureCountFromSpyContract(uint256 defenderId, uint256 amount) external;
+    function setTaxRateFromSpyContract(uint256 defenderId, uint256 newRate) external;
+
+    // (If you need capturing logic for infrastructure, adjust accordingly)
+}
+
+interface IForces {
+    function getDefendingTankCount(uint256 defenderId) external view returns (uint256);
+    function decreaseDefendingTankCount(uint256 amount, uint256 defenderId) external;
+}
+
+interface IMilitary {
+    function getThreatLevel(uint256 countryId) external view returns (uint256);
+    function setThreatLevelFromSpyContract(uint256 defenderId, uint256 level) external;
+    function setDefconLevelFromSpyContract(uint256 defenderId, uint256 level) external;
+}
+
+interface INationStrength {
+    function getNationStrength(uint256 countryId) external view returns (uint256);
+}
+
+interface ITreasury {
+    function spendBalance(uint256 attackerId, uint256 amount) external;
+
+}
+
+interface ICountryParameters {
+    function getGovernmentType(uint256 countryId) external view returns (uint256);
+    function getGovernmentPreference(uint256 countryId) external view returns (uint256);
+    function updateDesiredGovernment(uint256 countryId, uint256 newPref) external;
+    function getReligionPreference(uint256 countryId) external view returns (uint256);
+    function updateDesiredReligion(uint256 countryId, uint256 newPref) external;
+}
+
+interface IWonders1 {
+    function getCentralIntelligenceAgency(uint256 countryId) external view returns (bool);
+}
+interface IWonders2 {
+    function getHiddenNuclearMissileSilo(uint256 countryId) external view returns (bool);
+}
+
+interface ICountryMinter {
+    function checkOwnership(uint256 countryId, address user) external view returns (bool);
+}
+
+interface ISpies {
+    function getSpyCount(uint256 countryId) external view returns (uint256);
+    function decreaseDefenderSpyCount(uint256 amount, uint256 defenderId) external;
+}
+
+interface IMissiles {
+    function getNukeCount(uint256 countryId) external view returns (uint256);
+    function decreaseCruiseMissileCount(uint256 amount, uint256 defenderId) external;
+    function decreaseNukeCountFromSpyContract(uint256 defenderId) external;
+}
+
+interface IKeeper {
+    function getGameDay() external view returns (uint256);
+}
+
+interface IVRFCoordinatorV2 {
+    function requestRandomWords(
+        bytes32 keyHash,
+        uint64  subId,
+        uint16  minConfirmations,
+        uint32  callbackGasLimit,
+        uint32  numWords
+    ) external returns (uint256 requestId);
+}
+
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@gelatonetwork/relay-context/contracts/GelatoRelayContextERC2771.sol";
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
-///@title SpyOperationsContract
-///@author OxSnosh
-///@dev this contact inherits from openzeppelin's ownable contract
-contract SpyOperationsContract is Ownable {
+/* --------------------------------------------------------------------------
+ * Contract
+ * -------------------------------------------------------------------------- */
 
-    uint256 public attackId;
-    address public forces;
-    address public spies;
-    address public infrastructure;
-    address public military;
-    address public nationStrength;
-    address public treasury;
-    address public parameters;
-    address public missiles;
-    address public wonders1;
-    address public wonders2;
-    address public countryMinter;
-    address public keeper;
-
-    ForcesContract force;
-    InfrastructureContract inf;
-    MilitaryContract mil;
-    NationStrengthContract strength;
-    TreasuryContract tsy;
-    CountryParametersContract params;
-    MissilesContract mis;
-    WondersContract1 won1;
-    WondersContract2 won2;
-    CountryMinter mint;
-    KeeperContract keep;
-    SpyContract spy;
-
-    struct SpyAttack {
-        uint256 encryptedAttackerId;
-        uint256 defenderId;
-        uint256 attackType;
-        bool attackThwarted;
-        uint256 attackerId;
+contract SpyOperationsContractV25 is
+    GelatoRelayContextERC2771,
+    VRFConsumerBaseV2Plus
+{
+    // Explicitly override onlyOwner modifier to resolve ambiguity
+    modifier onlyOwner() override {
+        require(msg.sender == owner(), "Ownable: caller is not the owner");
+        _;
     }
 
-    mapping(uint256 => SpyAttack) spyAttackIdToSpyAttack;
-    mapping(uint256 => uint256) s_requestIdToRequestIndex;
-    mapping(uint256 => uint256[]) public s_randomnessRequestIdToRandomWords;
+    struct DaySpies { uint8 outgoing; uint8 incoming; }
 
-    event randomNumbersRequested(uint256 indexed requestId);
+    struct PendingAttack {
+        uint256 attackerId;
+        uint256 defenderId;
+        uint8   attackType;
+        bool    exists;
+    }
+
+    struct AttackMeta {
+        uint256 attackerId;
+        uint256 defenderId;
+        uint8   attackType;
+        bool    success;
+        bool    revealed;   // True if failure OR later reveal
+        bool    resolved;
+    }
+
+    /* ------------------------------- Constants -------------------------------- */
+
+    uint8  public constant MAX_OUTGOING      = 6;
+    uint8  public constant MAX_INCOMING      = 2;
+    uint8  public constant MIN_ATTACK_TYPE   = 1;
+    uint8  public constant MAX_ATTACK_TYPE   = 12;
+    uint256 public constant MASK_SENTINEL    = 0;  // Masked attacker id in public success event
+
+    /* --------------------------------- Storage -------------------------------- */
+
+    // Incremental attack id
+    uint256 public attackId;
+
+    // day => nationId => counts
+    mapping(uint256 => mapping(uint256 => DaySpies)) private _daySpyCount;
+
+    // VRF request -> attackId
+    mapping(uint256 => uint256) public vrfRequestToAttackId;
+
+    // attackId -> pending (while waiting for VRF)
+    mapping(uint256 => PendingAttack) public pending;
+
+    // attackId -> final meta
+    mapping(uint256 => AttackMeta) public attacks;
+
+    /* -------------------------- External Contract Refs ------------------------ */
+
+    IInfrastructure      public inf;
+    IForces              public force;
+    IMilitary            public mil;
+    INationStrength      public strength;
+    ITreasury            public tsy;
+    ICountryParameters   public params;
+    IMissiles            public mis;
+    IWonders1            public won1;
+    IWonders2            public won2;
+    ICountryMinter       public mint;
+    IKeeper              public keep;
+    ISpies               public spy;
+
+    /* ----------------------------- VRF Configuration --------------------------- */
+
+    bytes32 public vrfKeyHash;
+    uint64  public vrfSubId;
+    uint16  public vrfMinConfirmations = 3;
+    uint32  public vrfCallbackGasLimit;
+    uint32  public vrfNumWords = 1;
+    bool    public useNativePayment = true;
+
+    /* ---------------------------------- Events -------------------------------- */
+
+    event SpyAttackCommitted(uint256 indexed attackId, uint256 indexed defenderId, uint8 attackType);
+    event SpyAttackResolvedPublic(uint256 indexed attackId, uint256 maskedAttackerId, bool success);
+    event SpyAttackRevealed(uint256 indexed attackId, uint256 attackerId);
+    event VrfRequested(uint256 indexed attackId, uint256 indexed requestId);
+
+    event VrfConfigUpdated(bytes32 keyHash, uint64 subId, uint16 minConf, uint32 gasLimit, uint32 numWords, bool nativePayment);
+
+    /* -------------------------------- Constructor ------------------------------ */
+
+    constructor(
+        address _vrfCoordinator,
+        uint64  _subId,
+        bytes32 _keyHash,
+        uint32 _vrfCallbackGasLimit
+    )
+        GelatoRelayContextERC2771()
+        VRFConsumerBaseV2Plus(_vrfCoordinator)
+    {
+        vrfKeyHash = _keyHash;
+        vrfSubId   = _subId;
+        vrfCallbackGasLimit = _vrfCallbackGasLimit;
+    }
+
+    /* ---------------------------- Owner Admin Setters ------------------------- */
 
     function settings(
         address _infrastructure,
@@ -72,359 +204,358 @@ contract SpyOperationsContract is Ownable {
         address _missiles,
         address _countryMinter
     ) public onlyOwner {
-        infrastructure = _infrastructure;
-        inf = InfrastructureContract(_infrastructure);
-        forces = _forces;
-        force = ForcesContract(_forces);
-        military = _military;
-        mil = MilitaryContract(_military);
-        nationStrength = _nationStrength;
-        strength = NationStrengthContract(_nationStrength);
-        wonders1 = _wonders1;
-        won1 = WondersContract1(_wonders1);
-        wonders2 = _wonders2;
-        won2 = WondersContract2(_wonders2);
-        treasury = _treasury;
-        tsy = TreasuryContract(_treasury);
-        parameters = _parameters;
-        params = CountryParametersContract(payable(_parameters));
-        missiles = _missiles;
-        mis = MissilesContract(_missiles);
-        countryMinter = _countryMinter;
-        mint = CountryMinter(_countryMinter);
+        inf = IInfrastructure(_infrastructure);
+        force = IForces(_forces);
+        mil = IMilitary(_military);
+        strength = INationStrength(_nationStrength);
+        won1 = IWonders1(_wonders1);
+        won2 = IWonders2(_wonders2);
+        tsy = ITreasury(_treasury);
+        params = ICountryParameters(payable(_parameters));
+        mis = IMissiles(_missiles);
+        mint = ICountryMinter(_countryMinter);
     }
 
     function settings2(address _keeper, address _spies) public onlyOwner {
-        keeper = _keeper;
-        keep = KeeperContract(_keeper);
-        spies = _spies;
-        spy = SpyContract(_spies);
+        keep = IKeeper(_keeper);
+        spy = ISpies(_spies);
     }
 
-    ///@dev this functin is callable only by a nation owner and will allow a naton to conduct a spy operation
-    ///@notice this function will allow a nation to conduct a spy operation against another nation
-    ///@param defenderId is the id of the defending nation
-    ///@param attackType the id of the attack as it is stored on this contract
-    function checkSpyOperation(
+    function setVRFConfig(
+        bytes32 _keyHash,
+        uint64  _subId,
+        uint16  _minConf,
+        uint32  _gasLimit,
+        uint32  _numWords,
+        bool    _useNative
+    ) external onlyOwner {
+        vrfKeyHash          = _keyHash;
+        vrfSubId            = _subId;
+        vrfMinConfirmations = _minConf;
+        vrfCallbackGasLimit = _gasLimit;
+        vrfNumWords         = _numWords;
+        useNativePayment    = _useNative;
+        emit VrfConfigUpdated(_keyHash, _subId, _minConf, _gasLimit, _numWords, _useNative);
+    }
+
+    /* ------------------------------ Public Getters ---------------------------- */
+
+    function attackedAlready(uint256 defenderId) external view returns (bool) {
+        uint256 day = keep.getGameDay();
+        DaySpies storage def = _daySpyCount[day][defenderId];
+        return def.incoming >= MAX_INCOMING;
+    }
+
+    function getAttackPublic(uint256 id)
+        external
+        view
+        returns (
+            uint256 attackerIdOrMask,
+            uint256 defenderId,
+            uint8   attackType,
+            bool    success,
+            bool    revealed,
+            bool    resolved
+        )
+    {
+        AttackMeta storage m = attacks[id];
+        require(m.resolved, "NOT_RESOLVED");
+        uint256 shown = (m.success && !m.revealed) ? MASK_SENTINEL : m.attackerId;
+        return (shown, m.defenderId, m.attackType, m.success, m.revealed, m.resolved);
+    }
+
+    function initiateSpyAttack(
+        uint256 attackerId,
         uint256 defenderId,
-        uint256 attackType
-    ) public view returns (bool) {
-        uint256 infrastructureAmount = inf.getInfrastructureCount(defenderId);
-        uint256 techAmount = inf.getTechnologyCount(defenderId);
-        uint256 landAmount = inf.getLandCount(defenderId);
-        if (attackType == 4) {
-            require(
-                landAmount >= 15,
-                "defender does not have enough land to conduct operation"
-            );
+        uint8   attackType
+    ) external onlyGelatoRelayERC2771 returns (uint256 newAttackId) {
+        require(attackType >= MIN_ATTACK_TYPE && attackType <= MAX_ATTACK_TYPE, "attackType");
+        require(attackerId != defenderId, "SELF");
+        address user = _getMsgSender();
+        require(mint.checkOwnership(attackerId, user), "!owner");
+
+        _registerSpyOp(attackerId, defenderId);
+        require(_internalCheckSpyOperation(defenderId, attackType), "!allowed");
+
+        uint256 defenderStrength = strength.getNationStrength(defenderId);
+        uint256 cost = _calculateSpyOpCost(attackType, defenderStrength);
+
+        tsy.spendBalance(attackerId, cost);
+
+        pending[attackId] = PendingAttack({
+            attackerId: attackerId,
+            defenderId: defenderId,
+            attackType: attackType,
+            exists: true
+        });
+
+        uint256 requestId = _requestRandomness();
+        vrfRequestToAttackId[requestId] = attackId;
+
+        emit SpyAttackCommitted(attackId, defenderId, attackType);
+        emit VrfRequested(attackId, requestId);
+
+        newAttackId = attackId;
+        attackId++;
+    }
+
+    /* -------------------------- VRF Request Helper ---------------------------- */
+
+    function _requestRandomness() internal returns (uint256 reqId) {
+        VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+            keyHash: vrfKeyHash,
+            subId: vrfSubId,
+            requestConfirmations: vrfMinConfirmations,
+            callbackGasLimit: vrfCallbackGasLimit,
+            numWords: vrfNumWords,
+            extraArgs: VRFV2PlusClient._argsToBytes(
+                VRFV2PlusClient.ExtraArgsV1({ nativePayment: useNativePayment })
+            )
+        });
+
+        reqId = s_vrfCoordinator.requestRandomWords(req);
+    }
+
+    /* -------------------------- VRF Fulfillment (v2.5) ------------------------ */
+
+    /**
+     * @dev VRFConsumerBaseV2Plus internal override.
+     * NOTE: randomWords length = vrfNumWords.
+     */
+    function fulfillRandomWords(
+        uint256 requestId,
+        uint256[] calldata randomWords
+    ) internal override {
+        uint256 id = vrfRequestToAttackId[requestId];
+        require(pending[id].exists, "no pending");
+
+        PendingAttack memory p = pending[id];
+        delete pending[id];
+        delete vrfRequestToAttackId[requestId];
+
+        // Compute success
+        uint256 atkScore = getAttackerSuccessScore(p.attackerId);
+        uint256 defScore = getDefenseSuccessScore(p.defenderId);
+        uint256 total = atkScore + defScore;
+        bool success = false;
+        if (total > 0) {
+            success = (randomWords[0] % total) < atkScore;
         }
-        if (attackType == 10) {
-            require(
-                techAmount >= 15,
-                "defender does not have enough tech to conduct operation"
-            );
+
+        attacks[id] = AttackMeta({
+            attackerId: p.attackerId,
+            defenderId: p.defenderId,
+            attackType: p.attackType,
+            success: success,
+            revealed: !success,
+            resolved: true
+        });
+
+        if (success) {
+            uint256 effectRand = uint256(keccak256(
+                abi.encode(randomWords[0], id, p.attackerId, p.defenderId)
+            ));
+            _applySpyEffects(p.attackerId, p.defenderId, p.attackType, effectRand);
+            emit SpyAttackResolvedPublic(id, MASK_SENTINEL, true);
+        } else {
+            emit SpyAttackResolvedPublic(id, p.attackerId, false);
         }
-        if (attackType == 13) {
-            require(
-                infrastructureAmount >= 15,
-                "defender does not have enough infrastructure to conduct operation"
-            );
-        }
-        uint256 nukeCount = mis.getNukeCount(defenderId);
-        bool silo = won2.getHiddenNuclearMissileSilo(defenderId);
-        if (attackType == 14) {
-            if (silo) {
-                require(
-                    nukeCount >= 6,
-                    "defender does not have enough nukes to conduct operation"
-                );
-            } else {
-                require(
-                    nukeCount >= 1,
-                    "defender does not have enough nukes to conduct operation"
-                );
-            }
+    }
+
+    /* ------------------------------ Reveal Success ---------------------------- */
+
+    function revealAttack(uint256 id) external {
+        AttackMeta storage m = attacks[id];
+        require(m.resolved, "!resolved");
+        require(m.success, "only success");
+        require(!m.revealed, "revealed");
+        require(
+            mint.checkOwnership(m.attackerId, _getMsgSender()) || msg.sender == owner(),
+            "!auth"
+        );
+        m.revealed = true;
+        emit SpyAttackRevealed(id, m.attackerId);
+    }
+
+    /* ------------------------- Daily Cap Registration ------------------------- */
+
+    function _registerSpyOp(uint256 attackerId, uint256 defenderId) internal {
+        uint256 day = keep.getGameDay();
+
+        DaySpies storage atk = _daySpyCount[day][attackerId];
+        require(atk.outgoing < MAX_OUTGOING, "atk cap");
+        atk.outgoing += 1;
+
+        DaySpies storage def = _daySpyCount[day][defenderId];
+        require(def.incoming < MAX_INCOMING, "def cap");
+        def.incoming += 1;
+    }
+
+    /* ---------------------- Operation Allowance (internal) -------------------- */
+
+    function _internalCheckSpyOperation(uint256 defenderId, uint8 attackType) internal view returns (bool) {
+        uint256 infra = inf.getInfrastructureCount(defenderId);
+        uint256 tech  = inf.getTechnologyCount(defenderId);
+        uint256 land  = inf.getLandCount(defenderId);
+
+        if (attackType == 4)  require(land >= 15, "land<15");
+        if (attackType == 10) require(tech >= 15, "tech<15");
+        if (attackType == 11) require(infra >= 15, "infra<15");
+        if (attackType == 12) {
+            uint256 nukeCount = mis.getNukeCount(defenderId);
+            bool silo = won2.getHiddenNuclearMissileSilo(defenderId);
+            if (silo) require(nukeCount >= 6, "nukes<6");
+            else      require(nukeCount >= 1, "nukes<1");
         }
         return true;
     }
 
+    /* --------------------------- Success Score Logic -------------------------- */
 
-    function getAttackerSuccessScore(
-        uint256 countryId
-    ) public view returns (uint256) {
-        uint256 spyCount = spy.getSpyCount(countryId);
+    function getAttackerSuccessScore(uint256 countryId) public view returns (uint256) {
+        uint256 spyCount   = spy.getSpyCount(countryId);
         uint256 techAmount = inf.getTechnologyCount(countryId);
-        uint256 attackSuccessScore = (spyCount + (techAmount / 15));
-        bool cia = won1.getCentralIntelligenceAgency(countryId);
-        if (cia) {
-            attackSuccessScore = ((attackSuccessScore * 110) / 100);
+        uint256 score = spyCount + (techAmount / 15);
+        if (won1.getCentralIntelligenceAgency(countryId)) {
+            score = (score * 110) / 100;
         }
-        bool accomodativeGovt = checkAccomodativeGovernment(countryId);
-        if (accomodativeGovt) {
-            attackSuccessScore = ((attackSuccessScore * 110) / 100);
+        if (_accommodativeGov(countryId)) {
+            score = (score * 110) / 100;
         }
-        return attackSuccessScore;
+        return score;
     }
 
-    function checkAccomodativeGovernment(uint256 countryId)
-        public
-        view
-        returns (bool)
-    {
-        uint256 government = params.getGovernmentType(
-            countryId
-        );
-        if (
-            government == 2 ||
-            government == 7 ||
-            government == 10
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    function getDefenseSuccessScore(
-        uint256 countryId
-    ) public view returns (uint256) {
-        uint256 spyCount = spy.getSpyCount(countryId);
+    function getDefenseSuccessScore(uint256 countryId) public view returns (uint256) {
+        uint256 spyCount   = spy.getSpyCount(countryId);
         uint256 techAmount = inf.getTechnologyCount(countryId);
         uint256 landAmount = inf.getLandCount(countryId);
-        uint256 threatLevel = mil.getThreatLevel(countryId);
-        uint256 defenseSuccessScoreGross = (spyCount +
-            (techAmount / 20) +
-            (landAmount / 70));
-        uint256 defenseSuccessScore;
-        if (threatLevel == 1) {
-            defenseSuccessScore = ((defenseSuccessScoreGross * 75) / 100);
-        } else if (threatLevel == 2) {
-            defenseSuccessScore = ((defenseSuccessScoreGross * 90) / 100);
-        } else if (threatLevel == 3) {
-            defenseSuccessScore = defenseSuccessScoreGross;
-        } else if (threatLevel == 4) {
-            defenseSuccessScore = ((defenseSuccessScoreGross * 110) / 100);
-        } else {
-            defenseSuccessScore = ((defenseSuccessScoreGross * 125) / 100);
-        }
-        return defenseSuccessScore;
+        uint256 threat     = mil.getThreatLevel(countryId);
+
+        uint256 gross = spyCount + (techAmount / 20) + (landAmount / 70);
+        if (threat == 1) return (gross * 75) / 100;
+        if (threat == 2) return (gross * 90) / 100;
+        if (threat == 3) return gross;
+        if (threat == 4) return (gross * 110) / 100;
+        if (threat == 4) return (gross * 125) / 100;
+        return (gross * 125) / 100;
     }
 
-    event SpyAttackResults(
-        uint256 indexed attackId,
-        uint256 indexed attackerId,
-        uint256 indexed defenderId,
-        bool success,
-        uint256 attackType
-    );
-
-    address public relayer = 0xdB3892b0FD38D73B65a9AD2fC3920B74B2B71dfb;
-
-    modifier onlyRelayer() {
-        require(msg.sender == relayer);
-        _;
+    function _accommodativeGov(uint256 id) internal view returns (bool) {
+        uint256 g = params.getGovernmentType(id);
+        return (g == 2 || g == 7 || g == 10);
     }
 
-    mapping(uint256 => mapping(uint256 => bool)) public dayToDefenderIdToAttackedToday;
+    /* ------------------------------ Cost Function ----------------------------- */
 
-    function attackedAlready(
-        uint256 defenderId
-    )
-        public
-        view
-        returns (bool)
-    {
-        uint256 day = keep.getGameDay();
-        return dayToDefenderIdToAttackedToday[day][defenderId];
+    function _calculateSpyOpCost(uint8 attackType, uint256 defenderStrength) internal pure returns (uint256) {
+        if (attackType == 1)  return 100_000 + defenderStrength;
+        if (attackType == 2)  return 100_000 + defenderStrength * 2;
+        if (attackType == 3)  return 100_000 + defenderStrength * 3;
+        if (attackType == 4)  return 100_000 + defenderStrength * 3;
+        if (attackType == 5)  return 100_000 + defenderStrength * 3;
+        if (attackType == 6)  return 150_000 + defenderStrength;
+        if (attackType == 7)  return 150_000 + defenderStrength * 5;
+        if (attackType == 8)  return 250_000 + defenderStrength * 2;
+        if (attackType == 9)  return 300_000 + defenderStrength * 2;
+        if (attackType == 10) return 100_000 + defenderStrength * 20;
+        if (attackType == 11) return 500_000 + defenderStrength * 5;
+        if (attackType == 12) return 500_000 + defenderStrength * 15;
+        revert("attackType");
     }
 
-    function spyAttack(bool success, uint256 attackType, uint256 defenderId, uint256 attackerId, uint256 cost, uint256 randomNumber) public onlyRelayer {
-        uint256 day = keep.getGameDay();
-        if (dayToDefenderIdToAttackedToday[day][defenderId]) {
-            revert("Defender has already been attacked today");
-        }
-        if (success) {
-            tsy.spendBalance(attackerId, cost);
-            emit SpyAttackResults (
-                attackId,
-                999999999,
-                defenderId,
-                true,
-                attackType
-            );
-            completeSpyAttack(success, attackId, attackerId, defenderId, attackType, randomNumber);
-        } else {
-            emit SpyAttackResults (
-                attackId,
-                attackerId,
-                defenderId,
-                false,
-                attackType
-            );
-        }
-        attackId++;
-    }
+    /* ------------------------------- Effect Engine ---------------------------- */
 
-    function completeSpyAttack(
-        bool success,
-        uint256 _attackId,
-        uint256 attackerId,
+    function _applySpyEffects(
+        uint256 /*attackerId*/,
         uint256 defenderId,
-        uint256 attackType,
-        uint256 randomNumber
+        uint8   attackType,
+        uint256 seed
     ) internal {
-        if (!success) {
-            emit SpyAttackResults(
-                _attackId,
-                attackerId,
-                defenderId,
-                false,
-                attackType
-            );
-        } else if (success) {
-            if (attackType == 1) {
-                destroyCruiseMissiles(defenderId, randomNumber);
-            } else if (attackType == 2) {
-                destroyDefendingTanks(defenderId, randomNumber);
-            } else if (attackType == 3) {
-                captureLand(defenderId, randomNumber);
-            } else if (attackType == 4) {
-                changeDesiredGovernment(defenderId, randomNumber);
-            } else if (attackType == 5) {
-                changeDesiredReligion(defenderId, randomNumber);
-            } else if (attackType == 6) {
-                changeThreatLevel(defenderId);
-            } else if (attackType == 7) {
-                changeDefconLevel(defenderId);
-            } else if (attackType == 8) {
-                destroySpies(defenderId, randomNumber);
-            } else if (attackType == 9) {
-                captueTechnology(defenderId, randomNumber);
-            } else if (attackType == 10) {
-                sabotogeTaxes(defenderId, randomNumber);
-            } else if (attackType == 11) {
-                captureInfrastructure(defenderId, randomNumber);
-            } else {
-                destroyNukes(defenderId);
-            }
+        if (attackType == 1) {
+            _destroyCruiseMissiles(defenderId, seed);
+        } else if (attackType == 2) {
+            _destroyDefendingTanks(defenderId, seed);
+        } else if (attackType == 3) {
+            _captureLand(defenderId, seed);
+        } else if (attackType == 4) {
+            _changeDesiredGovernment(defenderId, seed);
+        } else if (attackType == 5) {
+            _changeDesiredReligion(defenderId, seed);
+        } else if (attackType == 6) {
+            mil.setThreatLevelFromSpyContract(defenderId, 1);
+        } else if (attackType == 7) {
+            mil.setDefconLevelFromSpyContract(defenderId, 5);
+        } else if (attackType == 8) {
+            _destroySpies(defenderId, seed);
+        } else if (attackType == 9) {
+            _captureTechnology(defenderId, seed);
+        } else if (attackType == 10) {
+            _sabotageTaxes(defenderId, seed);
+        } else if (attackType == 11) {
+            _captureInfrastructure(defenderId, seed);
+        } else if (attackType == 12) {
+            mis.decreaseNukeCountFromSpyContract(defenderId);
         }
     }
 
-    function destroyCruiseMissiles(
-        uint256 defenderId,
-        uint256 randomNumber
-    ) internal {
-        uint256 randomNumber2 = (randomNumber % 5) + 1;
-        mis.decreaseCruiseMissileCount(randomNumber2, defenderId);
+    function _randSlice(uint256 seed, bytes32 tag, uint256 modBase) private pure returns (uint256) {
+        return uint256(keccak256(abi.encode(seed, tag))) % modBase;
     }
 
-    function destroyDefendingTanks(
-        uint256 defenderId,
-        uint256 randomNumber
-    ) internal {
-        uint256 randomPercentage = ((randomNumber % 5) + 5);
-        uint256 defendingTankCount = force.getDefendingTankCount(defenderId);
-        uint256 tankAmountToDecrease = ((defendingTankCount * randomPercentage) /
-            100);
-        force.decreaseDefendingTankCount(tankAmountToDecrease, defenderId);
+    function _destroyCruiseMissiles(uint256 defenderId, uint256 seed) internal {
+        uint256 amount = (_randSlice(seed, "CRUISE", 5) + 1); // 1..5
+        mis.decreaseCruiseMissileCount(amount, defenderId);
     }
 
-    function captureLand(
-        uint256 defenderId,
-        uint256 randomNumber
-    ) internal {
-        uint256 randomNumberToDecreaseFromDefender = ((randomNumber % 10) +
-            5);
-        inf.decreaseLandCountFromSpyContract(defenderId, randomNumberToDecreaseFromDefender);
+    function _destroyDefendingTanks(uint256 defenderId, uint256 seed) internal {
+        uint256 pct = (_randSlice(seed, "TANKS", 5) + 5); // 5..9%
+        uint256 defending = force.getDefendingTankCount(defenderId);
+        uint256 delta = (defending * pct) / 100;
+        if (delta > 0) force.decreaseDefendingTankCount(delta, defenderId);
     }
 
-    function changeDesiredGovernment(
-        uint256 defenderId,
-        uint256 randomNumber
-    ) internal {
-        uint256 governmentPreference = params.getGovernmentPreference(
-            defenderId
-        );
-        uint256 newPreference = ((randomNumber % 10) + 1);
-        if (newPreference == governmentPreference) {
-            if (governmentPreference == 1) {
-                newPreference += 1;
-            } else {
-                newPreference -= 1;
-            }
+    function _captureLand(uint256 defenderId, uint256 seed) internal {
+        uint256 amt = (_randSlice(seed, "LAND", 10) + 5); // 5..14
+        inf.decreaseLandCountFromSpyContract(defenderId, amt);
+    }
+
+    function _changeDesiredGovernment(uint256 defenderId, uint256 seed) internal {
+        uint256 current = params.getGovernmentPreference(defenderId);
+        uint256 newPref = (_randSlice(seed, "GOV", 10) + 1); // 1..10
+        if (newPref == current) {
+            newPref = (current == 1) ? 2 : current - 1;
         }
-        params.updateDesiredGovernment(defenderId, newPreference);
+        params.updateDesiredGovernment(defenderId, newPref);
     }
 
-    function changeDesiredReligion(
-        uint256 defenderId,
-        uint256 randomNumber
-    ) internal {
-        uint256 religionPreference = params.getReligionPreference(defenderId);
-        uint256 newPreference = ((randomNumber % 14) + 1);
-        if (newPreference == religionPreference) {
-            if (religionPreference == 1) {
-                newPreference += 1;
-            } else {
-                newPreference -= 1;
-            }
+    function _changeDesiredReligion(uint256 defenderId, uint256 seed) internal {
+        uint256 current = params.getReligionPreference(defenderId);
+        uint256 newPref = (_randSlice(seed, "REL", 14) + 1); // 1..14
+        if (newPref == current) {
+            newPref = (current == 1) ? 2 : current - 1;
         }
-        params.updateDesiredReligion(defenderId, newPreference);
+        params.updateDesiredReligion(defenderId, newPref);
     }
 
-    function changeThreatLevel(
-        uint256 defenderId
-    ) internal {
-        mil.setThreatLevelFromSpyContract(defenderId, 1);
-    }
-
-    function changeDefconLevel(
-        uint256 defenderId
-    ) internal {
-        mil.setDefconLevelFromSpyContract(defenderId, 5);
-    }
-
-    function destroySpies(
-        uint256 defenderId,
-        uint256 randomNumber
-    ) internal {
+    function _destroySpies(uint256 defenderId, uint256 seed) internal {
         uint256 spyCount = spy.getSpyCount(defenderId);
-        uint256 spyCountToDestroy = ((randomNumber % 20) + 1);
-        if (spyCountToDestroy > spyCount) {
-            spyCountToDestroy = spyCount;
-        }
-        spy.decreaseDefenderSpyCount(spyCountToDestroy, defenderId);
+        uint256 toDestroy = (_randSlice(seed, "SPY", 20) + 1); // 1..20
+        if (toDestroy > spyCount) toDestroy = spyCount;
+        if (toDestroy > 0) spy.decreaseDefenderSpyCount(toDestroy, defenderId);
     }
 
-    function captueTechnology(
-        uint256 defenderId,
-        uint256 randomNumber
-    ) internal {
-        uint256 randomNumberToCapture = ((randomNumber % 10) + 5);
-        inf.decreaseTechCountFromSpyContract(defenderId, randomNumberToCapture);
+    function _captureTechnology(uint256 defenderId, uint256 seed) internal {
+        uint256 amt = (_randSlice(seed, "TECH", 10) + 5); // 5..14
+        inf.decreaseTechCountFromSpyContract(defenderId, amt);
     }
 
-    function sabotogeTaxes(
-        uint256 defenderId,
-        uint256 randomNumber
-    ) internal {
-
-        uint256 randomNumberToSetTaxes = ((randomNumber % 4) + 20);
-        inf.setTaxRateFromSpyContract(defenderId, randomNumberToSetTaxes);
+    function _sabotageTaxes(uint256 defenderId, uint256 seed) internal {
+        uint256 newRate = (_randSlice(seed, "TAX", 4) + 20); // 20..23
+        inf.setTaxRateFromSpyContract(defenderId, newRate);
     }
 
-    function captureInfrastructure(
-        uint256 defenderId,
-        uint256 randomNumber
-    ) internal {
-        uint256 randomNumberToExchange = ((randomNumber % 10) + 5);
-        inf.decreaseInfrastructureCountFromSpyContract(
-            defenderId,
-            randomNumberToExchange
-        );
-    }
-
-    function destroyNukes(uint256 defenderId) internal {
-        mis.decreaseNukeCountFromSpyContract(defenderId);
+    function _captureInfrastructure(uint256 defenderId, uint256 seed) internal {
+        uint256 amt = (_randSlice(seed, "INFRA", 10) + 5); // 5..14
+        inf.decreaseInfrastructureCountFromSpyContract(defenderId, amt);
     }
 }

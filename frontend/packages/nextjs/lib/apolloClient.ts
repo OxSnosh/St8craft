@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 export const client = new ApolloClient({
-  uri: "http://localhost:8000/subgraphs/name/scaffold-eth/your-contract",
+  uri: "https://api.studio.thegraph.com/query/115215/st-8-craft/0.0.1",
   cache: new InMemoryCache(),
 });

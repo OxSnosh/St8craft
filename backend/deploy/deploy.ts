@@ -427,7 +427,7 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       
         const spyOperationsContract = await deploy("SpyOperationsContract", {
           from: deployer,
-          args: [],
+          args: [vrfCoordinatorV2Address, subscriptionId, gasLane, callbackGasLimit],
           log: true,
         });
         const deployedSpyOperationsContract = await ethers.getContractAt("SpyOperationsContract", spyOperationsContract.address, signer);  
@@ -530,7 +530,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             forcesContract.address,
             fighterLosses.address,
             countryMinter.address,
-            additionalAirBattle.address
+            additionalAirBattle.address,
+            keeperContract.address,
           );          
 
         console.log("air battle contract settings");

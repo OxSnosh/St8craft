@@ -3,6 +3,6 @@ sources:
   - name: YourContract
     handler:
       graphql:
-        endpoint: https://api.thegraph.com/ipfs/oxsnosh/st8craft
+        endpoint: https://api.studio.thegraph.com/query/115215/st-8-craft/0.0.1
 documents:
   - ./graphql/GetNations.gql

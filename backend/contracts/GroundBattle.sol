@@ -11,6 +11,7 @@ import "./CountryMinter.sol";
 import "./Taxes.sol";
 import "./CountryParameters.sol";
 import "./Military.sol";
+import "./KeeperFile.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
@@ -23,7 +24,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 ///@dev this contract inherits from the chainlink vrf contract
 ///@notice the GroundBattleContract will allow nations at war to launch ground attacks against each other
 contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
-
     uint256 groundBattleId;
     address warAddress;
     address infrastructure;
@@ -37,6 +37,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     address additionalTaxes;
     address parameters;
     address military;
+    address keeper;
 
     uint256[] public todaysGroundBattles;
 
@@ -52,6 +53,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     AdditionalTaxesContract addTax;
     CountryParametersContract param;
     MilitaryContract mil;
+    KeeperContract keep;
 
     struct GroundForcesToBattle {
         uint256 attackType;
@@ -71,6 +73,14 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint256 defenderTankLosses;
     }
 
+    struct DayBattles {
+        uint8 offenseCount;
+        uint8 defenseCount;
+    }
+
+    mapping(uint256 => mapping(uint256 => DayBattles)) private _battleCount;
+    uint8 public constant MAX_GROUND_BATTLES_PER_DAY = 2;
+
     //Chainlik Variables
     uint256[] private s_randomWords;
     uint256 private immutable i_subscriptionId;
@@ -81,11 +91,11 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
     mapping(uint256 => GroundForcesToBattle) groundBattleIdToAttackerForces;
     mapping(uint256 => GroundForcesToBattle) groundBattleIdToDefenderForces;
-    
+
     mapping(uint256 => uint256) s_requestIdToRequestIndex;
     mapping(uint256 => uint256[]) public s_requestIndexToRandomWords;
 
-    event BattleResultsEvent (
+    event BattleResultsEvent(
         uint256 battleId,
         uint256 attackSolderLosses,
         uint256 attackTankLosses,
@@ -105,9 +115,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         i_callbackGasLimit = callbackGasLimit;
     }
 
-    function updateVRFCoordinator(
-        address vrfCoordinatorV2
-    ) public onlyOwner {
+    function updateVRFCoordinator(address vrfCoordinatorV2) public onlyOwner {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
     }
 
@@ -117,7 +125,8 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         address _forces,
         address _treasury,
         address _countryMinter,
-        address _military
+        address _military,
+        address _keeper
     ) public onlyOwner {
         warAddress = _warAddress;
         war = WarContract(_warAddress);
@@ -131,6 +140,8 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         mint = CountryMinter(_countryMinter);
         military = _military;
         mil = MilitaryContract(_military);
+        keeper = _keeper;
+        keep = KeeperContract(_keeper);
     }
 
     function settings2(
@@ -254,6 +265,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
                 attackType == 4,
             "invalid attack type"
         );
+        _registerGroundBattle(warId, attackerId);
         generateAttackerForcesStruct(
             warId,
             groundBattleId,
@@ -264,6 +276,38 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         war.cancelPeaceOffersUponAttack(warId);
         fulfillRequest(groundBattleId);
         groundBattleId++;
+    }
+
+    /// @dev reverts if attacker has already fought twice today in this war
+    function _registerGroundBattle(uint256 warId, uint256 attackerId) internal {
+        uint256 today = keep.getGameDay();
+        DayBattles storage bucket = _battleCount[warId][today];
+
+        (uint256 offense, uint256 defense) = war.getInvolvedParties(warId);
+
+        if (attackerId == offense) {
+            require(
+                bucket.offenseCount < MAX_GROUND_BATTLES_PER_DAY,
+                "offense daily cap reached"
+            );
+            bucket.offenseCount += 1;
+        } else if (attackerId == defense) {
+            require(
+                bucket.defenseCount < MAX_GROUND_BATTLES_PER_DAY,
+                "defense daily cap reached"
+            );
+            bucket.defenseCount += 1;
+        } else {
+            revert("attacker not in this war");
+        }
+    }
+
+    function getGroundBattlesToday(
+        uint256 warId,
+        uint256 gameDay
+    ) external view returns (uint8 offense, uint8 defense) {
+        DayBattles storage bucket = _battleCount[warId][gameDay];
+        return (bucket.offenseCount, bucket.defenseCount);
     }
 
     function generateAttackerForcesStruct(
@@ -373,7 +417,9 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
             warId
         );
         uint256 attackerTech = inf.getTechnologyCount(attackerId);
-        uint256 strength = (soldierEfficiency + (15 * tanksDeployed) + (attackerTech));
+        uint256 strength = (soldierEfficiency +
+            (15 * tanksDeployed) +
+            (attackerTech));
         uint256 mod = 100;
         bool pentagon = won3.getPentagon(attackerId);
         if (pentagon) {
@@ -418,7 +464,9 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint256 soldierEfficiency = getDefendingSoldierEfficiency(defenderId);
         uint256 tanks = force.getDefendingTankCount(defenderId);
         uint256 defenderTech = inf.getTechnologyCount(defenderId);
-        uint256 strength = ((soldierEfficiency) + (17 * tanks) + (defenderTech));
+        uint256 strength = ((soldierEfficiency) +
+            (17 * tanks) +
+            (defenderTech));
         (uint256 warOffense, uint256 warDefense) = war.getInvolvedParties(
             _warId
         );
@@ -444,7 +492,10 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         return defendingSoldierEfficiency;
     }
 
-    function getDefenderStrengthModifier(uint256 defenderId, uint256 attackerId) public view returns (uint256) {
+    function getDefenderStrengthModifier(
+        uint256 defenderId,
+        uint256 attackerId
+    ) public view returns (uint256) {
         uint256 mod = 100;
         uint256 officeOfPropagandaCount = imp4.getOfficeOfPropagandaCount(
             attackerId
@@ -473,10 +524,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         return mod;
     }
 
-    event RandomnessRequested(
-        uint256 requestId,
-        uint256 battleId
-    );
+    event RandomnessRequested(uint256 requestId, uint256 battleId);
 
     function fulfillRequest(uint256 battleId) internal {
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
@@ -486,14 +534,13 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
                 requestConfirmations: REQUEST_CONFIRMATIONS,
                 callbackGasLimit: i_callbackGasLimit,
                 numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                extraArgs: VRFV2PlusClient._argsToBytes(
+                    VRFV2PlusClient.ExtraArgsV1({nativePayment: true})
+                )
             })
         );
         s_requestIdToRequestIndex[requestId] = battleId;
-        emit RandomnessRequested(
-            requestId,
-            battleId
-        );        
+        emit RandomnessRequested(requestId, battleId);
     }
 
     function fulfillRandomWords(
@@ -506,10 +553,8 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
             .strength;
         uint256 defenderStrength = groundBattleIdToDefenderForces[battleId]
             .strength;
-        uint256 attackerId = groundBattleIdToAttackerForces[battleId]
-            .countryId;
-        uint256 defenderId = groundBattleIdToDefenderForces[battleId]
-            .countryId;
+        uint256 attackerId = groundBattleIdToAttackerForces[battleId].countryId;
+        uint256 defenderId = groundBattleIdToDefenderForces[battleId].countryId;
         uint256 warId = groundBattleIdToAttackerForces[battleId].warId;
         uint256 totalStrength = (attackerStrength + defenderStrength);
         uint256 randomVictoryNumber = randomWords[0] % totalStrength;
@@ -546,7 +591,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         );
     }
 
-    event GroundBattleResultsEvent (
+    event GroundBattleResultsEvent(
         uint256 battleId,
         uint256 warId,
         uint256 attackerId,
@@ -558,7 +603,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     );
 
     function completeBattleSequence(
-        uint256 battleId, 
+        uint256 battleId,
         uint256 attackerId,
         uint256 attackerSoldierLosses,
         uint256 attackerTankLosses,
@@ -575,13 +620,15 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
             defenderTankLosses,
             defenderId
         );
-        require(war.decreaseGroundBattleLosses(
-            attackerSoldierLosses,
-            attackerTankLosses,
-            attackerId,
-            warId
-        ));
-        emit GroundBattleResultsEvent (
+        require(
+            war.decreaseGroundBattleLosses(
+                attackerSoldierLosses,
+                attackerTankLosses,
+                attackerId,
+                warId
+            )
+        );
+        emit GroundBattleResultsEvent(
             battleId,
             warId,
             attackerId,
@@ -603,6 +650,7 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         if (anarchyCheckAttacker) {
             param.inflictAnarchy(attackerId);
         }
+        collectSpoils(battleId, attackerId);
     }
 
     function getPercentageLosses(
@@ -797,5 +845,3 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         );
     }
 }
-
-

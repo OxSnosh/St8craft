@@ -250,6 +250,10 @@ contract NukeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         s_requestIdToRequestIndex[requestId] = id;
     }
 
+    event NukeAttackPending(
+        uint256 requestId
+    );
+
     ///@dev this function will be called by the chainlink VRF contract in response to a randomness request
     ///@dev the random numbers will be used to determine if the nuke strike was a success or not
     ///@notice a nations default odds of a successful nuke strike are 50%
@@ -265,10 +269,31 @@ contract NukeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint256 requestNumber = s_requestIdToRequestIndex[requestId];
         s_requestIndexToRandomWords[requestNumber] = randomWords;
         s_randomWords = randomWords;
+        emit NukeAttackPending(
+            requestId
+        );
+    }   
+
+    address public oracle = 0xA918a6FE02d64e999FadB6FB9c3E2C74A63ED67C;
+
+    modifier onlyOracle() {
+        require(msg.sender == oracle, "!ORACLE");
+        _;
+    }
+
+    function setOracle(address _oracleAddress) public onlyOwner {
+        oracle = _oracleAddress;
+    }
+
+    function completeNukeAttack(
+        uint256 requestId
+    ) external onlyOracle nonReentrant {
+        uint256 requestNumber = s_requestIdToRequestIndex[requestId];
+        uint256[] memory randomWords = s_requestIndexToRandomWords[requestNumber];
         uint256 attackerId = nukeAttackIdToNukeAttack[requestNumber].attackerId;
         uint256 defenderId = nukeAttackIdToNukeAttack[requestNumber].defenderId;
         uint256 thwartOdds = getThwartOdds(attackerId, defenderId);
-        uint256 randomNukeSuccessNumber = ((s_randomWords[0] % 100) + 1);
+        uint256 randomNukeSuccessNumber = ((randomWords[0] % 100) + 1);
         if (randomNukeSuccessNumber > thwartOdds) {
             inflictNukeDamage(requestNumber);
             mis.decreaseNukeCountFromNukeContract(attackerId);

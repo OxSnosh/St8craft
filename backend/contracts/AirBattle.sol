@@ -10,6 +10,7 @@ import "./Wonders.sol";
 import "./CountryMinter.sol";
 import "./Forces.sol";
 import "./Missiles.sol";
+import "./KeeperFile.sol";
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import {IVRFCoordinatorV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/interfaces/IVRFCoordinatorV2Plus.sol";
@@ -30,6 +31,7 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     address fighterLosses;
     address countryMinter;
     address addAirBattleAddress;
+    address keeper;
     //fighter strength
     uint256 yak9Strength = 1;
     uint256 p51MustangStrength = 2;
@@ -61,6 +63,7 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     FighterLosses fighterLoss;
     CountryMinter mint;
     AdditionalAirBattle addAirBattle;
+    KeeperContract keep;
 
     uint256[] private s_randomWords;
     uint256 public i_subscriptionId;
@@ -81,6 +84,13 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint256[] defenderFighterCasualties;
         uint256[] damage;
     }
+
+    struct DaySorties {
+        uint8 offenseCount;
+        uint8 defenseCount;
+    }
+
+    mapping(uint256 => mapping(uint256 => DaySorties)) private _sortieCount;
 
     event AirAssaultLaunched(
         uint256 indexed battleId,
@@ -120,7 +130,8 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         address _forces,
         address _fighterLosses,
         address _mint,
-        address _addAirBattle
+        address _addAirBattle,
+        address _keeper
     ) public onlyOwner {
         warAddress = _warAddress;
         war = WarContract(_warAddress);
@@ -138,6 +149,8 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         mint = CountryMinter(_mint);
         addAirBattleAddress = _addAirBattle;
         addAirBattle = AdditionalAirBattle(_addAirBattle);
+        keeper = _keeper;
+        keep = KeeperContract(_keeper);
     }
 
     ///@dev this function is a public function
@@ -173,6 +186,7 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint256 attackerFighterSum = getAttackerFighterSum(
             attackerFighterArray
         );
+        _registerSortie(warId, attackerId);
         uint256 attackerBomberSum = getAttackerBomberSum(attackerBomberArray);
         uint256 attackSum = (attackerFighterSum + attackerBomberSum);
         require(attackSum <= 25, "cannot send more than 25 planes on a sortie");
@@ -195,6 +209,37 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
             airBattleId
         );
         airBattleId++;
+    }
+
+    /// @notice reverts if caller’s side already flew two sorties today
+    /// @param warId        the war
+    /// @param attackerId   caller’s nation id
+    function _registerSortie(
+        uint256 warId,
+        uint256 attackerId
+    ) internal {
+        uint256 today = keep.getGameDay();
+        DaySorties storage bucket = _sortieCount[warId][today];
+
+        (uint256 offense, uint256 defense) = war.getInvolvedParties(warId);
+
+        if (attackerId == offense) {
+            require(bucket.offenseCount < 2, "offense daily cap reached");
+            bucket.offenseCount += 1;
+        } else if (attackerId == defense) {
+            require(bucket.defenseCount < 2, "defense daily cap reached");
+            bucket.defenseCount += 1;
+        } else {
+            revert("attacker not in this war");
+        }
+    }
+
+    function getSortiesToday(
+        uint256 warId,
+        uint256 gameDay
+    ) external view returns (uint8 offense, uint8 defense) {
+        DaySorties storage bucket = _sortieCount[warId][gameDay];
+        return (bucket.offenseCount, bucket.defenseCount);
     }
 
     function completeAirBattleLaunch(
