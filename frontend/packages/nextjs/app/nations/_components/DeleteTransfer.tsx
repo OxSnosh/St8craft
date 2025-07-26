@@ -6,7 +6,7 @@ import { useWriteContract } from "wagmi";
 import { deleteNation, transferNation } from "~~/utils/deleteTransfer";
 import { useAllContracts } from "~~/utils/scaffold-eth/contractsData";
 
-const TransferDeleteNation = () => {
+const TransferDeleteNation: React.FC = () => {
   const contractsData = useAllContracts();
   const { writeContractAsync } = useWriteContract();
   const countryMinter = contractsData?.CountryMinter;

@@ -36,6 +36,10 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/mint",
   },
   {
+    label: "Nations",
+    href: "/nations?id=0",
+  },
+  {
     label: "Gameplay Guide",
     href: "/gameplay",
   },

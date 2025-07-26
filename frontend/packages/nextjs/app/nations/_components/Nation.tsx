@@ -22,7 +22,7 @@ import BuyWonder from "./BuyWonder";
 import CollectTaxes from "./CollectTaxes";
 import ManageWars from "./DeclareWar";
 import TransferDeleteNation from "./DeleteTransfer";
-import DepositWithdraw from "./DepositWithdraw";
+import WBXSwap from "./Swap";
 import GovernmentDetails from "./GovernmentDetails";
 import ManageTrades from "./ManageTrades";
 import Messages from "./Messages";
@@ -42,7 +42,7 @@ const menuItems = [
     options: ["Government Settings", "Military Settings", "Manage Trades", "Send Aid", "Senate", "Alliance"],
   },
   { category: "MANAGE WARS", options: ["Declare War", "Active Wars", "Spy Attack"] },
-  { category: "TREASURY", options: ["Collect Taxes", "Pay Bills", "Deposit and Withdraw"] },
+  { category: "TREASURY", options: ["Collect Taxes", "Pay Bills", "Swap for WBX"] },
   { category: "MUNICIPAL PURCHASES", options: ["Infrastructure", "Technology", "Land"] },
   { category: "NATION UPGRADES", options: ["Improvements", "Wonders"] },
   {
@@ -192,8 +192,8 @@ const Nation = () => {
         setSelectedComponent(<MilitarySettings />);
       } else if (savedMenuItem === "Pay Bills") {
         setSelectedComponent(<PayBills />);
-      } else if (savedMenuItem === "Deposit and Withdraw") {
-        setSelectedComponent(<DepositWithdraw />);
+      } else if (savedMenuItem === "Swap for WBX") {
+        setSelectedComponent(<WBXSwap wbxAddress="0x4DeaEee7C7a34aAfED7BCDDB9CC042eAD4aD98F9" />);
       } else if (savedMenuItem === "Infrastructure") {
         setSelectedComponent(<BuyInfrastructure />);
       } else if (savedMenuItem === "Technology") {
@@ -262,8 +262,8 @@ const Nation = () => {
       setSelectedComponent(<MilitarySettings />);
     } else if (option === "Pay Bills") {
       setSelectedComponent(<PayBills />);
-    } else if (option === "Deposit and Withdraw") {
-      setSelectedComponent(<DepositWithdraw />);
+    } else if (option === "Swap for WBX") {
+      setSelectedComponent(<WBXSwap wbxAddress="0x4DeaEee7C7a34aAfED7BCDDB9CC042eAD4aD98F9" />);
     } else if (option === "Infrastructure") {
       setSelectedComponent(<BuyInfrastructure />);
     } else if (option === "Technology") {

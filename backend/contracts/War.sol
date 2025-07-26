@@ -18,20 +18,15 @@ import "hardhat/console.sol";
 ///@dev this contract inherits from openzeppelin's ownable contract
 contract WarContract is Ownable {
     uint256 public warId;
-    address public countryMinter;
-    address public nationStrength;
-    address public military;
-    address public breakBlockade;
-    address public navalAttack;
-    address public airBattle;
-    address public groundBattle;
-    address public cruiseMissile;
-    address public blockade;
-    address public nuke;
-    address public forces;
-    address public wonders1;
-    address public keeper;
-    address public treasury;
+    address private nationStrength;
+    address private breakBlockade;
+    address private navalAttack;
+    address private airBattle;
+    address private groundBattle;
+    address private cruiseMissile;
+    address private blockade;
+    address private nuke;
+    address private forces;
 
     NationStrengthContract nsc;
     MilitaryContract mil;
@@ -131,7 +126,6 @@ contract WarContract is Ownable {
         address _wonders1,
         address _keeper
     ) public onlyOwner {
-        countryMinter = _countryMinter;
         mint = CountryMinter(_countryMinter);
         nationStrength = _nationStrength;
         breakBlockade = _breakBlockadeAddress;
@@ -139,13 +133,10 @@ contract WarContract is Ownable {
         airBattle = _airBattleAddress;
         groundBattle = _groundBattle;
         nsc = NationStrengthContract(_nationStrength);
-        military = _military;
         mil = MilitaryContract(_military);
         cruiseMissile = _cruiseMissile;
         forces = _forces;
-        wonders1 = _wonders1;
         won1 = WondersContract1(_wonders1);
-        keeper = _keeper;
         keep = KeeperContract(_keeper);
     }
 
@@ -155,7 +146,6 @@ contract WarContract is Ownable {
         address _blockade,
         address _nuke
     ) public onlyOwner {
-        treasury = _treasury;
         tres = TreasuryContract(_treasury);
         forces = _forces;
         forc = ForcesContract(_forces);
@@ -734,40 +724,80 @@ contract WarContract is Ownable {
     }
 
     function recallTroopsFromDeactivatedWars(uint256 id) public {
-        bool isOwner = mint.checkOwnership(id, msg.sender);
-        require(isOwner, "!nation owner");
+        require(mint.checkOwnership(id, msg.sender), "!nation owner");
+
+        // 1) Recall from ALL ACTIVE wars; deactivate those that are expired.
         uint256[] memory activeWars = idToActiveWars[id];
-        for (uint256 i = 0; i < activeWars.length; i++) {
-            (, bool expired) = getDaysLeft(activeWars[i]);
-            if (expired == true) {
-                removeActiveWar(activeWars[i]);
-            }
-        }
-        uint256[] storage deactivatedWars = idToDeactivatedWars[id];
-        for (uint256 i = 0; i < deactivatedWars.length; i++) {
-            uint256 war = deactivatedWars[i];
+        for (uint256 i = 0; i < activeWars.length; ) {
+            uint256 war = activeWars[i];
+
             (uint256 offenseId, uint256 defenseId) = getInvolvedParties(war);
             if (id == offenseId) {
-                uint256 soldiersDeployed = warIdToOffenseDeployed1[war]
-                    .soldiersDeployed;
-                uint256 tanksDeployed = warIdToOffenseDeployed1[war]
-                    .tanksDeployed;
-                forc.withdrawSoldiers(soldiersDeployed, id);
-                forc.withdrawTanks(tanksDeployed, id);
-                warIdToOffenseDeployed1[war].soldiersDeployed = 0;
-                warIdToOffenseDeployed1[war].tanksDeployed = 0;
+                uint256 s = warIdToOffenseDeployed1[war].soldiersDeployed;
+                uint256 t = warIdToOffenseDeployed1[war].tanksDeployed;
+                if (s > 0) {
+                    forc.withdrawSoldiers(s, id);
+                    warIdToOffenseDeployed1[war].soldiersDeployed = 0;
+                }
+                if (t > 0) {
+                    forc.withdrawTanks(t, id);
+                    warIdToOffenseDeployed1[war].tanksDeployed = 0;
+                }
             } else if (id == defenseId) {
-                uint256 soldiersDeployed = warIdToDefenseDeployed1[war]
-                    .soldiersDeployed;
-                uint256 tanksDeployed = warIdToDefenseDeployed1[war]
-                    .tanksDeployed;
-                forc.withdrawSoldiers(soldiersDeployed, id);
-                forc.withdrawTanks(tanksDeployed, id);
-                warIdToDefenseDeployed1[war].soldiersDeployed = 0;
-                warIdToDefenseDeployed1[war].tanksDeployed = 0;
+                uint256 s = warIdToDefenseDeployed1[war].soldiersDeployed;
+                uint256 t = warIdToDefenseDeployed1[war].tanksDeployed;
+                if (s > 0) {
+                    forc.withdrawSoldiers(s, id);
+                    warIdToDefenseDeployed1[war].soldiersDeployed = 0;
+                }
+                if (t > 0) {
+                    forc.withdrawTanks(t, id);
+                    warIdToDefenseDeployed1[war].tanksDeployed = 0;
+                }
             }
-            deactivatedWars[i] = deactivatedWars[deactivatedWars.length - 1];
+
+            // If expired, move it out of active list.
+            (, bool expired) = getDaysLeft(war);
+            if (expired) {
+                removeActiveWar(war);
+            }
+
+            unchecked { ++i; }
+        }
+
+        // 2) Recall from DEACTIVATED wars (guards avoid double-withdraw) and clear the list.
+        uint256[] storage deactivatedWars = idToDeactivatedWars[id];
+        for (uint256 i = deactivatedWars.length; i > 0; ) {
+            uint256 war = deactivatedWars[i - 1];
+
+            (uint256 offenseId, uint256 defenseId) = getInvolvedParties(war);
+            if (id == offenseId) {
+                uint256 s = warIdToOffenseDeployed1[war].soldiersDeployed;
+                uint256 t = warIdToOffenseDeployed1[war].tanksDeployed;
+                if (s > 0) {
+                    forc.withdrawSoldiers(s, id);
+                    warIdToOffenseDeployed1[war].soldiersDeployed = 0;
+                }
+                if (t > 0) {
+                    forc.withdrawTanks(t, id);
+                    warIdToOffenseDeployed1[war].tanksDeployed = 0;
+                }
+            } else if (id == defenseId) {
+                uint256 s = warIdToDefenseDeployed1[war].soldiersDeployed;
+                uint256 t = warIdToDefenseDeployed1[war].tanksDeployed;
+                if (s > 0) {
+                    forc.withdrawSoldiers(s, id);
+                    warIdToDefenseDeployed1[war].soldiersDeployed = 0;
+                }
+                if (t > 0) {
+                    forc.withdrawTanks(t, id);
+                    warIdToDefenseDeployed1[war].tanksDeployed = 0;
+                }
+            }
+
             deactivatedWars.pop();
+            unchecked { --i; }
         }
     }
+
 }
