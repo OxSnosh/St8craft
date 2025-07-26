@@ -151,8 +151,6 @@ contract CountryMinter is ERC721, Ownable, ReentrancyGuard {
         require(bytes(nationName).length <= 64, "Nation Name too long");
         require(bytes(capitalCity).length <= 64, "Capital Name too long");
         require(bytes(nationSlogan).length <= 128, "Slogan too long");
-        uint256 seedMoney = TreasuryContract(treasury).getSeedMoney();
-        IWarBucks(warbucks).burnFromMint(msg.sender, seedMoney);
         _safeMint(msg.sender, countryId);
         idToOwner[countryId] = msg.sender;
         ownerCountryCount[msg.sender]++;

@@ -65,7 +65,6 @@ contract AidContract is Ownable, ReentrancyGuard {
         uint256 idSender;
         uint256 idRecipient;
         uint256 techAid;
-        uint256 balanceAid;
         uint256 soldierAid;
         bool accepted;
         bool cancelled;
@@ -77,7 +76,6 @@ contract AidContract is Ownable, ReentrancyGuard {
         uint256 indexed idRecipient,
         uint256 dayProposed,
         uint256 techAid,
-        uint256 balanceAid,
         uint256 soldierAid
     );
 
@@ -86,7 +84,6 @@ contract AidContract is Ownable, ReentrancyGuard {
         uint256 indexed idSender,
         uint256 indexed idRecipient,
         uint256 techAid,
-        uint256 balanceAid,
         uint256 soldierAid
     );
 
@@ -106,7 +103,6 @@ contract AidContract is Ownable, ReentrancyGuard {
     /// @param idSender is the country ID of the aid sender (caller of the function)
     /// @param idRecipient is the country ID of the aid recipient
     /// @param techAid is the amount of Technology being sent in the proposal
-    /// @param balanceAid is the amount of balance being sent in the proposal
     /// @param soldiersAid is the amount of troops beind sent in the proposal
     /// @notice the max aid is 100 Tech, 6,000,000 balance and 4,000 soldiers without a Federal Aid Commission
     /// @notice the max aid is 150 Tech, 9,000,000 balance and 6,000 soldiers with a Federal Aid Commission
@@ -114,7 +110,6 @@ contract AidContract is Ownable, ReentrancyGuard {
         uint256 idSender,
         uint256 idRecipient,
         uint256 techAid,
-        uint256 balanceAid,
         uint256 soldiersAid
     ) public nonReentrant {
         bool isOwner = mint.checkOwnership(idSender, msg.sender);
@@ -129,7 +124,6 @@ contract AidContract is Ownable, ReentrancyGuard {
         bool aidAvailable = checkAvailability(
             idSender,
             techAid,
-            balanceAid,
             soldiersAid
         );
         require(aidAvailable, "aid not available");
@@ -139,31 +133,27 @@ contract AidContract is Ownable, ReentrancyGuard {
             idSender,
             idRecipient
         );
-        uint256[3] memory maximums;
+        uint256[2] memory maximums;
         if (!federalAidEligible) {
             maximums = [
                 uint256(100),
-                uint256(6000000 * (10 ** 18)),
                 uint256(4000)
             ];
         }
         if (federalAidEligible) {
             maximums = [
                 uint256(150),
-                uint256(9000000 * (10 ** 18)),
                 uint256(6000)
             ];
         }
         require(techAid <= maximums[0], "max tech exceeded");
-        require(balanceAid <= maximums[1], "max balance exceeded");
-        require(soldiersAid <= maximums[2], "max soldier aid is exceeded");
+        require(soldiersAid <= maximums[1], "max soldier aid is exceeded");
         completeProposal(
             aidProposalId,
             day,
             idSender,
             idRecipient,
             techAid,
-            balanceAid,
             soldiersAid
         );
     }
@@ -174,7 +164,6 @@ contract AidContract is Ownable, ReentrancyGuard {
         uint256 idSender,
         uint256 idRecipient,
         uint256 techAid,
-        uint256 balanceAid,
         uint256 soldiersAid
     ) internal {
         Proposal memory newProposal = Proposal(
@@ -183,7 +172,6 @@ contract AidContract is Ownable, ReentrancyGuard {
             idSender,
             idRecipient,
             techAid,
-            balanceAid,
             soldiersAid,
             false,
             false
@@ -197,7 +185,6 @@ contract AidContract is Ownable, ReentrancyGuard {
             idRecipient,
             day,
             techAid,
-            balanceAid,
             soldiersAid
         );
         aidProposalId++;
@@ -265,27 +252,18 @@ contract AidContract is Ownable, ReentrancyGuard {
     ///@notice this function checks that the aid proposed is less than the available aid of the sender nation
     ///@param idSender is the nation ID of the nations proposing aid
     ///@param techAid is the amount of Tech in the aid proposal
-    ///@param balanceAid is the amount of Balance in the aid proposal
     ///@param soldiersAid is the amount of soldiers in the aid proposal
     ///@return bool true if the sender has enough of each aid parameter to send
     function checkAvailability(
         uint256 idSender,
         uint256 techAid,
-        uint256 balanceAid,
         uint256 soldiersAid
     ) public view returns (bool) {
         uint256 techAvailable = InfrastructureContract(infrastructure)
             .getTechnologyCount(idSender);
-        uint256 balanceAvailable = TreasuryContract(treasury).checkBalance(
-            idSender
-        );
         uint256 soldiersAvailable = ForcesContract(forces)
             .getDefendingSoldierCount(idSender);
         require(techAvailable >= techAid, "not enough tech for this proposal");
-        require(
-            balanceAvailable >= balanceAid,
-            "not enough funds for this proposal"
-        );
         require(
             soldiersAvailable >= soldiersAid,
             "not enough soldiers for this proposal"
@@ -351,7 +329,6 @@ contract AidContract is Ownable, ReentrancyGuard {
             revert("Proposal expired and removed");
         }
         uint256 tech = idToProposal[proposalId].techAid;
-        uint256 balance = idToProposal[proposalId].balanceAid;
         uint256 soldiers = idToProposal[proposalId].soldierAid;
         address addressRecipient = mint.ownerOf(idRecipient);
         require(
@@ -360,7 +337,7 @@ contract AidContract is Ownable, ReentrancyGuard {
         );
         bool sanctioned = sen.isSanctioned(idSender, idRecipient);
         require(!sanctioned, "trade not possible");
-        bool available = checkAvailability(idSender, tech, balance, soldiers);
+        bool available = checkAvailability(idSender, tech, soldiers);
         require(available, "balances not available");
         idToProposal[proposalId].accepted = true;
         require(InfrastructureContract(infrastructure).sendTech(
@@ -368,18 +345,12 @@ contract AidContract is Ownable, ReentrancyGuard {
             idRecipient,
             tech
         ));
-        require(TreasuryContract(treasury).sendAidBalance(
-            idSender,
-            idRecipient,
-            balance
-        ));
         require(ForcesContract(forces).sendSoldiers(idSender, idRecipient, soldiers));
         finishAcceptProposal(
             proposalId,
             idSender,
             idRecipient,
             tech,
-            balance,
             soldiers
         );
     }
@@ -389,7 +360,6 @@ contract AidContract is Ownable, ReentrancyGuard {
         uint256 idSender,
         uint256 idRecipient,
         uint256 tech,
-        uint256 balance,
         uint256 soldiers
     ) internal {
         uint256[] storage senderProposals = idToAidProposalsSent[idSender];
@@ -426,7 +396,6 @@ contract AidContract is Ownable, ReentrancyGuard {
             idSender,
             idRecipient,
             tech,
-            balance,
             soldiers
         );
     }
@@ -532,7 +501,7 @@ contract AidContract is Ownable, ReentrancyGuard {
     )
         public
         view
-        returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256)
+        returns (uint256, uint256, uint256, uint256, uint256, uint256)
     {
         return (
             idToProposal[proposalId].proposalId,
@@ -540,7 +509,6 @@ contract AidContract is Ownable, ReentrancyGuard {
             idToProposal[proposalId].idSender,
             idToProposal[proposalId].idRecipient,
             idToProposal[proposalId].techAid,
-            idToProposal[proposalId].balanceAid,
             idToProposal[proposalId].soldierAid
         );
     }

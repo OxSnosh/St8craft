@@ -58,7 +58,6 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
     uint256 public daysToInactive = 30;
     uint256 public maxDaysOfTaxes = 20;
     uint256 private silt = 100;
-    uint256 public seedMoney = 2000000 * (10 ** 18);
 
     CountryMinter mint;
     GroundBattleContract ground;
@@ -68,7 +67,6 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
         bool initialized;
         uint256 dayOfLastBillPaid;
         uint256 dayOfLastTaxCollection;
-        uint256 balance;
         bool demonitized;
     }
 
@@ -98,6 +96,8 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
         uint256 fundsTransferred
     );
 
+    WarBucks public wbx;
+
     ///@dev this function is only callable by the contract owner
     ///@dev this function will be called immediately after contract deployment in order to set contract pointers
     function settings1(
@@ -113,6 +113,7 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
         address _infrastructure
     ) public onlyOwner {
         warBucksAddress = _warBucksAddress;
+        wbx = WarBucks(warBucksAddress);
         wonders1 = _wonders1;
         wonders2 = _wonders2;
         wonders3 = _wonders3;
@@ -202,12 +203,9 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
             true,
             gameDay,
             gameDay,
-            0,
             false
         );
         idToTreasury[id] = newTreasury;
-        idToTreasury[id].balance += seedMoney;
-        totalGameBalance += seedMoney;
         counter++;
     }
 
@@ -216,52 +214,9 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
     ///@param id is the nation id of the nation being queries
     ///@return uint256 is the balance of war bucks for the nation
     function checkBalance(uint256 id) public view returns (uint256) {
-        return idToTreasury[id].balance;
-    }
-
-    ///@dev this function is only callable from a nation owner
-    ///@dev this function allows a nation owner to withdraw funds from their nation
-    ///@notice this function allows a nation owner to withdraw funds from their nation
-    ///@param amount is the amount of funds being withdrawn
-    ///@param id is the nation id of the nation withdrawing funds
-    function withdrawFunds(uint256 amount, uint256 id) public nonReentrant {
-        uint256 gameBalance = idToTreasury[id].balance;
-        require(gameBalance >= amount, "insufficient game balance");
-        bool isOwner = mint.checkOwnership(id, msg.sender);
-        require(isOwner, "!nation owner");
-        uint256 gameDay = keep.getGameDay();
-        uint256 daysOfBillsPaid = idToTreasury[id].dayOfLastBillPaid;
-        require(
-            daysOfBillsPaid == gameDay,
-            "pay bills before withdrawing funds"
-        );
-        bool demonitized = idToTreasury[id].demonitized;
-        require(demonitized == false, "ERROR");
-        idToTreasury[id].balance -= amount;
-        totalGameBalance -= amount;
-        IWarBucks(warBucksAddress).mintFromTreasury(msg.sender, amount);
-        emit FundsWithdrawn(id, amount);
-    }
-
-    ///@dev this function is only callable from a nation owner
-    ///@dev this function allows a nation owner to add funds to their nation
-    ///@notice this function allows a nation owner to add funds to their nation
-    ///@param amount is the amount of funds being added
-    ///@param id is the nation id of the nation withdrawing funds
-    function addFunds(uint256 amount, uint256 id) public nonReentrant{
-        uint256 coinBalance = IWarBucks(warBucksAddress).balanceOf(msg.sender);
-        require(
-            coinBalance >= amount,
-            "deposit amount exceeds balance in wallet"
-        );
-        bool isOwner = mint.checkOwnership(id, msg.sender);
-        require(isOwner, "!nation owner");
-        bool demonitized = idToTreasury[id].demonitized;
-        require(demonitized == false, "ERROR");
-        idToTreasury[id].balance += amount;
-        totalGameBalance += amount;
-        IWarBucks(warBucksAddress).burnFromTreasury(msg.sender, amount);
-        emit FundsAdded(id, amount);
+        address owner = mint.idToOwner(id);
+        uint256 balance = wbx.balanceOf(owner);       
+        return balance;
     }
 
     ///@dev this funtion is a public view function that will return the number of days it has been since a nation has collected taxes
@@ -301,8 +256,8 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
         uint256 id,
         uint256 amount
     ) public onlyTaxesContract {
-        idToTreasury[id].balance += amount;
-        totalGameBalance += amount;
+        address owner = mint.idToOwner(id);
+        wbx.mintFromTreasury(owner, amount);
         uint256 day = keep.getGameDay();
         idToTreasury[id].dayOfLastTaxCollection = day;
     }
@@ -336,12 +291,8 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
         uint256 id,
         uint256 amount
     ) public onlyBillsContract returns (bool) {
-        require(
-            idToTreasury[id].balance >= amount,
-            "balance not high enough to pay bills"
-        );
-        idToTreasury[id].balance -= amount;
-        totalGameBalance -= amount;
+        address owner = mint.idToOwner(id);
+        wbx.burnFromTreasury(owner, amount);
         uint256 day = keep.getGameDay();
         idToTreasury[id].dayOfLastBillPaid = day;
         return true;
@@ -413,14 +364,13 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
         uint256 id,
         uint256 cost
     ) external approvedBalanceSpender returns (bool) {
-        uint256 balance = idToTreasury[id].balance;
+        uint256 balance = wbx.balanceOf(mint.idToOwner(id));
         require(balance >= cost, "insufficient balance");
         bool demonitized = idToTreasury[id].demonitized;
         require(demonitized == false, "ERROR");
         bool inactive = checkInactive(id);
         require(inactive == false, "ERROR Inactive, pay bills to reactivate");
-        idToTreasury[id].balance -= cost;
-        totalGameBalance -= cost;
+        wbx.burnFromTreasury(mint.idToOwner(id), cost);
         //TAXES here
         uint256 taxLevied = ((cost * silt) / 100);
         if (taxLevied > 0) {
@@ -443,22 +393,6 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
     function withdrawSiltRevenues(uint256 amount) public onlyOwner {
         WarBucks(warBucksAddress).transfer(msg.sender, amount);
         emit OwnerWithdrawMilfRevenues(amount);
-    }
-
-    ///@notice the seed money is the amount of warbucks that a nation owner will need to have in their wallet when the nation is minted 
-    ///@dev when a nation is minted the seed money is deposited into the nations balance and the warbucks are burned
-    ///@param newSeedMoney is the new amount of warbucks that a nation owner will need to have in their wallet when the nation is minted
-    function updateSeedMoney(uint256 newSeedMoney) public onlyOwner {
-        seedMoney = (newSeedMoney * (10 ** 18));
-        emit SeedMoneyUpdated(newSeedMoney);
-    }
-
-    ///@notice this function will return the seed money that is required to mint a nation
-    ///@notice seed money is the amount of warbuck a nation will need to have in their wallet when the nation is minted
-    ///@dev when a nation is minted the seed money is deposited into the nations balance and the warucks are burned
-    ///@return uint256 is the seed money required to mint a nation
-    function getSeedMoney() public view returns (uint256) {
-        return seedMoney;
     }
 
     ///@dev this function allows the contract owner to set the tax rate in game purchases are taxed at
@@ -487,27 +421,5 @@ contract TreasuryContract is Ownable, ReentrancyGuard {
 
     function getTotalGameBalance() public view returns (uint256) {
         return totalGameBalance;
-    }
-
-    modifier onlyAidContract() {
-        require(msg.sender == aid);
-        _;
-    }
-
-    ///@dev this function is only callable from the aid contract
-    ///@dev this function will send the balance in an aid package from the sender nation to the recipient nation
-    ///@param idSender is the sender of an aid package
-    ///@param idRecipient is the recipient of an aid package
-    ///@param amount is the amount of balance being included in the aid package
-    function sendAidBalance(
-        uint256 idSender,
-        uint256 idRecipient,
-        uint256 amount
-    ) public onlyAidContract returns (bool) {
-        uint256 balance = idToTreasury[idSender].balance;
-        require(balance >= amount, "not enough balance");
-        idToTreasury[idSender].balance -= amount;
-        idToTreasury[idRecipient].balance += amount;
-        return true;
     }
 }

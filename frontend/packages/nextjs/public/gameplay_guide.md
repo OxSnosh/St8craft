@@ -4,81 +4,43 @@ St8craft Gameplay Guide
 
 # Summary
 
-St8craft is a text based mass multiplayer online game played in the browser. The game is run by a series of smart contracts deployed to the Fantom Blockchain and rulers govern nations in order to increase their strength and profitability. Nations will be NFTs, rulers will be externally managed crypto wallets and the in game currency will be instantly fungible for an ERC20 crypto currency. This currency, called WarBucks, can be purchased on the open market and deposited into a nation enabling faster growth. In game balace can also be withdrawn from nations resulting in WarBucks getting deposited into a rulers wallet.
+St8craft is a text based mass multiplayer online game played in the browser. The game is run by a series of smart contracts deployed to the Base Blockchain and rulers govern nations in order to increase their strength, protect themselves from attack and growing in size. Nations will be NFTs, rulers will be externally managed crypto wallets and the in game currency will be instantly fungible for an ERC20 crypto currency. This currency, called WarBucks (WBX), is used to obtain in‑game credits. Players may convert WB into in‑game credits for immediate gameplay utility.
 
-Nations will compete against each other to grow faster, recover more efficiently from attack and maintain strong militaries to deter enemies and inflict damage on foes faster and more forcefully. The citizens of thriving nations will be happier and earn more income allowing their rulers to levy higher taxes. Revenues from taxes can be invested into civil, municipal or militay upgrades each with different costs and benefits. Your success and prosperity playing MataNations will likely be determined by your ability to form self sustaining autonomous alliances between your peer nations and coming to eachothers aid when wars break out.
+Nations will compete against each other to grow faster, recover more efficiently from attack and maintain strong militaries to deter enemies and inflict damage on foes faster and more forcefully. The citizens of thriving nations will be happier and earn more income allowing their rulers to levy higher taxes. Revenues from taxes can be invested into civil, municipal or militay upgrades each with different costs and benefits. Your success and prosperity playing St8craft will likely be determined by your ability to form self sustaining autonomous alliances between your peer nations and coming to eachothers aid when wars break out.
 
 # Ecosystem
 
-## The Fantom Blockchain
+## The Base Blockchain
 
-The [Fantom Blockchain](https://https://fantom.foundation/) is a fast, scalable, and secure layer-1 EVM-compatible platform built on a permissionless aBFT consensus protocol. On Fantom, transactions are confirmed in seconds and cost just a few cents. Speed, low transaction costs, and high throughput make Fantom the ideal host for St8craft.
+[Base](https://www.base.org/) is a secure, low-cost, builder-friendly Ethereum Layer-2 (not a Layer-1) optimistic rollup, incubated by Coinbase and built on the open-source OP Stack; it inherits Ethereum’s security, offers fast finality and low fees suited to frequent in-game transactions, and as part of the emerging Optimism “Superchain” provides composability with the broader EVM ecosystem—making it an ideal settlement layer for St8craft’s high-interaction gameplay.
 
-## FTM
+## ETH
 
-The native currency of Fantom is FTM. Funds can be bridged from any major EVM chain via the bridge on [SpookySwap](https://https://spooky.fi/#/bridge).
+The native currency of Base is ETH. Funds can be bridged from any major EVM chain via the bridge on [Uniswap](https://app.uniswap.org/swap?chain=base).
 
 ## WarBucks (WB)
 
-The contract address for WarBucks on the FTM chain is OxXXXXXXXXXXXXXXXXXXX. The WarBucks contract inherits from the OpenZeppelin ERC20 contract.
+The contract address for WarBucks on the Base chain is 0x4DeaEee7C7a34aAfED7BCDDB9CC042eAD4aD98F9. The WarBucks contract inherits from the OpenZeppelin ERC20 contract.
 
-FTM can then be swapped for WarBucks [here](https://). Nations rulers will need to deposit 2,000,000 WarBucks in order for a nation to be minted and, upon minting, the WarBucks will be burned and the nation will recieve 2,000,000 units of in game money reserves. 1 WB is equally and immidiately fungible for 1 unit of in game money reserves at the discretion of the nation ruler. WB can be deposited into a nation at any time for an equal amount of in game money reserves and in game reserves can be withdrawn to an equal amount of WB.
+ETH can then be swapped for WarBucks [here](https://). Nations rulers will need to deposit 2,000,000 WarBucks in order for a nation to be minted and, upon minting, the WarBucks will be burned and the nation will recieve 2,000,000 units of in game money reserves. 1 WB is equally and immidiately fungible for 1 unit of in game money reserves controlled by the nation owner. WB can be deposited into a nation at any time for an equal amount of in game money reserves and in game reserves can be withdrawn to an equal amount of WBX.
 
-The initial supply for WarBucks will be 20? Trillion. The overall supply will be the sum of supply available in the ERC20 token in addition to all the in game balances of the nations. The overall supply will be in constant flux as nations collect taxes and pay bills.
+The initial supply for WarBucks will be 200 Billion. The overall supply will be the sum of supply available in the ERC20 token in addition to all the in game balances of the nations. The overall supply will be in constant flux as nations collect taxes and pay bills.
 
-When a nation collects taxes the overall balance of the game and thus the overall supply of WB will increase in the amount of the tax collection. When a nation spends money or pays bill the balance spent will be decresed from the overall game balance. Purchases will be taxed at the St8craft International Logistics Fee (SILF) percentage when money reserves are spent on upgarades at no additional cost to the consumer but with a percentage of the puchase being deposited as WB tokens in the treasury contract. The overall governance of the game, including the treasury contract, will initially be managed by a multisig wallet and eventually by a combination of the holders of the St8craft Governance Token and team senators to the fullest extent possible.
+When a nation collects taxes the overall balance of the game and thus the overall supply of WB will increase in the amount of the tax collection. When a nation spends money or pays bills the balance spent will be decresed from the overall game balance. Purchases will be taxed at the St8craft International Logistics Tax (SILT) percentage when money reserves are spent on upgarades at no additional cost to the consumer but with a percentage of the puchase being deposited as WB tokens in the treasury contract. The overall governance of the game, including the treasury contract, will initially be managed by a multisig wallet and eventually by a combination of the holders of the St8craft Governance Token and team senators to the fullest extent possible.
 
-If is important to note that the WarBuck currency will be pegged to USDC at some point in the future where it will not cost more than 10 USDC ($10) for 2,000,000 WarBucks. This is to prevent the cost of minting a nation to preclude players from having access to the game. To this extent, the WarBucks currency is not for long-term speculation. In order to maintain the peg to $10 for 2,000,000 WarBucks, currency that is collected from the SILF will be sold for St8craft Governance Token (SNGT). Thus, in order to speculate on the success of the game, the SGT token (not WB) should be purchased for long term investment purposes.
+Compliance note: WB credits in this section refer to consumptive, in‑game units. They are provided in unlimited supply for gameplay, not marketed for profit, and are not supported by buybacks, burns, floors, or pegs.
 
-## St8craft Governance Token (SGT)
+## St8craft Governance Token (ST8)
 
-The contract address for SGT on the FTM chain is OxXXXXXXXXXXXXXXXXXX. The SGT contract inherits from the OpenZeppelin ERC20 contract.
+The contract address for SGT on the FTM chain is 0x3eE9aD8BbAd6402fA6408aEDfF1B73Ee62814F52. The SGT contract inherits from the OpenZeppelin ERC20 contract.
 
 Governance for the game will initially be controlled by a multisig wallet. However, to the fullest extent possible, governance of the game will be held by the holders of the St8craft Governance Token or perhaps elected team senators where possible.
 
-The economics of the game are structured so that the price of the WarBucks (WB) token will have a peg of 10 USDC for 2,000,000 WB.
+The supply of SGT is 200,000,000.
 
-The supply of SGT is 100,000,000?.
+## State NFTs (ST8s)
 
-[Chart of Tokenomics]
-
-## State NFTs (SNFT)
-
-The contract address for the St8craft NFTs is OxXXXXXXXXXXXXXXX. The MNFT contract inherits from the OpenZeppelin ERC721 contract.
-
-# Governance
-
-## MultiSig Governance
-
-The overall governance of the game will initially be managed by a multisig wallet and eventually by a combination of the holders of the St8craft Governance Token and team senators to the fullest extent possible.
-
-The address for the multisig is OxXXXXXXXXXXXX.
-
-# Monetary Operations of the Game
-
-## Transparency
-
-Given the nature of the game, there will be several necessary monetary operations that will result in fluctuations to the price of assets associated with the game. To the fullest extent allowable, provided not doing so will cause additional monetary loss, monetary operations of the game will be disclosed at least 6 hours prior to any change becoming active.
-
-These various monetary operations are as follows:
-
-## Changes to the St8craft International Logistics Fee (SLF)
-
-All purchases in the game call a function spendBalance() on the treasury smart contract. When this function is called the owner of a nation will recieve their purchase in exchange for spending the required amount of in game balance of that nation. When the balance is spent it is decreased from the nation's balance and the overall balance of the game and that balance is essentially burned from the overall supply of WB. A portion of this money spent can be collected via the St8craft International Logistics Fee (SLF). WB collected via the SLF will be used to fund operations of the game. At the discretion of the governance of the game and with a necessary disclosure period of 6 hours, the SLF percentage can be changed.
-
-## Swapping WB for MNGT
-
-Should the price of WarBucks increase to the extent that it becomes more expensive than $10 per 2,000,000 WB to mint a nation, then monetary operations may take place to sell WB from the treasury and buy MNGT. This will help stabalize the price of WB at $10 per 2,000,000 WB and in turn cause buy pressure in the MNGT coin. Please note that the WB token is not meant for long term investment purposes but rather to facilitate transactions within the game ecosystem. Should a stakeholder wish to speculate on the success of the game they should purchase the St8craft Governance Token (SGT).
-
-Should monetary action be required to peg the price of WB and in turn purchase MNGT, then orders will be placed as TWAP orders on SpookySwap at set intervals and volumes disclosed at least 6 hours before the order is placed. The orders will be placed on the WB/MNGT pair to sell WB and buy MNGT.
-
-## Buying WB To Support the Price
-
-Should it be deemed necessary to increase the price of the WB token there are several options to do so
-
-## Burning WB
-
-A second option to support the price of WB is to burn WB form the treasury. WB collected via the SLF will be held in the treasury contract and can be collected by the multisig and burned via governance decisions where the event will be disclosed at least 6 hours before taking place.
+The contract address for the St8craft NFT CountryMinter contract is 0xBd46eA737E6999A24B71D48c1435D6aFE3812c65. The ST8s contract inherits from the OpenZeppelin ERC721 contract.
 
 # Gameplay
 
@@ -106,7 +68,7 @@ There are 15 teams in the game. Entering into a trade agreement with a team meme
 
 #### Senators
 
-Each team has 5 democratically elected senators. Senators will be elected every thirty days. Each nation can vote for a senator on their team each election. If a nation switched teams they must wait 30 days before casting a vote in an election.
+Each team has 5 democratically elected senators. Senators will be elected every 20 days. Each nation can vote for a senator on their team each election. If a nation switched teams they must wait 30 days before casting a vote in an election.
 
 Senators have the ability to sanction nations. Sanctioned nations will not have the ability to trade with anyone else on the team where they are sanctioned.
 
@@ -1160,7 +1122,7 @@ The higher a nations total population the more points will be subtracted from a 
 
 ## Taxes
 
-Taxes are available to be collected from your nation on a daily basis. A nation can go 20 days without collecting taxes. If a ruler waits more than 20 days to collect taxes then there is no additional collection benefit and any additional money will be lost.
+Taxes are available to be collected from your nation on a daily basis. A nation can go 20 days without collecting taxes. If a ruler waits more than 20 days to collect taxes then there is no additional collection benefit.
 
 Taxes will be the product of
 (citizens _ days since last collection _ income per citizen \* tax rate)
@@ -1235,13 +1197,15 @@ Citizens can be taxed at a percentage of their income. Lets say your citizens ea
 
 Tax rates can differ from 15% to 28% with higher tax rates adversley affecting a nations happiness. If a nation has the Social Security wonder a ruler can increase the tax rate to 30% without a penalty to happiness.
 
+Compliance note: WB credits in this section refer to consumptive, in‑game units. They are provided in unlimited supply for gameplay, not marketed for profit, and are not supported by buybacks, burns, floors, or pegs.
+
 ### Income Adjustments
 
 Furs, Gems, Gold, Silver, Scholars, Agriculture Development Program, Mining Industry Consortium and Nuclear Power Plants all add to citizen income.
 
 ## Bills
 
-Nations will incur bills in order to be maintained. Bills will be calulated based on a nations upkeep \* days since last bill payment. A nation is allowed to go for 30 days without paying its bills until it is places into inactivity mode. When inactive, a nation will not be able to spend money, collect taxes nor will other nations be able to declare war on an them.
+Nations will incur bills in order to be maintained. Bills will be calulated based on a nations upkeep * days since last bill payment. A nation is allowed to go for 30 days without paying its bills until it is places into inactivity mode. When inactive, a nation will not be able to spend money, collect taxes nor will other nations be able to declare war on an them.
 
 Infrastruture, improvements, wonders and military all require upkeep.
 

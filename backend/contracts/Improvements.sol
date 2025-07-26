@@ -8,6 +8,7 @@ import "./Wonders.sol";
 import "./CountryMinter.sol";
 import "./Infrastructure.sol";
 import "./Resources.sol";
+import "./Spies.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 

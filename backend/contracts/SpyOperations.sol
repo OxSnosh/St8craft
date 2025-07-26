@@ -88,15 +88,11 @@ import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/V
  * Contract
  * -------------------------------------------------------------------------- */
 
-contract SpyOperationsContractV25 is
+contract SpyOperationsContract is
     GelatoRelayContextERC2771,
     VRFConsumerBaseV2Plus
 {
-    // Explicitly override onlyOwner modifier to resolve ambiguity
-    modifier onlyOwner() override {
-        require(msg.sender == owner(), "Ownable: caller is not the owner");
-        _;
-    }
+
 
     struct DaySpies { uint8 outgoing; uint8 incoming; }
 
