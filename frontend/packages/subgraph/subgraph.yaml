@@ -61,7 +61,8 @@ dataSources:
         - name: CruiseMissileContract
           file: ./abis/base_CruiseMissileContract.json
       eventHandlers:
-        - event: CruiseMissileAttackResults(indexed uint256,indexed uint256,indexed
+        - event:
+            CruiseMissileAttackResults(indexed uint256,indexed uint256,indexed
             uint256,bool,uint256,uint256)
           handler: handleCruiseMissileAttackResults
       file: ./src/cruiseMissileMapping.ts
@@ -103,7 +104,7 @@ dataSources:
         - name: SpyOperationsContract
           file: ./abis/base_SpyOperationsContract.json
       eventHandlers:
-        - event: SpyAttackResults(indexed uint256,indexed uint256,indexed
+        - event: SpyAttackResolvedPublic(indexed uint256, uint256,
             uint256,bool,uint256)
           handler: handleSpyOperation
       file: ./src/spyOperationMapping.ts

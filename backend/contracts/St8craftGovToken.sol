@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @notice This token is spent at the amount equivalent cost in USDC to the seed money of the nation
 contract St8craftGovToken is ERC20, Ownable {
 
+
     /// @param initialSupply is the initial supply minted of St8craftGovToekn
     /// @dev the initialSupply is minted to the deployer of the contract
     constructor(uint256 initialSupply) ERC20("St8craft Governance Token", "ST8") {

@@ -69,6 +69,7 @@ contract WarBucks is ERC20, Ownable {
         _burn(account, amount);
     }
 
+
     function burnFromMint(
         address account,
         uint256 amount

@@ -164,7 +164,7 @@ contract SpyOperationsContract is
     /* ---------------------------------- Events -------------------------------- */
 
     event SpyAttackCommitted(uint256 indexed attackId, uint256 indexed defenderId, uint8 attackType);
-    event SpyAttackResolvedPublic(uint256 indexed attackId, uint256 maskedAttackerId, bool success);
+    event SpyAttackResolvedPublic(uint256 indexed attackId, uint256 maskedAttackerId, uint256 defenderId, bool success, uint256 attackType);
     event SpyAttackRevealed(uint256 indexed attackId, uint256 attackerId);
     event VrfRequested(uint256 indexed attackId, uint256 indexed requestId);
 
@@ -352,9 +352,9 @@ contract SpyOperationsContract is
                 abi.encode(randomWords[0], id, p.attackerId, p.defenderId)
             ));
             _applySpyEffects(p.attackerId, p.defenderId, p.attackType, effectRand);
-            emit SpyAttackResolvedPublic(id, MASK_SENTINEL, true);
+            emit SpyAttackResolvedPublic(id, MASK_SENTINEL, p.defenderId, true, p.attackType);
         } else {
-            emit SpyAttackResolvedPublic(id, p.attackerId, false);
+            emit SpyAttackResolvedPublic(id, p.attackerId, p.defenderId, false, p.attackType);
         }
     }
 

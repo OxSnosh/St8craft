@@ -6,23 +6,34 @@ import backgroundImage from "/public/landing_page_2.webp";
 const LandingPage = () => {
   return (
     <div
-      className="w-screen h-screen bg-cover bg-center text-white flex flex-col justify-center items-center"
+      className="w-screen h-screen bg-cover bg-center text-white relative"
       style={{ backgroundImage: `url(${backgroundImage.src})` }}
     >
       {/* Background Overlay */}
-      <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50"></div>
+      <div className="absolute inset-0 bg-black/50 z-0" />
 
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center text-center">
-        <div className="w-3/4 max-w-xl bg-black bg-opacity-70 p-6 rounded-lg">
-          <h1 className="text-4xl font-bold mb-4">WELCOME COMMANDER</h1>
-          <p className="text-lg mb-6">THE FATE OF YOUR NATION IS IN YOUR HANDS</p>
-          <button
-            className="px-6 py-3 bg-red-600 hover:bg-red-700 font-semibold rounded-lg text-xl"
-            onClick={() => (window.location.href = "/")}
+      {/* FIXED Instructions Bar */}
+      <div className="fixed inset-x-0 top-24 z-[9999] px-4">
+        <div className="mx-auto max-w-4xl rounded-lg border border-white/20 bg-black/70 backdrop-blur-sm px-4 py-3 text-sm md:text-base text-center">
+          <span className="font-semibold">Instructions:</span>{" "}
+          1) Connect Wallet&nbsp;&nbsp; 2) Mint Nation&nbsp;&nbsp; 3){" "}
+          <a
+            href="/buy"
+            className="underline underline-offset-4 hover:no-underline"
           >
-            Initiate Protocol
-          </button>
+            Buy WarBucks Here
+          </a>
+          &nbsp;&nbsp; 4) Conquer
+        </div>
+      </div>
+
+      {/* Foreground content (pad for fixed bar) */}
+      <div className="relative z-10 w-full h-full flex flex-col items-center justify-start px-4 pt-40">
+        <div className="w-3/4 max-w-xl bg-black/70 p-6 rounded-lg text-center">
+          <h1 className="text-4xl font-bold mb-4">WELCOME COMMANDER</h1>
+          <p className="text-lg mb-6">
+            THE FATE OF YOUR NATION IS IN YOUR HANDS
+          </p>
         </div>
       </div>
     </div>
