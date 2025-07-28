@@ -6,6 +6,7 @@ import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { ApolloProvider } from "@apollo/client";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import { ScaffoldEthAppWithProviders } from "~~/components/ScaffoldEthAppWithProviders";
+import { Analytics } from '@vercel/analytics/next';
 
 const baseChain = {
   id: 8453,
@@ -48,6 +49,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
               <ThemeProvider enableSystem>
                 <ScaffoldEthAppWithProviders>
                   {children}
+                  <Analytics />
                 </ScaffoldEthAppWithProviders>
               </ThemeProvider>
             </ApolloProvider>

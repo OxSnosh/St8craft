@@ -1,17 +1,117 @@
 [
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_vrfCoordinator",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_subId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_keyHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "_vrfCallbackGasLimit",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "have",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "want",
+        "type": "address"
+      }
+    ],
+    "name": "OnlyCoordinatorCanFulfill",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "have",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "coordinator",
+        "type": "address"
+      }
+    ],
+    "name": "OnlyOwnerOrCoordinator",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddress",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "vrfCoordinator",
+        "type": "address"
+      }
+    ],
+    "name": "CoordinatorSet",
+    "type": "event"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
         "indexed": true,
         "internalType": "address",
-        "name": "previousOwner",
+        "name": "from",
         "type": "address"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "newOwner",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferRequested",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
         "type": "address"
       }
     ],
@@ -30,11 +130,36 @@
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "attackerId",
+        "name": "defenderId",
         "type": "uint256"
       },
       {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "attackType",
+        "type": "uint8"
+      }
+    ],
+    "name": "SpyAttackCommitted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "attackId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maskedAttackerId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "defenderId",
         "type": "uint256"
@@ -52,7 +177,7 @@
         "type": "uint256"
       }
     ],
-    "name": "SpyAttackResults",
+    "name": "SpyAttackResolvedPublic",
     "type": "event"
   },
   {
@@ -61,12 +186,152 @@
       {
         "indexed": true,
         "internalType": "uint256",
+        "name": "attackId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "attackerId",
+        "type": "uint256"
+      }
+    ],
+    "name": "SpyAttackRevealed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "keyHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "subId",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "minConf",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "gasLimit",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "numWords",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "nativePayment",
+        "type": "bool"
+      }
+    ],
+    "name": "VrfConfigUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "attackId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
         "name": "requestId",
         "type": "uint256"
       }
     ],
-    "name": "randomNumbersRequested",
+    "name": "VrfRequested",
     "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "MASK_SENTINEL",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_ATTACK_TYPE",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_INCOMING",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_OUTGOING",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MIN_ATTACK_TYPE",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "acceptOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [],
@@ -104,39 +369,40 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "countryId",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "checkAccomodativeGovernment",
+    "name": "attacks",
     "outputs": [
       {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
+        "internalType": "uint256",
+        "name": "attackerId",
+        "type": "uint256"
+      },
       {
         "internalType": "uint256",
         "name": "defenderId",
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint8",
         "name": "attackType",
-        "type": "uint256"
-      }
-    ],
-    "name": "checkSpyOperation",
-    "outputs": [
+        "type": "uint8"
+      },
       {
         "internalType": "bool",
-        "name": "",
+        "name": "success",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "revealed",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "resolved",
         "type": "bool"
       }
     ],
@@ -145,10 +411,10 @@
   },
   {
     "inputs": [],
-    "name": "countryMinter",
+    "name": "force",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract IForces",
         "name": "",
         "type": "address"
       }
@@ -160,34 +426,41 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "getAttackPublic",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "attackerIdOrMask",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "defenderId",
         "type": "uint256"
-      }
-    ],
-    "name": "dayToDefenderIdToAttackedToday",
-    "outputs": [
+      },
+      {
+        "internalType": "uint8",
+        "name": "attackType",
+        "type": "uint8"
+      },
       {
         "internalType": "bool",
-        "name": "",
+        "name": "success",
         "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "forces",
-    "outputs": [
+      },
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
+        "internalType": "bool",
+        "name": "revealed",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "resolved",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -233,10 +506,52 @@
   },
   {
     "inputs": [],
-    "name": "infrastructure",
+    "name": "inf",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract IInfrastructure",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "attackerId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "defenderId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint8",
+        "name": "attackType",
+        "type": "uint8"
+      }
+    ],
+    "name": "initiateSpyAttack",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "newAttackId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "keep",
+    "outputs": [
+      {
+        "internalType": "contract IKeeper",
         "name": "",
         "type": "address"
       }
@@ -246,10 +561,10 @@
   },
   {
     "inputs": [],
-    "name": "keeper",
+    "name": "mil",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract IMilitary",
         "name": "",
         "type": "address"
       }
@@ -259,10 +574,10 @@
   },
   {
     "inputs": [],
-    "name": "military",
+    "name": "mint",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract ICountryMinter",
         "name": "",
         "type": "address"
       }
@@ -272,23 +587,10 @@
   },
   {
     "inputs": [],
-    "name": "missiles",
+    "name": "mis",
     "outputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "nationStrength",
-    "outputs": [
-      {
-        "internalType": "address",
+        "internalType": "contract IMissiles",
         "name": "",
         "type": "address"
       }
@@ -311,35 +613,15 @@
   },
   {
     "inputs": [],
-    "name": "parameters",
+    "name": "params",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract ICountryParameters",
         "name": "",
         "type": "address"
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "relayer",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -348,22 +630,127 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
       }
     ],
-    "name": "s_randomnessRequestIdToRandomWords",
+    "name": "pending",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "attackerId",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "defenderId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint8",
+        "name": "attackType",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bool",
+        "name": "exists",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "requestId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "randomWords",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "rawFulfillRandomWords",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "revealAttack",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "s_vrfCoordinator",
+    "outputs": [
+      {
+        "internalType": "contract IVRFCoordinatorV2Plus",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_vrfCoordinator",
+        "type": "address"
+      }
+    ],
+    "name": "setCoordinator",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_keyHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint64",
+        "name": "_subId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint16",
+        "name": "_minConf",
+        "type": "uint16"
+      },
+      {
+        "internalType": "uint32",
+        "name": "_gasLimit",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "_numWords",
+        "type": "uint32"
+      },
+      {
+        "internalType": "bool",
+        "name": "_useNative",
+        "type": "bool"
+      }
+    ],
+    "name": "setVRFConfig",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -444,10 +831,23 @@
   },
   {
     "inputs": [],
-    "name": "spies",
+    "name": "spy",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract ISpies",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "strength",
+    "outputs": [
+      {
+        "internalType": "contract INationStrength",
         "name": "",
         "type": "address"
       }
@@ -458,46 +858,8 @@
   {
     "inputs": [
       {
-        "internalType": "bool",
-        "name": "success",
-        "type": "bool"
-      },
-      {
-        "internalType": "uint256",
-        "name": "attackType",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "defenderId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "attackerId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "cost",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "randomNumber",
-        "type": "uint256"
-      }
-    ],
-    "name": "spyAttack",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
-        "name": "newOwner",
+        "name": "to",
         "type": "address"
       }
     ],
@@ -508,10 +870,10 @@
   },
   {
     "inputs": [],
-    "name": "treasury",
+    "name": "tsy",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract ITreasury",
         "name": "",
         "type": "address"
       }
@@ -521,10 +883,107 @@
   },
   {
     "inputs": [],
-    "name": "wonders1",
+    "name": "useNativePayment",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "vrfCallbackGasLimit",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "vrfKeyHash",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "vrfMinConfirmations",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "vrfNumWords",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "vrfRequestToAttackId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "vrfSubId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "won1",
+    "outputs": [
+      {
+        "internalType": "contract IWonders1",
         "name": "",
         "type": "address"
       }
@@ -534,10 +993,10 @@
   },
   {
     "inputs": [],
-    "name": "wonders2",
+    "name": "won2",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract IWonders2",
         "name": "",
         "type": "address"
       }

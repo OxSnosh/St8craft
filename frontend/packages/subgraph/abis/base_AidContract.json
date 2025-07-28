@@ -29,12 +29,6 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "balanceAid",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
         "name": "soldierAid",
         "type": "uint256"
       }
@@ -73,12 +67,6 @@
         "indexed": false,
         "internalType": "uint256",
         "name": "techAid",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "balanceAid",
         "type": "uint256"
       },
       {
@@ -203,11 +191,6 @@
       {
         "internalType": "uint256",
         "name": "techAid",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "balanceAid",
         "type": "uint256"
       },
       {
@@ -362,11 +345,6 @@
     ],
     "name": "getProposal",
     "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      },
       {
         "internalType": "uint256",
         "name": "",
@@ -566,11 +544,6 @@
       },
       {
         "internalType": "uint256",
-        "name": "balanceAid",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
         "name": "soldierAid",
         "type": "uint256"
       },
@@ -674,11 +647,6 @@
       {
         "internalType": "uint256",
         "name": "techAid",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "balanceAid",
         "type": "uint256"
       },
       {

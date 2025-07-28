@@ -231,6 +231,19 @@
   },
   {
     "inputs": [],
+    "name": "MAX_GROUND_BATTLES_PER_DAY",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "acceptOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -443,6 +456,35 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "warId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gameDay",
+        "type": "uint256"
+      }
+    ],
+    "name": "getGroundBattlesToday",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "offense",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "defense",
+        "type": "uint8"
       }
     ],
     "stateMutability": "view",
@@ -728,6 +770,11 @@
       {
         "internalType": "address",
         "name": "_military",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_keeper",
         "type": "address"
       }
     ],

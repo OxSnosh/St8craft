@@ -22,6 +22,19 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "newValue",
+        "type": "uint16"
+      }
+    ],
+    "name": "TaxModifierUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": true,
         "internalType": "uint256",
         "name": "id",
@@ -609,6 +622,19 @@
   {
     "inputs": [
       {
+        "internalType": "uint16",
+        "name": "newBP",
+        "type": "uint16"
+      }
+    ],
+    "name": "setTaxModifierBP",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_countryMinter",
         "type": "address"
@@ -725,6 +751,19 @@
     "name": "settings2",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "taxModifierBP",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

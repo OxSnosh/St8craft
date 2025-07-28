@@ -155,7 +155,7 @@ contract SpyOperationsContract is
     /* ----------------------------- VRF Configuration --------------------------- */
 
     bytes32 public vrfKeyHash;
-    uint64  public vrfSubId;
+    uint256  public vrfSubId;
     uint16  public vrfMinConfirmations = 3;
     uint32  public vrfCallbackGasLimit;
     uint32  public vrfNumWords = 1;
@@ -174,7 +174,7 @@ contract SpyOperationsContract is
 
     constructor(
         address _vrfCoordinator,
-        uint64  _subId,
+        uint256  _subId,
         bytes32 _keyHash,
         uint32 _vrfCallbackGasLimit
     )
