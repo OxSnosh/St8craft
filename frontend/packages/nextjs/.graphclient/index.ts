@@ -2216,7 +2216,7 @@ const yourContractTransforms = [];
 const additionalTypeDefs = [] as any[];
 const yourContractHandler = new GraphqlHandler({
               name: "YourContract",
-              config: {"endpoint":"https://api.studio.thegraph.com/query/115215/st-8-craft/0.0.1"},
+              config: {"endpoint":"https://api.studio.thegraph.com/query/115215/st-8-craft/0.0.2"},
               baseDir,
               cache,
               pubsub,

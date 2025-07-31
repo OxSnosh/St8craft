@@ -104,8 +104,7 @@ dataSources:
         - name: SpyOperationsContract
           file: ./abis/base_SpyOperationsContract.json
       eventHandlers:
-        - event: SpyAttackResolvedPublic(indexed uint256, uint256,
-            uint256,bool,uint256)
+        - event: SpyAttackResolvedPublic(indexed uint256,uint256,uint256,bool,uint256)
           handler: handleSpyOperation
       file: ./src/spyOperationMapping.ts
   - kind: ethereum/contract
