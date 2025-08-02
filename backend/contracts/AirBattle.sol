@@ -8,7 +8,6 @@ import "./Infrastructure.sol";
 import "./Forces.sol";
 import "./Wonders.sol";
 import "./CountryMinter.sol";
-import "./Forces.sol";
 import "./Missiles.sol";
 import "./KeeperFile.sol";
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
@@ -32,26 +31,6 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     address countryMinter;
     address addAirBattleAddress;
     address keeper;
-    //fighter strength
-    uint256 yak9Strength = 1;
-    uint256 p51MustangStrength = 2;
-    uint256 f86SabreStrength = 3;
-    uint256 mig15Strength = 4;
-    uint256 f100SuperSabreStrength = 5;
-    uint256 f35LightningStrength = 6;
-    uint256 f15EagleStrength = 7;
-    uint256 su30MkiStrength = 8;
-    uint256 f22RaptorStrength = 9;
-    //bomber strength
-    uint256 ah1CobraStrength = 1;
-    uint256 ah64ApacheStrength = 2;
-    uint256 bristolBlenheimStrength = 3;
-    uint256 b52MitchellStrength = 4;
-    uint256 b17gFlyingFortressStrength = 5;
-    uint256 b52StratofortressStrength = 6;
-    uint256 b2SpiritStrength = 7;
-    uint256 b1bLancerStrength = 8;
-    uint256 tupolevTu160Strength = 9;
 
     WarContract war;
     FightersContract fighter;
@@ -66,11 +45,12 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     KeeperContract keep;
 
     uint256[] private s_randomWords;
-    uint256 public i_subscriptionId;
-    bytes32 public i_gasLane;
-    uint32 public i_callbackGasLimit;
-    uint16 public constant REQUEST_CONFIRMATIONS = 3;
-    uint32 public constant NUM_WORDS = 6;
+    uint256 public s_subscriptionId;
+    bytes32 public s_gasLane;
+    uint32 public s_callbackGasLimit;
+    uint16 public s_confirmations = 3;
+    uint32 public s_numWords = 6;
+    bool public s_useNative = true;
 
     struct AirBattle {
         uint256 warId;
@@ -84,13 +64,6 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint256[] defenderFighterCasualties;
         uint256[] damage;
     }
-
-    struct DaySorties {
-        uint8 offenseCount;
-        uint8 defenseCount;
-    }
-
-    mapping(uint256 => mapping(uint256 => DaySorties)) private _sortieCount;
 
     event AirAssaultLaunched(
         uint256 indexed battleId,
@@ -115,10 +88,36 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
-        i_gasLane = gasLane;
-        i_subscriptionId = subscriptionId;
-        i_callbackGasLimit = callbackGasLimit;
+        s_gasLane = gasLane;
+        s_subscriptionId = subscriptionId;
+        s_callbackGasLimit = callbackGasLimit;
     }
+
+    function setVRFConfig(
+        bytes32 _keyHash,
+        uint64  _subId,
+        uint16  _minConf,
+        uint32  _gasLimit,
+        uint32  _numWords,
+        bool    _useNative
+    ) external onlyOwner {
+        s_gasLane                   = _keyHash;
+        s_subscriptionId            = _subId;
+        s_confirmations             = _minConf;
+        s_callbackGasLimit          = _gasLimit;
+        s_numWords                  = _numWords;
+        s_useNative                 = _useNative;
+        emit VrfConfigUpdated(_keyHash, _subId, _minConf, _gasLimit, _numWords, _useNative);
+    }
+
+    event VrfConfigUpdated(
+        bytes32 keyHash,
+        uint64 subId,
+        uint16 minConf,
+        uint32 gasLimit,
+        uint32 numWords,
+        bool useNative
+    );
 
     ///@dev this function is only callable by the owner
     ///@dev this function will be called right after deployment in order to set up contract pointers
@@ -186,7 +185,7 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint256 attackerFighterSum = getAttackerFighterSum(
             attackerFighterArray
         );
-        _registerSortie(warId, attackerId);
+        _registerSortie(attackerId, defenderId);
         uint256 attackerBomberSum = getAttackerBomberSum(attackerBomberArray);
         uint256 attackSum = (attackerFighterSum + attackerBomberSum);
         require(attackSum <= 25, "cannot send more than 25 planes on a sortie");
@@ -211,35 +210,25 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         airBattleId++;
     }
 
-    /// @notice reverts if caller’s side already flew two sorties today
-    /// @param warId        the war
-    /// @param attackerId   caller’s nation id
-    function _registerSortie(
-        uint256 warId,
-        uint256 attackerId
-    ) internal {
+    mapping(uint256 => mapping(uint256 => mapping(uint256 => uint8))) private _pairSorties;
+    uint8 constant MAX_PAIR_SORTIES = 2;
+
+    function _registerSortie(uint256 attackerId, uint256 defenderId) internal {
         uint256 today = keep.getGameDay();
-        DaySorties storage bucket = _sortieCount[warId][today];
+        uint8 sorties = _pairSorties[attackerId][defenderId][today];
 
-        (uint256 offense, uint256 defense) = war.getInvolvedParties(warId);
+        require(sorties < MAX_PAIR_SORTIES, "daily cap vs defender reached");
 
-        if (attackerId == offense) {
-            require(bucket.offenseCount < 2, "offense daily cap reached");
-            bucket.offenseCount += 1;
-        } else if (attackerId == defense) {
-            require(bucket.defenseCount < 2, "defense daily cap reached");
-            bucket.defenseCount += 1;
-        } else {
-            revert("attacker not in this war");
-        }
+        _pairSorties[attackerId][defenderId][today] = sorties + 1;
     }
 
     function getSortiesToday(
-        uint256 warId,
-        uint256 gameDay
-    ) external view returns (uint8 offense, uint8 defense) {
-        DaySorties storage bucket = _sortieCount[warId][gameDay];
-        return (bucket.offenseCount, bucket.defenseCount);
+        uint256 attackerId,
+        uint256 defenderId
+    ) external view returns (uint8 sortieCount) {
+        uint256 today = keep.getGameDay();
+        uint8 sorties = _pairSorties[attackerId][defenderId][today];
+        return (sorties);
     }
 
     function completeAirBattleLaunch(
@@ -421,12 +410,12 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: s_useNative}))
             })
         );
         s_requestIdToRequestIndex[requestId] = battleId;
@@ -437,12 +426,12 @@ contract AirBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     function fulfillRequest(uint256 battleId) internal {
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: s_useNative}))
             })
         );
         s_requestIdToRequestIndex[requestId] = battleId;

@@ -29,11 +29,12 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    uint256 private immutable i_subscriptionId;
-    bytes32 private immutable i_gasLane;
-    uint32 private immutable i_callbackGasLimit;
-    uint16 private constant REQUEST_CONFIRMATIONS = 3;
-    uint32 private constant NUM_WORDS = 1;
+    uint256 private s_subscriptionId;
+    bytes32 private s_gasLane;
+    uint32 private s_callbackGasLimit;
+    uint16 private s_confirmations = 3;
+    uint32 private s_numWords = 1;
+    bool private s_useNative = true;
 
     WarContract war;
     CountryMinter mint;
@@ -71,10 +72,36 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
-        i_gasLane = gasLane;
-        i_subscriptionId = subscriptionId;
-        i_callbackGasLimit = callbackGasLimit;
+        s_gasLane = gasLane;
+        s_subscriptionId = subscriptionId;
+        s_callbackGasLimit = callbackGasLimit;
     }
+
+    function setVRFConfig(
+        bytes32 _keyHash,
+        uint64  _subId,
+        uint16  _minConf,
+        uint32  _gasLimit,
+        uint32  _numWords,
+        bool    _useNative
+    ) external onlyOwner {
+        s_gasLane                   = _keyHash;
+        s_subscriptionId            = _subId;
+        s_confirmations             = _minConf;
+        s_callbackGasLimit          = _gasLimit;
+        s_numWords                  = _numWords;
+        s_useNative                 = _useNative;
+        emit VrfConfigUpdated(_keyHash, _subId, _minConf, _gasLimit, _numWords, _useNative);
+    }
+
+    event VrfConfigUpdated(
+        bytes32 keyHash,
+        uint64 subId,
+        uint16 minConf,
+        uint32 gasLimit,
+        uint32 numWords,
+        bool useNative
+    );
 
     function updateVRFCoordinator(
         address vrfCoordinatorV2
@@ -221,7 +248,7 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     mapping(uint256 => uint256) public pendingRequestTimestamp;
     uint256 public constant RETRY_TIMEOUT = 5 minutes;
 
-    function retryFulfillRequest(uint256 battleId) public {
+    function retryFulfillRequest(uint256 battleId) public onlyOwner {
         require(pendingRequests[battleId], "No pending request");
         require(
             block.timestamp > pendingRequestTimestamp[battleId] + RETRY_TIMEOUT,
@@ -230,12 +257,12 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: s_useNative}))
             })
         );
         s_requestIdToRequestIndex[requestId] = battleId;
@@ -249,12 +276,12 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     function fulfillRequest(uint256 battleId) internal {
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: s_useNative}))
             })
         );
         s_requestIdToRequestIndex[requestId] = battleId;
@@ -274,20 +301,25 @@ contract NavalBlockadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
         uint256 battleId = s_requestIdToRequestIndex[requestId];
 
-        delete pendingRequests[battleId];
-        delete pendingRequestTimestamp[battleId];
+        if (!pendingRequests[battleId]) {
+            return;                 
+        }
 
         s_requestIndexToRandomWords[battleId] = randomWords;
         s_randomWords = randomWords;
         uint256 blockadePercentage = ((s_randomWords[0] % 5) + 1);
         blockadeIdToBlockade[battleId]
             .blockadePercentageReduction = blockadePercentage;
+        
         emit BlockadeCompleted(
             blockadeIdToBlockade[battleId].blockaderId,
             blockadeIdToBlockade[battleId].blockadedId,
             battleId,
             blockadePercentage
         );
+
+        delete pendingRequests[battleId];
+        delete pendingRequestTimestamp[battleId];
     }
 
     function getActiveBlockadesAgainst(
@@ -458,11 +490,12 @@ contract BreakBlocadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    uint256 private immutable i_subscriptionId;
-    bytes32 private immutable i_gasLane;
-    uint32 private immutable i_callbackGasLimit;
-    uint16 private constant REQUEST_CONFIRMATIONS = 3;
-    uint32 private constant NUM_WORDS = 6;
+    uint256 private s_subscriptionId;
+    bytes32 private s_gasLane;
+    uint32 private s_callbackGasLimit;
+    uint16 private s_confirmations = 3;
+    uint32 private s_numWords = 6;
+    bool private s_useNative = true;
 
     CountryMinter mint;
     NavalBlockadeContract navBlock;
@@ -513,10 +546,36 @@ contract BreakBlocadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
-        i_gasLane = gasLane;
-        i_subscriptionId = subscriptionId;
-        i_callbackGasLimit = callbackGasLimit;
+        s_gasLane = gasLane;
+        s_subscriptionId = subscriptionId;
+        s_callbackGasLimit = callbackGasLimit;
     }
+
+    function setVRFConfig(
+        bytes32 _keyHash,
+        uint64  _subId,
+        uint16  _minConf,
+        uint32  _gasLimit,
+        uint32  _numWords,
+        bool    _useNative
+    ) external onlyOwner {
+        s_gasLane                   = _keyHash;
+        s_subscriptionId            = _subId;
+        s_confirmations             = _minConf;
+        s_callbackGasLimit          = _gasLimit;
+        s_numWords                  = _numWords;
+        s_useNative                 = _useNative;
+        emit VrfConfigUpdated(_keyHash, _subId, _minConf, _gasLimit, _numWords, _useNative);
+    }
+
+    event VrfConfigUpdated(
+        bytes32 keyHash,
+        uint64 subId,
+        uint16 minConf,
+        uint32 gasLimit,
+        uint32 numWords,
+        bool useNative
+    );
 
     function updateVRFCoordinator(
         address vrfCoordinatorV2
@@ -790,7 +849,7 @@ contract BreakBlocadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     mapping(uint256 => uint256) public pendingRequestTimestamp;
     uint256 public constant RETRY_TIMEOUT = 5 minutes;
 
-    function retryFulfillRequest(uint256 battleId) public {
+    function retryFulfillRequest(uint256 battleId) public onlyOwner{
         require(pendingRequests[battleId], "No pending request");
         require(
             block.timestamp > pendingRequestTimestamp[battleId] + RETRY_TIMEOUT,
@@ -799,12 +858,12 @@ contract BreakBlocadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: s_useNative}))
             })
         );
 
@@ -819,12 +878,12 @@ contract BreakBlocadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     function fulfillRequest(uint256 battleId) internal {
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: s_useNative}))
             })
         );
         s_requestIdToRequestIndex[requestId] = battleId;
@@ -852,8 +911,11 @@ contract BreakBlocadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
             "Request not pending"
         );
         uint256 battleId = s_requestIdToRequestIndex[requestId];
-        delete pendingRequests[battleId];
-        delete pendingRequestTimestamp[battleId];
+
+        if (!pendingRequests[battleId]) {
+            return;                 
+        }
+
         s_requestIndexToRandomWords[battleId] = randomWords;
         uint256[] memory attackerChances = battleIdToBreakBlockadeChanceArray[
             battleId
@@ -867,6 +929,8 @@ contract BreakBlocadeContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint256[] memory defenderTypes = battleIdToDefendBlockadeTypeArray[
             battleId
         ];
+        delete pendingRequests[battleId];
+        delete pendingRequestTimestamp[battleId];
         emit BreakBlockadeRequested(
             requestId,
             battleId,
@@ -989,11 +1053,12 @@ contract NavalAttackContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     //Chainlik Variables
     // uint256[] private s_randomWords;
     // VRFConsumerBaseV2Plus public i_vrfCoordinator;
-    uint256 private immutable i_subscriptionId;
-    bytes32 private immutable i_gasLane;
-    uint32 private immutable i_callbackGasLimit;
-    uint16 private constant REQUEST_CONFIRMATIONS = 3;
-    uint32 private constant NUM_WORDS = 6;
+    uint256 private s_subscriptionId;
+    bytes32 private s_gasLane;
+    uint32 private s_callbackGasLimit;
+    uint16 private s_confirmations = 3;
+    uint32 private s_numWords = 6;
+    bool private s_useNative = true;
 
     NavyContract nav;
     NavalBlockadeContract navBlock;
@@ -1038,10 +1103,36 @@ contract NavalAttackContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
-        i_gasLane = gasLane;
-        i_subscriptionId = subscriptionId;
-        i_callbackGasLimit = callbackGasLimit;
+        s_gasLane = gasLane;
+        s_subscriptionId = subscriptionId;
+        s_callbackGasLimit = callbackGasLimit;
     }
+
+    function setVRFConfig(
+        bytes32 _keyHash,
+        uint64  _subId,
+        uint16  _minConf,
+        uint32  _gasLimit,
+        uint32  _numWords,
+        bool    _useNative
+    ) external onlyOwner {
+        s_gasLane                   = _keyHash;
+        s_subscriptionId            = _subId;
+        s_confirmations             = _minConf;
+        s_callbackGasLimit          = _gasLimit;
+        s_numWords                  = _numWords;
+        s_useNative                 = _useNative;
+        emit VrfConfigUpdated(_keyHash, _subId, _minConf, _gasLimit, _numWords, _useNative);
+    }
+
+    event VrfConfigUpdated(
+        bytes32 keyHash,
+        uint64 subId,
+        uint16 minConf,
+        uint32 gasLimit,
+        uint32 numWords,
+        bool useNative
+    );
 
     function updateVRFCoordinator(
         address vrfCoordinatorV2
@@ -1409,7 +1500,7 @@ contract NavalAttackContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     mapping(uint256 => uint256) public pendingRequestTimestamp;
     uint256 public constant RETRY_TIMEOUT = 5 minutes;
 
-    function retryFulfillRequest(uint256 battleId) public {
+    function retryFulfillRequest(uint256 battleId) public onlyOwner {
         require(pendingRequests[battleId], "No pending request");
         require(
             block.timestamp > pendingRequestTimestamp[battleId] + RETRY_TIMEOUT,
@@ -1418,12 +1509,12 @@ contract NavalAttackContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: s_useNative}))
             })
         );
 
@@ -1438,12 +1529,12 @@ contract NavalAttackContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     function fulfillRequest(uint256 battleId) internal {
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: s_useNative}))
             })
         );
         s_requestIdToRequestIndex[requestId] = battleId;
@@ -1472,8 +1563,11 @@ contract NavalAttackContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
             "Request not pending"
         );
         uint256 battleId = s_requestIdToRequestIndex[requestId];
-        delete pendingRequests[battleId];
-        delete pendingRequestTimestamp[battleId];
+
+        if (!pendingRequests[battleId]) {
+            return;                 
+        }
+
         s_requestIndexToRandomWords[battleId] = randomWords;
         uint256 numberBetweenZeroAndTwo = (randomWords[0] % 2);
         uint256 losses = getLosses(battleId, numberBetweenZeroAndTwo);
@@ -1485,6 +1579,8 @@ contract NavalAttackContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
             battleId
         ];
         uint256[] memory defenderTypes = battleIdToDefenderTypeArray[battleId];
+        delete pendingRequests[battleId];
+        delete pendingRequestTimestamp[battleId];
         emit NavalAttackRequested(
             requestId,
             battleId,

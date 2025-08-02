@@ -11,13 +11,14 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import {IVRFCoordinatorV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/interfaces/IVRFCoordinatorV2Plus.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "hardhat/console.sol";
 
 ///@title CruiseMissileContract
 ///@author OxSnosh
 ///@notice this contract will allow a nation owner to launch a cruise missile attack against another nation
 ///@dev this contract inherits from OpenZeppelin ownable and Chainlink VRF
-contract CruiseMissileContract is VRFConsumerBaseV2Plus {
+contract CruiseMissileContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
     uint256 public cruiseMissileAttackId;
     address public forces;
     address public countryMinter;
@@ -31,11 +32,12 @@ contract CruiseMissileContract is VRFConsumerBaseV2Plus {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    uint256 private immutable i_subscriptionId;
-    bytes32 private immutable i_gasLane;
-    uint32 private immutable i_callbackGasLimit;
-    uint16 private constant REQUEST_CONFIRMATIONS = 3;
-    uint32 private constant NUM_WORDS = 3;
+    uint256 private s_subscriptionId;
+    bytes32 private s_gasLane;
+    uint32 private s_callbackGasLimit;
+    uint16 private s_confirmations = 3;
+    uint32 private s_numWords = 3;
+    bool private s_useNative = true;
 
     ForcesContract force;
     CountryMinter mint;
@@ -84,9 +86,9 @@ contract CruiseMissileContract is VRFConsumerBaseV2Plus {
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
-        i_gasLane = gasLane;
-        i_subscriptionId = subscriptionId;
-        i_callbackGasLimit = callbackGasLimit;
+        s_gasLane = gasLane;
+        s_subscriptionId = subscriptionId;
+        s_callbackGasLimit = callbackGasLimit;
     }
 
     function updateVRFCoordinator(
@@ -94,6 +96,32 @@ contract CruiseMissileContract is VRFConsumerBaseV2Plus {
     ) public onlyOwner {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
     }
+
+       function setVRFConfig(
+        bytes32 _keyHash,
+        uint64  _subId,
+        uint16  _minConf,
+        uint32  _gasLimit,
+        uint32  _numWords,
+        bool    _useNative
+    ) external onlyOwner {
+        s_gasLane                   = _keyHash;
+        s_subscriptionId            = _subId;
+        s_confirmations             = _minConf;
+        s_callbackGasLimit          = _gasLimit;
+        s_numWords                  = _numWords;
+        s_useNative                 = _useNative;
+        emit VrfConfigUpdated(_keyHash, _subId, _minConf, _gasLimit, _numWords, _useNative);
+    }
+
+    event VrfConfigUpdated(
+        bytes32 keyHash,
+        uint64 subId,
+        uint16 minConf,
+        uint32 gasLimit,
+        uint32 numWords,
+        bool useNative
+    );
 
     ///@dev this function is only callable by the contract owner
     ///@dev this function will be called immediately after contract deployment in order to set contract pointers
@@ -144,7 +172,7 @@ contract CruiseMissileContract is VRFConsumerBaseV2Plus {
         uint256 attackerId,
         uint256 defenderId,
         uint256 warId
-    ) public {
+    ) public nonReentrant{
         bool isOwner = mint.checkOwnership(attackerId, msg.sender);
         require(isOwner, "!nation owner");
         uint256 missileCount = mis.getCruiseMissileCount(attackerId);
@@ -178,21 +206,65 @@ contract CruiseMissileContract is VRFConsumerBaseV2Plus {
         cruiseMissileAttackId++;
     }
 
+    mapping(uint256 => bool) public pendingRequests;                 
+    mapping(uint256 => uint256) public pendingRequestTimestamp;      
+    mapping(uint256 => uint256) private _activeReqId;                
+    uint256 public constant RETRY_TIMEOUT = 10 minutes;
+
+    event VRFRequestSent(uint256 indexed id, uint256 indexed requestId);
+
     ///@dev this is an internal function that will call the VRFCoordinator from randomness from chainlink
     ///@param id this is the ID of the cruise missile attack
     function fulfillRequest(uint256 id) internal {
+        require(!pendingRequests[id], "Randomness already requested");
+
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                // Set nativePayment to true to pay for VRF requests with Sepolia ETH instead of LINK
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(
+                    VRFV2PlusClient.ExtraArgsV1({ nativePayment: s_useNative })
+                )
             })
         );
+
         s_requestIdToRequestIndex[requestId] = id;
+        _activeReqId[id] = requestId;                  
+        pendingRequests[id] = true;                    
+        pendingRequestTimestamp[id] = block.timestamp; 
+
+        emit VRFRequestSent(id, requestId);
+    }
+
+    //retry failed requests
+    function retryFulfillRequest(uint256 id) external onlyOwner{
+        require(pendingRequests[id], "no pending request");
+        require(
+            block.timestamp >= pendingRequestTimestamp[id] + RETRY_TIMEOUT,
+            "retry timeout not reached"
+        );
+
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(
+                    VRFV2PlusClient.ExtraArgsV1({ nativePayment: s_useNative })
+                )
+            })
+        );
+
+        s_requestIdToRequestIndex[requestId] = id;
+        _activeReqId[id] = requestId;                  
+        pendingRequestTimestamp[id] = block.timestamp; 
+
+        emit VRFRequestSent(id, requestId);
     }
 
     ///@dev this is the fnction that the ChainlinkVRF contract will call when it responds
@@ -207,43 +279,52 @@ contract CruiseMissileContract is VRFConsumerBaseV2Plus {
         uint256 requestId,
         uint256[] calldata randomWords
     ) internal override {
-        uint256 requestNumber = s_requestIdToRequestIndex[requestId];
-        s_requestIndexToRandomWords[requestNumber] = randomWords;
+        uint256 attackId = s_requestIdToRequestIndex[requestId];
+
+        if (!pendingRequests[attackId]) return;
+        if (_activeReqId[attackId] != requestId) return;
+
+        s_requestIndexToRandomWords[attackId] = randomWords;
         s_randomWords = randomWords;
-        uint256 defenderId = attackIdToCruiseMissile[requestNumber].defenderId;
-        uint256 attackerId = attackIdToCruiseMissile[requestNumber].attackerId;
+
+        uint256 defenderId = attackIdToCruiseMissile[attackId].defenderId;
+        uint256 attackerId = attackIdToCruiseMissile[attackId].attackerId;
         uint256 successOdds = getSuccessOdds(attackerId, defenderId);
-        uint256[] memory randomNumbers = s_requestIndexToRandomWords[
-            requestNumber
-        ];
-        uint256 successNumber = (randomNumbers[0] % 100);
-        uint256 damageTypeNumber = (randomNumbers[1] % 3);
+
+        uint256 successNumber = (randomWords[0] % 100);
+        uint256 damageTypeNumber = (randomWords[1] % 3);
+
         if (successNumber < successOdds) {
             emit CruiseMissileAttackResults(
-                requestNumber,
+                attackId,
                 attackerId,
                 defenderId,
                 true,
-                attackIdToCruiseMissile[requestNumber].warId,
+                attackIdToCruiseMissile[attackId].warId,
                 damageTypeNumber
             );
+
             if (damageTypeNumber == 0) {
-                destroyTanks(requestNumber);
+                destroyTanks(attackId);
             } else if (damageTypeNumber == 1) {
-                destroyTech(requestNumber);
-            } else if (damageTypeNumber == 2) {
-                destroyInfrastructure(requestNumber);
+                destroyTech(attackId);
+            } else {
+                destroyInfrastructure(attackId);
             }
         } else {
             emit CruiseMissileAttackResults(
-                requestNumber,
+                attackId,
                 attackerId,
                 defenderId,
                 false,
-                attackIdToCruiseMissile[requestNumber].warId,
+                attackIdToCruiseMissile[attackId].warId,
                 0
             );
         }
+
+        pendingRequests[attackId] = false;
+        delete pendingRequestTimestamp[attackId];
+        delete _activeReqId[attackId];
     }
 
     function getSuccessOdds(

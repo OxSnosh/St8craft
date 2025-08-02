@@ -24,22 +24,20 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 ///@dev this contract inherits from the chainlink vrf contract
 ///@notice the GroundBattleContract will allow nations at war to launch ground attacks against each other
 contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
-    uint256 groundBattleId;
-    address warAddress;
-    address infrastructure;
-    address forces;
-    address treasury;
-    address improvements2;
-    address improvements4;
-    address wonders3;
-    address wonders4;
-    address countryMinter;
-    address additionalTaxes;
-    address parameters;
-    address military;
-    address keeper;
-
-    uint256[] public todaysGroundBattles;
+    uint256 private groundBattleId;
+    address private warAddress;
+    address private infrastructure;
+    address private forces;
+    address private treasury;
+    address private improvements2;
+    address private improvements4;
+    address private wonders3;
+    address private wonders4;
+    address private countryMinter;
+    address private additionalTaxes;
+    address private parameters;
+    address private military;
+    address private keeper;
 
     WarContract war;
     InfrastructureContract inf;
@@ -83,17 +81,18 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
     //Chainlik Variables
     uint256[] private s_randomWords;
-    uint256 private immutable i_subscriptionId;
-    bytes32 private immutable i_gasLane;
-    uint32 private immutable i_callbackGasLimit;
-    uint16 private constant REQUEST_CONFIRMATIONS = 3;
-    uint32 private constant NUM_WORDS = 10;
+    uint256 private s_subscriptionId;
+    bytes32 private s_gasLane;
+    uint32 private s_callbackGasLimit;
+    uint16 private s_confirmations = 3;
+    uint32 private s_numWords = 10;
+    bool private s_useNative = true;
 
     mapping(uint256 => GroundForcesToBattle) groundBattleIdToAttackerForces;
     mapping(uint256 => GroundForcesToBattle) groundBattleIdToDefenderForces;
 
     mapping(uint256 => uint256) s_requestIdToRequestIndex;
-    mapping(uint256 => uint256[]) public s_requestIndexToRandomWords;
+    mapping(uint256 => uint256[]) private s_requestIndexToRandomWords;
 
     event BattleResultsEvent(
         uint256 battleId,
@@ -110,10 +109,36 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
-        i_gasLane = gasLane;
-        i_subscriptionId = subscriptionId;
-        i_callbackGasLimit = callbackGasLimit;
+        s_gasLane = gasLane;
+        s_subscriptionId = subscriptionId;
+        s_callbackGasLimit = callbackGasLimit;
     }
+
+    function setVRFConfig(
+        bytes32 _keyHash,
+        uint64  _subId,
+        uint16  _minConf,
+        uint32  _gasLimit,
+        uint32  _numWords,
+        bool    _useNative
+    ) external onlyOwner {
+        s_gasLane                   = _keyHash;
+        s_subscriptionId            = _subId;
+        s_confirmations             = _minConf;
+        s_callbackGasLimit          = _gasLimit;
+        s_numWords                  = _numWords;
+        s_useNative                 = _useNative;
+        emit VrfConfigUpdated(_keyHash, _subId, _minConf, _gasLimit, _numWords, _useNative);
+    }
+
+    event VrfConfigUpdated(
+        bytes32 keyHash,
+        uint64 subId,
+        uint16 minConf,
+        uint32 gasLimit,
+        uint32 numWords,
+        bool useNative
+    );
 
     function updateVRFCoordinator(address vrfCoordinatorV2) public onlyOwner {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
@@ -164,41 +189,6 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         addTax = AdditionalTaxesContract(_additionalTaxes);
         parameters = _parameters;
         param = CountryParametersContract(payable(_parameters));
-    }
-
-    function updateWarContract(address newAddress) public onlyOwner {
-        warAddress = newAddress;
-        war = WarContract(newAddress);
-    }
-
-    function updateInfrastructureContract(address newAddress) public onlyOwner {
-        infrastructure = newAddress;
-        inf = InfrastructureContract(newAddress);
-    }
-
-    function updateForcesContract(address newAddress) public onlyOwner {
-        forces = newAddress;
-        force = ForcesContract(newAddress);
-    }
-
-    function updateTreasuryContract(address newAddress) public onlyOwner {
-        treasury = newAddress;
-        tsy = TreasuryContract(newAddress);
-    }
-
-    function updateImprovemetsContract2(address newAddress) public onlyOwner {
-        improvements2 = newAddress;
-        imp2 = ImprovementsContract2(newAddress);
-    }
-
-    function updateWondersContract3(address newAddress) public onlyOwner {
-        wonders3 = newAddress;
-        won3 = WondersContract3(newAddress);
-    }
-
-    function updateWondersContract4(address newAddress) public onlyOwner {
-        wonders4 = newAddress;
-        won4 = WondersContract4(newAddress);
     }
 
     function battleOdds(
@@ -524,23 +514,63 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         return mod;
     }
 
+        
     event RandomnessRequested(uint256 requestId, uint256 battleId);
+    event RandomnessRequestRetried(uint256 oldRequestId, uint256 newRequestId, uint256 battleId);
+    event RandomnessRequestCleared(uint256 requestId, uint256 battleId);
+    event StaleRandomnessIgnored(uint256 staleRequestId, uint256 battleId);
+
+    
+    error RequestPending(uint256 id, uint256 retryAfter);
+    error UnknownRequest(uint256 requestId);
+
+    
+    mapping(uint256 => bool)    public pendingRequests;         
+    mapping(uint256 => uint256) public pendingRequestTimestamp;  
+    mapping(uint256 => uint256) public idToRequestId;        
+
+    uint256 public constant RETRY_TIMEOUT = 10 minutes;
+
+    function canRetry(uint256 battleId) public view returns (bool) {
+        if (!pendingRequests[battleId]) return true;
+        return block.timestamp >= pendingRequestTimestamp[battleId] + RETRY_TIMEOUT;
+    }
+
+    function retryGroundBattleVRF(uint256 battleId) external onlyOwner {
+        require(canRetry(battleId), "Retry not yet available");
+        fulfillRequest(battleId);
+    }
 
     function fulfillRequest(uint256 battleId) internal {
+        if (pendingRequests[battleId] && block.timestamp < pendingRequestTimestamp[battleId] + RETRY_TIMEOUT) {
+            revert RequestPending(battleId, pendingRequestTimestamp[battleId] + RETRY_TIMEOUT);
+        }
+
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
                 extraArgs: VRFV2PlusClient._argsToBytes(
-                    VRFV2PlusClient.ExtraArgsV1({nativePayment: true})
+                    VRFV2PlusClient.ExtraArgsV1({nativePayment: s_useNative})
                 )
             })
         );
+
+        uint256 oldReq = idToRequestId[battleId];
+
         s_requestIdToRequestIndex[requestId] = battleId;
-        emit RandomnessRequested(requestId, battleId);
+        idToRequestId[battleId] = requestId;
+        pendingRequests[battleId] = true;
+        pendingRequestTimestamp[battleId] = block.timestamp;
+
+        if (oldReq != 0 && oldReq != requestId) {
+            emit RandomnessRequestRetried(oldReq, requestId, battleId);
+        } else {
+            emit RandomnessRequested(requestId, battleId);
+        }
     }
 
     function fulfillRandomWords(
@@ -548,37 +578,46 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
         uint256[] calldata randomWords
     ) internal override {
         uint256 battleId = s_requestIdToRequestIndex[requestId];
+
+        // check unknown request id
+        if (battleId == 0 && idToRequestId[battleId] != requestId) {
+            revert UnknownRequest(requestId);
+        }
+
+        // Ignore stale fulfillments (older request superseded by a retry)
+        if (idToRequestId[battleId] != requestId) {
+            emit StaleRandomnessIgnored(requestId, battleId);
+            return;
+        }
+        // Must still be pending
+        if (!pendingRequests[battleId]) {
+            emit StaleRandomnessIgnored(requestId, battleId);
+            return;
+        }
+
         s_requestIndexToRandomWords[battleId] = randomWords;
-        uint256 attackerStrength = groundBattleIdToAttackerForces[battleId]
-            .strength;
-        uint256 defenderStrength = groundBattleIdToDefenderForces[battleId]
-            .strength;
-        uint256 attackerId = groundBattleIdToAttackerForces[battleId].countryId;
-        uint256 defenderId = groundBattleIdToDefenderForces[battleId].countryId;
-        uint256 warId = groundBattleIdToAttackerForces[battleId].warId;
-        uint256 totalStrength = (attackerStrength + defenderStrength);
-        uint256 randomVictoryNumber = randomWords[0] % totalStrength;
+
+        uint256 attackerStrength = groundBattleIdToAttackerForces[battleId].strength;
+        uint256 defenderStrength = groundBattleIdToDefenderForces[battleId].strength;
+        uint256 attackerId       = groundBattleIdToAttackerForces[battleId].countryId;
+        uint256 defenderId       = groundBattleIdToDefenderForces[battleId].countryId;
+        uint256 warId            = groundBattleIdToAttackerForces[battleId].warId;
+
+        uint256 randomVictoryNumber  = randomWords[0] % (attackerStrength + defenderStrength);
+
         uint256 attackerSoldierLosses;
         uint256 attackerTankLosses;
         uint256 defenderSoldierLosses;
         uint256 defenderTankLosses;
+
         if (randomVictoryNumber < attackerStrength) {
-            //attack victorious
-            (
-                attackerSoldierLosses,
-                attackerTankLosses,
-                defenderSoldierLosses,
-                defenderTankLosses
-            ) = attackVictory(battleId);
+            (attackerSoldierLosses, attackerTankLosses, defenderSoldierLosses, defenderTankLosses) =
+                attackVictory(battleId);
         } else {
-            //defense victorious
-            (
-                attackerSoldierLosses,
-                attackerTankLosses,
-                defenderSoldierLosses,
-                defenderTankLosses
-            ) = defenseVictory(battleId);
+            (attackerSoldierLosses, attackerTankLosses, defenderSoldierLosses, defenderTankLosses) =
+                defenseVictory(battleId);
         }
+
         completeBattleSequence(
             battleId,
             attackerId,
@@ -589,6 +628,13 @@ contract GroundBattleContract is VRFConsumerBaseV2Plus, ReentrancyGuard {
             defenderTankLosses,
             warId
         );
+
+        pendingRequests[battleId] = false;
+        pendingRequestTimestamp[battleId] = 0;
+        delete idToRequestId[battleId];
+        delete s_requestIdToRequestIndex[requestId];
+
+        emit RandomnessRequestCleared(requestId, battleId);
     }
 
     event GroundBattleResultsEvent(

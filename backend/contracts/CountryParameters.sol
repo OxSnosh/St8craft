@@ -30,11 +30,12 @@ contract CountryParametersContract is
 
     //chainlink variables
     // VRFConsumerBaseV2Plus public i_vrfCoordinator;
-    uint256 private immutable i_subscriptionId;
-    bytes32 private immutable i_gasLane;
-    uint32 private immutable i_callbackGasLimit;
-    uint16 private constant REQUEST_CONFIRMATIONS = 3;
-    uint32 private constant NUM_WORDS = 2;
+    uint256 private s_subscriptionId;
+    bytes32 private s_gasLane;
+    uint32 private s_callbackGasLimit;
+    uint16 private s_confirmations = 3;
+    uint32 private s_numWords = 2;
+    bool private s_useNative = true;
 
     CountryMinter mint;
     SenateContract senate;
@@ -122,9 +123,9 @@ contract CountryParametersContract is
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
-        i_gasLane = gasLane;
-        i_subscriptionId = subscriptionId;
-        i_callbackGasLimit = callbackGasLimit;
+        s_gasLane = gasLane;
+        s_subscriptionId = subscriptionId;
+        s_callbackGasLimit = callbackGasLimit;
     }
 
     function updateVRFCoordinator(
@@ -132,6 +133,32 @@ contract CountryParametersContract is
     ) public onlyOwner {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
     }
+
+    function setVRFConfig(
+        bytes32 _keyHash,
+        uint64  _subId,
+        uint16  _minConf,
+        uint32  _gasLimit,
+        uint32  _numWords,
+        bool    _useNative
+    ) external onlyOwner {
+        s_gasLane                   = _keyHash;
+        s_subscriptionId            = _subId;
+        s_confirmations             = _minConf;
+        s_callbackGasLimit          = _gasLimit;
+        s_numWords                  = _numWords;
+        s_useNative                 = _useNative;
+        emit VrfConfigUpdated(_keyHash, _subId, _minConf, _gasLimit, _numWords, _useNative);
+    }
+
+    event VrfConfigUpdated(
+        bytes32 keyHash,
+        uint64 subId,
+        uint16 minConf,
+        uint32 gasLimit,
+        uint32 numWords,
+        bool useNative
+    );
 
     ///@dev this function is only callable by the contract owner
     ///@dev this function will be called immediately after contract deployment in order to set contract pointers
@@ -215,73 +242,86 @@ contract CountryParametersContract is
 
     mapping(uint256 => bool) public pendingRequests;
     mapping(uint256 => uint256) public pendingRequestTimestamp;
+    mapping(uint256 => uint256) private _activeReqId;
     uint256 public constant RETRY_TIMEOUT = 10 minutes;
 
-    ///@dev this is an internal function that will initalize the call for randomness from the chainlink VRF contract
-    ///@param id is the nation ID of the nation being minted
+    event VRFRequestSent(uint256 indexed id, uint256 indexed requestId);
+
     function fulfillRequest(uint256 id) internal {
         require(!pendingRequests[id], "Randomness already requested");
+
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(
+                    VRFV2PlusClient.ExtraArgsV1({ nativePayment: s_useNative })
+                )
             })
         );
+
         s_requestIdToRequestIndex[requestId] = id;
+        _activeReqId[id] = requestId;                
         pendingRequests[id] = true;
         pendingRequestTimestamp[id] = block.timestamp;
 
         emit VRFRequestSent(id, requestId);
     }
 
-    event VRFRequestSent(uint256 indexed id, uint256 indexed requestId);
-
-    function retryFulfillRequest(uint256 countryId) public {
-        require(pendingRequests[countryId], "No pending request");
+    function retryFulfillRequest(uint256 id) public onlyOwner {
+        require(pendingRequests[id], "No pending request");
         require(
-            block.timestamp >
-                pendingRequestTimestamp[countryId] + RETRY_TIMEOUT,
+            block.timestamp > pendingRequestTimestamp[id] + RETRY_TIMEOUT,
             "Retry not allowed yet"
         );
 
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
+                numWords: s_numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(
+                    VRFV2PlusClient.ExtraArgsV1({ nativePayment: s_useNative })
+                )
             })
         );
 
-        s_requestIdToRequestIndex[requestId] = countryId;
-        pendingRequestTimestamp[countryId] = block.timestamp;
+        s_requestIdToRequestIndex[requestId] = id;
+        _activeReqId[id] = requestId;                
+        pendingRequestTimestamp[id] = block.timestamp;
 
-        emit VRFRequestSent(countryId, requestId);
+        emit VRFRequestSent(id, requestId);
     }
 
-    ///@dev this is the function that gets called by the chainlink VRF contract
-    ///@param requestId is the parameter that will allow the chainlink VRF to store a nations corresponding random words
-    ///@param randomWords this array will contain 2 random numbers that will be used to determine a nations desired religion and government upon minting
+    /// @dev Chainlink VRF callback. Ignores stale/duplicate callbacks created by retries.
+    /// @param requestId  The VRF request id.
+    /// @param randomWords  Random words returned by VRF (used to set religion/government).
     function fulfillRandomWords(
         uint256 requestId,
         uint256[] calldata randomWords
     ) internal override {
-        uint256 requestNumber = s_requestIdToRequestIndex[requestId];
+        uint256 id = s_requestIdToRequestIndex[requestId];
 
-        s_requestIndexToRandomWords[requestNumber] = randomWords;
-        s_randomWords = s_requestIndexToRandomWords[requestNumber];
+        if (!pendingRequests[id]) return;
+        if (_activeReqId[id] != requestId) return;
 
-        uint256 religionPreference = ((randomWords[0] % 14) + 1);
-        uint256 governmentPreference = ((randomWords[1] % 9) + 1);
+        s_requestIndexToRandomWords[id] = randomWords;
+        s_randomWords = randomWords;
 
-        idToReligionPreference[requestNumber] = religionPreference;
-        idToGovernmentPreference[requestNumber] = governmentPreference;
+        uint256 religionPreference = (randomWords[0] % 14) + 1;
+        uint256 governmentPreference = (randomWords[1] % 9) + 1;
+
+        idToReligionPreference[id] = religionPreference;
+        idToGovernmentPreference[id] = governmentPreference;
+
+        pendingRequests[id] = false;
+        delete pendingRequestTimestamp[id];
+        delete _activeReqId[id];
     }
 
     ///@dev this is public function that will allow a nation ruler to reset a nations name
