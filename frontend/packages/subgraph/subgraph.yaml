@@ -9,7 +9,7 @@ dataSources:
     network: base
     source:
       abi: CountryMinter
-      address: "0xBd46eA737E6999A24B71D48c1435D6aFE3812c65"
+      address: "0x8216Ba2665805FDcA6c4F47D381DF6b461901d5F"
       startBlock: 32300000
     mapping:
       kind: ethereum/events
@@ -29,7 +29,7 @@ dataSources:
     network: base
     source:
       abi: WarContract
-      address: "0xb4E906f71f3504Db3Df26DFE08D2048e393D9cF7"
+      address: "0x81541EF9363C76a40e7C56362D456b3aD92f4b93"
       startBlock: 32300000
     mapping:
       kind: ethereum/events
@@ -49,7 +49,7 @@ dataSources:
     network: base
     source:
       abi: CruiseMissileContract
-      address: "0xAc13d83FC189A17140f996Bf106E53c4A444Ba2e"
+      address: "0xF00b8B2C0Bd96432ef924D14d6A485544D012747"
       startBlock: 32300000
     mapping:
       kind: ethereum/events
@@ -71,7 +71,7 @@ dataSources:
     network: base
     source:
       abi: NukeContract
-      address: "0x72909b2b9b9C49D377Dda51d6F31F308f2bBbaDB"
+      address: "0x5be7bDc3a213A75Eb2699B9ADB0770c4113083df"
       startBlock: 32300000
     mapping:
       kind: ethereum/events
@@ -92,7 +92,7 @@ dataSources:
     network: base
     source:
       abi: SpyOperationsContract
-      address: "0x532229d3CD62778Bddd53839459Ddc156808E124"
+      address: "0x714EE473D18d4424D09D11FDad4Fe7e21a0deC2B"
       startBlock: 32300000
     mapping:
       kind: ethereum/events
@@ -112,14 +112,14 @@ dataSources:
     network: base
     source:
       abi: AdditionalAirBattle
-      address: "0x7043cdD43C24480b31171f054fdd8498E61023e1"
+      address: "0x09ccF746cBea8c339B801754C0B759C7aD795DCf"
       startBlock: 32300000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
-        - SpyOperation
+        - AirBattle
       abis:
         - name: AdditionalAirBattle
           file: ./abis/base_AdditionalAirBattle.json
@@ -133,7 +133,7 @@ dataSources:
     network: base
     source:
       abi: NavalAttackContract
-      address: "0xd59dd7E0C02628B3e2CF4A0F850653174B4De526"
+      address: "0x443dBA349AC5c415a83f604ecDA18538adb43Dcd"
       startBlock: 32300000
     mapping:
       kind: ethereum/events
@@ -153,7 +153,7 @@ dataSources:
     network: base
     source:
       abi: BreakBlocadeContract
-      address: "0x451Bd367e741cf2daA7af4A426F6Dc6E744F6F2d"
+      address: "0xb06B82B9492332034B5E2178202FBf5b06bCE315"
       startBlock: 32300000
     mapping:
       kind: ethereum/events
@@ -173,7 +173,7 @@ dataSources:
     network: base
     source:
       abi: NavalBlockadeContract
-      address: "0xbACDb096799884Fc79Cf26BD6243d7A8f3103854"
+      address: "0xD083d8eE746B0463133c643Ee35E6de31C814C32"
       startBlock: 32300000
     mapping:
       kind: ethereum/events
@@ -193,7 +193,7 @@ dataSources:
     network: base
     source:
       abi: Messenger
-      address: "0xe0B173787565f1E48252a029FBbc6b5C7b0933BB"
+      address: "0x6488D553675ed6FF323A91FF28d955Aa49A331b0"
       startBlock: 32300000
     mapping:
       kind: ethereum/events
@@ -216,7 +216,7 @@ dataSources:
     network: base
     source:
       abi: GroundBattleContract
-      address: "0xd11Ab091c07bd19Ebbf500083C1cAB5F8fB7ca84"
+      address: "0xaA9b8eb96A6439690f33aa9250474Faf2bFDCC2B"
       startBlock: 32300000
     mapping:
       kind: ethereum/events

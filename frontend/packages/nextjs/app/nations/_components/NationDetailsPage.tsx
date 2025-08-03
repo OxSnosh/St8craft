@@ -268,8 +268,6 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
     }
 
     try {
-      const publicClient = usePublicClient();
-      const { writeContractAsync } = useWriteContract();
 
       // Ensure the public client and writeContractAsync are available
       if (!publicClient || !writeContractAsync) {
@@ -283,7 +281,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
         abi: contractData.abi,
         address: contractData.address,
         functionName: "postMessage",
-        args: [nationId, post],
+        args: [nationIdForPost, post],
       });
 
       // Simulate the transaction
@@ -312,7 +310,7 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
         abi: contractData.abi,
         address: contractData.address,
         functionName: "postMessage",
-        args: [nationId, post],
+        args: [nationIdForPost, post],
       });
 
       alert("Posted successfully!");

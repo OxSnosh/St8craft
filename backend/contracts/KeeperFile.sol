@@ -13,6 +13,7 @@ contract KeeperContract is Ownable {
 
     event GameDayIncremented(uint256 indexed gameDay);
 
+
     constructor() {
         interval = 12 hours;
         lastTimeStamp = block.timestamp;

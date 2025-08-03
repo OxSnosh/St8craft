@@ -230,6 +230,49 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "keyHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "subId",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "minConf",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "gasLimit",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "numWords",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "useNative",
+        "type": "bool"
+      }
+    ],
+    "name": "VrfConfigUpdated",
+    "type": "event"
+  },
+  {
     "inputs": [],
     "name": "RETRY_TIMEOUT",
     "outputs": [
@@ -591,6 +634,44 @@
       }
     ],
     "name": "setOracle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_keyHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint64",
+        "name": "_subId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint16",
+        "name": "_minConf",
+        "type": "uint16"
+      },
+      {
+        "internalType": "uint32",
+        "name": "_gasLimit",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "_numWords",
+        "type": "uint32"
+      },
+      {
+        "internalType": "bool",
+        "name": "_useNative",
+        "type": "bool"
+      }
+    ],
+    "name": "setVRFConfig",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

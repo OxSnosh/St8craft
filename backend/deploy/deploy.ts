@@ -624,6 +624,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             warBucks.address,
             bonusResourcesContract.address
           );
+
+          console.log("country minter settings");
           
           await deployedCountryMinter.settings2(
             improvementsContract1.address,
@@ -635,7 +637,9 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             wondersContract3.address,
             wondersContract4.address
           );
-          
+    
+          console.log("country minter settings");
+
           await deployedCountryMinter.settings3(
             militaryContract.address,
             forcesContract.address,
@@ -686,6 +690,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             infrastructureContract.address,
             missilesContract.address
           );
+
+        console.log("cruise missile contract settings");
           
           await deployedCruiseMissileContract.settings2(
             improvementsContract1.address,
@@ -709,6 +715,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             nukeContract.address
           );
           
+          console.log("environment contract settings");
+
           await deployedEnvironmentContract.settings2(
             improvementsContract1.address,
             improvementsContract3.address,
@@ -731,8 +739,10 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             wondersContract1.address,
             fighterLosses.address
           );
-          
-          await deployedFightersContract.settings2(
+        
+        console.log("fighters contract settings");
+
+        await deployedFightersContract.settings2(
             navyContract.address,
             bombersContract.address
           );
@@ -758,8 +768,10 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             wondersContract4.address,
             navyContract.address
           );
-          
-          await deployedFightersMarketplace1.settings2(
+        
+        console.log("fighters marketplace 1 settings");
+
+        await deployedFightersMarketplace1.settings2(
             bonusResourcesContract.address,
             navyContract2.address
           );
@@ -790,6 +802,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             warContract.address
           );
           
+          console.log("forces contract settings");
+
           await deployedForcesContract.settings2(
             infrastructureContract.address,
             resourcesContract.address,
@@ -812,8 +826,10 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             nationStrengthContract.address,
             infrastructureContract.address
           );
-          
-          await deployedMissilesContract.settings2(
+
+        console.log("missiles contract settings");
+        
+        await deployedMissilesContract.settings2(
             resourcesContract.address,
             improvementsContract1.address,
             wondersContract1.address,
@@ -833,6 +849,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             militaryContract.address,
             keeperContract.address,
           );
+
+          console.log("ground battle contract settings");
           
           await deployedGroundBattleContract.settings2(
             improvementsContract2.address,
@@ -907,6 +925,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             bonusResourcesContract.address
         );
 
+        console.log("infrastructure contract settings");
+
         await deployedInfrastructureContract.settings2(
             wondersContract1.address,
             wondersContract2.address,
@@ -917,6 +937,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             forcesContract.address,
             aidContract.address
         );
+
+        console.log("infrastructure contract settings");
 
         await deployedInfrastructureContract.settings3(
             spyOperationsContract.address,
@@ -988,6 +1010,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             additionalNavyContract.address
           );
           
+          console.log("navy contract settings");
+
           await deployedNavyContract.settings2(
             countryMinter.address,
             bonusResourcesContract.address,
@@ -1009,6 +1033,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             navalActionsContract.address,
             additionalNavyContract.address
           );
+
+          console.log("navy contract 2 settings");
           
           await deployedNavyContract2.settings2(
             countryMinter.address,
@@ -1099,6 +1125,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             keeperContract.address
           );
           
+        console.log("nuke contract settings");
+
           await deployedNukeContract.settings2(
             countryParametersContract.address
           );
@@ -1114,7 +1142,9 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             technologyMarketContract.address,
             countryParametersContract.address
           );
-          
+
+        console.log("resources contract settings");
+
           await deployedBonusResourcesContract.settings(
             infrastructureContract.address,
             countryMinter.address,
@@ -1157,6 +1187,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             countryMinter.address
             );
 
+        console.log("spy operations contract settings");
+
         await deployedSpyOperationsContract.settings2(
             keeperContract.address,
             spyContract.address
@@ -1178,6 +1210,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             environmentContract.address
           );
           
+          console.log("taxes contract settings");
+
           await deployedTaxesContract.settings2(
             countryParametersContract.address,
             wondersContract1.address,
@@ -1205,6 +1239,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             bonusResourcesContract.address
           );
           
+        console.log("additional taxes contract settings");
+
           await deployedAdditionalTaxesContract.settings2(
             improvementsContract2.address,
             improvementsContract3.address,
@@ -1240,6 +1276,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             improvementsContract4.address,
             infrastructureContract.address
           );
+
+          console.log("treasury contract settings");
           
           await deployedTreasuryContract.settings2(
             groundBattleContract.address,
@@ -1254,6 +1292,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             billsContract.address,
             spyOperationsContract.address
           );
+
+          console.log("treasury contract settings");
           
           await deployedTreasuryContract.settings3(
             navyContract2.address,
@@ -1285,6 +1325,8 @@ const main: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             keeperContract.address
           );
           
+          console.log("war contract settings");
+
           await deployedWarContract.settings2(
             treasuryContract.address,
             forcesContract.address,

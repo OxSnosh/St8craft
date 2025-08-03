@@ -33,11 +33,12 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
 
     //Chainlik Variables
     // VRFConsumerBaseV2Plus public i_vrfCoordinator;
-    uint256 private immutable i_subscriptionId;
-    bytes32 private immutable i_gasLane;
-    uint32 private immutable i_callbackGasLimit;
-    uint16 private constant REQUEST_CONFIRMATIONS = 3;
+    uint256 private s_subscriptionId;
+    bytes32 private s_gasLane;
+    uint32 private s_callbackGasLimit;
+    uint16 private s_confirmations = 3;
     uint32 private constant NUM_WORDS = 2;
+    bool private s_nativePayment = true;
 
     struct Resources1 {
         bool initialized;
@@ -188,9 +189,23 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2Plus(vrfCoordinatorV2) {
         s_vrfCoordinator = IVRFCoordinatorV2Plus(vrfCoordinatorV2);
-        i_gasLane = gasLane;
-        i_subscriptionId = subscriptionId;
-        i_callbackGasLimit = callbackGasLimit;
+        s_gasLane = gasLane;
+        s_subscriptionId = subscriptionId;
+        s_callbackGasLimit = callbackGasLimit;
+    }
+
+    function updateVRFCoordinator(
+        uint256 subscriptionId,
+        bytes32 gasLane,
+        uint32 callbackGasLimit,
+        uint16 requestConfirmations,
+        bool nativePayment
+    ) external onlyOwner {
+        s_gasLane = gasLane;
+        s_subscriptionId = subscriptionId;
+        s_callbackGasLimit = callbackGasLimit;
+        s_confirmations = requestConfirmations;
+        s_nativePayment = nativePayment;
     }
 
     ///@dev this function is only callable by the contract owner
@@ -221,10 +236,6 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
     ///@dev this function will call the chainlink vrf contract to assign the minted nation two resources randomly
     ///@param id is the nation id of the nation being minted
     function generateResources(uint256 id) external onlyCountryMinter {
-        require(
-            idToResources1[id].initialized == false,
-            "this nation already has resources"
-        );
         Resources1 memory newResources1 = Resources1(
             true,
             false,
@@ -261,12 +272,12 @@ contract ResourcesContract is VRFConsumerBaseV2Plus {
     function fulfillRequest(uint256 id) internal {
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_gasLane,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
+                keyHash: s_gasLane,
+                subId: s_subscriptionId,
+                requestConfirmations: s_confirmations,
+                callbackGasLimit: s_callbackGasLimit,
                 numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: s_nativePayment}))
             })
         );
         s_requestIdToRequestIndex[requestId] = id;
