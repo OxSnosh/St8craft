@@ -9,7 +9,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
   const { gelatoArgs, multiChainProvider } = context;
   const provider = new JsonRpcProvider("https://sepolia.base.org")
 
-    const breakBlockadeAddress = "0x10F1f79713A49B9Ae0ba9be50e86590f54Fc2571"; // update if needed
+    const breakBlockadeAddress = "0xb06B82B9492332034B5E2178202FBf5b06bCE315"; // update if needed
     const breakBlockade = new Contract(breakBlockadeAddress, ORACLE_ABI, provider);
 
     const EVENT_ABI = [

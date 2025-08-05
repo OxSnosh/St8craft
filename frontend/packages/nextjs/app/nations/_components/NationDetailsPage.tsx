@@ -276,34 +276,34 @@ const NationDetailsPage = ({ nationId, onPropeseTrade }: NationDetailsPageProps)
         return;
       }
 
-      // Simulating the transaction using Wagmi's public client
-      const data = await publicClient.readContract({
-        abi: contractData.abi,
-        address: contractData.address,
-        functionName: "postMessage",
-        args: [nationIdForPost, post],
-      });
+      // // Simulating the transaction using Wagmi's public client
+      // const data = await publicClient.readContract({
+      //   abi: contractData.abi,
+      //   address: contractData.address,
+      //   functionName: "postMessage",
+      //   args: [nationIdForPost, post],
+      // });
 
-      // Simulate the transaction
-      try {
-        const result = await publicClient.call({
-          to: contractData.address,
-          data: data as `0x${string}`,
-        });
+      // // Simulate the transaction
+      // try {
+      //   const result = await publicClient.call({
+      //     to: contractData.address,
+      //     data: data as `0x${string}`,
+      //   });
 
-        console.log("Transaction Simulation Result:", result);
+      //   console.log("Transaction Simulation Result:", result);
 
-        if (String(result).startsWith("0x08c379a0")) {
-          const errorMessage = parseRevertReason({ data: result });
-          alert(`Simulation failed: ${errorMessage}`);
-          return;
-        }
-      } catch (simulationError: any) {
-        const errorMessage = parseRevertReason(simulationError);
-        console.error("Simulation failed:", errorMessage);
-        alert(`Simulation failed: ${errorMessage}`);
-        return;
-      }
+      //   if (String(result).startsWith("0x08c379a0")) {
+      //     const errorMessage = parseRevertReason({ data: result });
+      //     alert(`Simulation failed: ${errorMessage}`);
+      //     return;
+      //   }
+      // } catch (simulationError: any) {
+      //   const errorMessage = parseRevertReason(simulationError);
+      //   console.error("Simulation failed:", errorMessage);
+      //   alert(`Simulation failed: ${errorMessage}`);
+      //   return;
+      // }
 
       // Sending the actual transaction if simulation is successful
       await writeContractAsync({

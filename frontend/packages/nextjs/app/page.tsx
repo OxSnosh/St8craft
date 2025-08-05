@@ -55,7 +55,7 @@ const Home: NextPage = () => {
                   Mint Nation
                 </Link>
                 &nbsp;&nbsp; 3){" "}
-                <Link href="/buy" className="underline underline-offset-4 hover:no-underline">
+                <Link href="https://app.uniswap.org/swap?chain=base&outputCurrency=0x50CFF056F46101B8713320b3e0944A03044f0eA5" className="underline underline-offset-4 hover:no-underline">
                   Buy WarBucks Here
                 </Link>
                 &nbsp;&nbsp; 4) Conquer

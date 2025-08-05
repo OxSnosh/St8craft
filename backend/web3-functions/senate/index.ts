@@ -9,7 +9,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
   const { multiChainProvider } = context;
   const provider = new JsonRpcProvider("https://sepolia.base.org")
 
-  const senateAddress = "0x71b9b0f6c999cbbb0fef9c92b80d54e4973214da";
+  const senateAddress = "0xdAcD0aa01079A76fDd2235dB5663111Aec5C2400";
   const senate = new Contract(senateAddress, ORACLE_ABI, provider);
 
   const EVENT_ABI = [
